@@ -1,18 +1,17 @@
 ﻿using System;
 using FluentAssertions.Common;
-using FluentAssertions.Specs.Equivalency;
 using Xunit;
 using Xunit.Sdk;
 
-namespace FluentAssertions.Specs.Types
-{
-    /// <content>
-    /// The [Not]HaveMethod specs.
-    /// </content>
-    public partial class TypeAssertionSpecs
-    {
-        #region HaveMethod
+namespace FluentAssertions.Specs.Types;
 
+/// <content>
+/// The [Not]HaveMethod specs.
+/// </content>
+public partial class TypeAssertionSpecs
+{
+    public class HaveMethod
+    {
         [Fact]
         public void When_asserting_a_type_has_a_method_which_it_does_it_succeeds()
         {
@@ -24,8 +23,8 @@ namespace FluentAssertions.Specs.Types
                 type.Should()
                     .HaveMethod("VoidMethod", new Type[] { })
                     .Which.Should()
-                        .HaveAccessModifier(CSharpAccessModifier.Private)
-                        .And.ReturnVoid();
+                    .HaveAccessModifier(CSharpAccessModifier.Private)
+                    .And.ReturnVoid();
 
             // Assert
             act.Should().NotThrow();
@@ -40,12 +39,12 @@ namespace FluentAssertions.Specs.Types
             // Act
             Action act = () =>
                 type.Should().HaveMethod(
-                        "NonExistentMethod", new[] { typeof(int), typeof(Type) }, "we want to test the failure {0}", "message");
+                    "NonExistentMethod", new[] { typeof(int), typeof(Type) }, "we want to test the failure {0}", "message");
 
             // Assert
             act.Should().Throw<XunitException>()
                 .WithMessage(
-                    "Expected method *.ClassWithNoMembers.NonExistentMethod(*.Int32, *.Type) to exist *failure message*" +
+                    "Expected method *ClassWithNoMembers.NonExistentMethod(*.Int32, *.Type) to exist *failure message*" +
                     ", but it does not.");
         }
 
@@ -108,7 +107,7 @@ namespace FluentAssertions.Specs.Types
                 type.Should().HaveMethod(string.Empty, new[] { typeof(string) });
 
             // Assert
-            act.Should().ThrowExactly<ArgumentNullException>()
+            act.Should().ThrowExactly<ArgumentException>()
                 .WithParameterName("name");
         }
 
@@ -126,11 +125,10 @@ namespace FluentAssertions.Specs.Types
             act.Should().ThrowExactly<ArgumentNullException>()
                 .WithParameterName("parameterTypes");
         }
+    }
 
-        #endregion
-
-        #region NotHaveMethod
-
+    public class NotHaveMethod
+    {
         [Fact]
         public void When_asserting_a_type_does_not_have_a_method_which_it_does_not_it_succeeds()
         {
@@ -215,7 +213,7 @@ namespace FluentAssertions.Specs.Types
                 type.Should().NotHaveMethod(string.Empty, new[] { typeof(string) });
 
             // Assert
-            act.Should().ThrowExactly<ArgumentNullException>()
+            act.Should().ThrowExactly<ArgumentException>()
                 .WithParameterName("name");
         }
 
@@ -233,7 +231,5 @@ namespace FluentAssertions.Specs.Types
             act.Should().ThrowExactly<ArgumentNullException>()
                 .WithParameterName("parameterTypes");
         }
-
-        #endregion
     }
 }

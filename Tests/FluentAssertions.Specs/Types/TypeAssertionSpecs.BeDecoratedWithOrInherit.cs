@@ -2,15 +2,15 @@
 using Xunit;
 using Xunit.Sdk;
 
-namespace FluentAssertions.Specs.Types
-{
-    /// <content>
-    /// The [Not]BeDecoratedWithOrInherit specs.
-    /// </content>
-    public partial class TypeAssertionSpecs
-    {
-        #region BeDecoratedWithOrInherit
+namespace FluentAssertions.Specs.Types;
 
+/// <content>
+/// The [Not]BeDecoratedWithOrInherit specs.
+/// </content>
+public partial class TypeAssertionSpecs
+{
+    public class BeDecoratedWithOrInherit
+    {
         [Fact]
         public void When_type_inherits_expected_attribute_it_succeeds()
         {
@@ -81,7 +81,7 @@ namespace FluentAssertions.Specs.Types
             // Act
             Action act = () =>
                 typeWithAttribute.Should()
-                    .BeDecoratedWithOrInherit<DummyClassAttribute>(a => (a.Name == "Expected") && a.IsEnabled);
+                    .BeDecoratedWithOrInherit<DummyClassAttribute>(a => a.Name == "Expected" && a.IsEnabled);
 
             // Assert
             act.Should().NotThrow();
@@ -97,7 +97,7 @@ namespace FluentAssertions.Specs.Types
             Action act = () =>
                 typeWithAttribute.Should()
                     .BeDecoratedWithOrInherit<DummyClassAttribute>(a => a.Name == "Expected")
-                        .Which.IsEnabled.Should().BeTrue();
+                    .Which.IsEnabled.Should().BeTrue();
 
             // Assert
             act.Should().NotThrow();
@@ -112,7 +112,7 @@ namespace FluentAssertions.Specs.Types
             // Act
             Action act = () =>
                 typeWithAttribute.Should()
-                    .BeDecoratedWithOrInherit<DummyClassAttribute>(a => (a.Name == "Unexpected") && a.IsEnabled);
+                    .BeDecoratedWithOrInherit<DummyClassAttribute>(a => a.Name == "Unexpected" && a.IsEnabled);
 
             // Assert
             act.Should().Throw<XunitException>()
@@ -120,11 +120,10 @@ namespace FluentAssertions.Specs.Types
                     "Expected type *.ClassWithInheritedAttribute to be decorated with or inherit *.DummyClassAttribute " +
                     "that matches (a.Name == \"Unexpected\")*a.IsEnabled, but no matching attribute was found.");
         }
+    }
 
-        #endregion
-
-        #region NotBeDecoratedWithOrInherit
-
+    public class NotBeDecoratedWithOrInherit
+    {
         [Fact]
         public void When_type_does_not_inherit_unexpected_attribute_it_succeeds()
         {
@@ -181,7 +180,7 @@ namespace FluentAssertions.Specs.Types
             // Act
             Action act = () =>
                 typeWithoutAttribute.Should()
-                    .NotBeDecoratedWithOrInherit<DummyClassAttribute>(a => (a.Name == "Unexpected") && a.IsEnabled);
+                    .NotBeDecoratedWithOrInherit<DummyClassAttribute>(a => a.Name == "Unexpected" && a.IsEnabled);
 
             // Assert
             act.Should().NotThrow();
@@ -196,7 +195,7 @@ namespace FluentAssertions.Specs.Types
             // Act
             Action act = () =>
                 typeWithoutAttribute.Should()
-                    .NotBeDecoratedWithOrInherit<DummyClassAttribute>(a => (a.Name == "Expected") && a.IsEnabled);
+                    .NotBeDecoratedWithOrInherit<DummyClassAttribute>(a => a.Name == "Expected" && a.IsEnabled);
 
             // Assert
             act.Should().Throw<XunitException>()
@@ -204,7 +203,5 @@ namespace FluentAssertions.Specs.Types
                     "Expected type *.ClassWithInheritedAttribute to not be decorated with or inherit *.DummyClassAttribute " +
                     "that matches (a.Name == \"Expected\") * a.IsEnabled, but a matching attribute was found.");
         }
-
-        #endregion
     }
 }

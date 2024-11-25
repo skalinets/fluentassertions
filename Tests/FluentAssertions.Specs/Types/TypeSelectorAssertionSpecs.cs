@@ -6,12 +6,12 @@ using FluentAssertions.Types;
 using Xunit;
 using Xunit.Sdk;
 
-namespace FluentAssertions.Specs.Types
-{
-    public class TypeSelectorAssertionSpecs
-    {
-        #region BeSealed
+namespace FluentAssertions.Specs.Types;
 
+public class TypeSelectorAssertionSpecs
+{
+    public class BeSealed
+    {
         [Fact]
         public void When_all_types_are_sealed_it_succeeds()
         {
@@ -43,11 +43,10 @@ namespace FluentAssertions.Specs.Types
                 .WithMessage(
                     "Expected all types to be sealed *failure message*, but the following types are not:*\"*.Abstract\".");
         }
+    }
 
-        #endregion
-
-        #region NotBeSealed
-
+    public class NotBeSealed
+    {
         [Fact]
         public void When_all_types_are_not_sealed_it_succeeds()
         {
@@ -78,11 +77,10 @@ namespace FluentAssertions.Specs.Types
             act.Should().Throw<XunitException>()
                 .WithMessage("Expected all types not to be sealed *failure message*, but the following types are:*\"*.Sealed\".");
         }
+    }
 
-        #endregion
-
-        #region BeDecoratedWith
-
+    public class BeDecoratedWith
+    {
         [Fact]
         public void When_asserting_a_selection_of_decorated_types_is_decorated_with_an_attribute_it_succeeds()
         {
@@ -153,7 +151,7 @@ namespace FluentAssertions.Specs.Types
             Action act = () =>
                 types.Should()
                     .BeDecoratedWith<DummyClassAttribute>(
-                        a => (a.Name == "Expected") && a.IsEnabled, "we want to test the failure {0}", "message");
+                        a => a.Name == "Expected" && a.IsEnabled, "we want to test the failure {0}", "message");
 
             // Assert
             act.Should().Throw<XunitException>()
@@ -162,11 +160,10 @@ namespace FluentAssertions.Specs.Types
                     "(a.Name == \"Expected\") * a.IsEnabled *failure message*, but no matching attribute was found on " +
                     "the following types:*\"*.ClassWithoutAttribute*.OtherClassWithoutAttribute\".");
         }
+    }
 
-        #endregion
-
-        #region BeDecoratedWithOrInherit
-
+    public class BeDecoratedWithOrInherit
+    {
         [Fact]
         public void When_asserting_a_selection_of_decorated_types_inheriting_an_attribute_it_succeeds()
         {
@@ -223,7 +220,8 @@ namespace FluentAssertions.Specs.Types
         }
 
         [Fact]
-        public void When_asserting_a_selection_of_types_with_some_inheriting_attributes_with_unexpected_attribute_property_it_fails()
+        public void
+            When_asserting_a_selection_of_types_with_some_inheriting_attributes_with_unexpected_attribute_property_it_fails()
         {
             // Arrange
             var types = new TypeSelector(new[]
@@ -238,7 +236,7 @@ namespace FluentAssertions.Specs.Types
             Action act = () =>
                 types.Should()
                     .BeDecoratedWithOrInherit<DummyClassAttribute>(
-                        a => (a.Name == "Expected") && a.IsEnabled, "we want to test the failure {0}", "message");
+                        a => a.Name == "Expected" && a.IsEnabled, "we want to test the failure {0}", "message");
 
             // Assert
             act.Should().Throw<XunitException>()
@@ -247,11 +245,10 @@ namespace FluentAssertions.Specs.Types
                     "(a.Name == \"Expected\")*a.IsEnabled *failure message*, but no matching attribute was found " +
                     "on the following types:*\"*.ClassWithoutAttribute*.OtherClassWithoutAttribute\".");
         }
+    }
 
-        #endregion
-
-        #region NotBeDecoratedWith
-
+    public class NotBeDecoratedWith
+    {
         [Fact]
         public void When_asserting_a_selection_of_non_decorated_types_is_not_decorated_with_an_attribute_it_succeeds()
         {
@@ -320,7 +317,7 @@ namespace FluentAssertions.Specs.Types
             Action act = () =>
                 types.Should()
                     .NotBeDecoratedWith<DummyClassAttribute>(
-                        a => (a.Name == "Expected") && a.IsEnabled, "we want to test the failure {0}", "message");
+                        a => a.Name == "Expected" && a.IsEnabled, "we want to test the failure {0}", "message");
 
             // Assert
             act.Should().Throw<XunitException>()
@@ -329,11 +326,10 @@ namespace FluentAssertions.Specs.Types
                     "(a.Name == \"Expected\") * a.IsEnabled *failure message*, but a matching attribute was found " +
                     "on the following types:*\"*.ClassWithAttribute\".");
         }
+    }
 
-        #endregion
-
-        #region NotBeDecoratedWithOrInherit
-
+    public class NotBeDecoratedWithOrInherit
+    {
         [Fact]
         public void When_asserting_a_selection_of_non_decorated_types_does_not_inherit_an_attribute_it_succeeds()
         {
@@ -382,7 +378,7 @@ namespace FluentAssertions.Specs.Types
             // Act
             Action act = () => types.Should()
                 .NotBeDecoratedWithOrInherit<DummyClassAttribute>(
-                    a => (a.Name == "Expected") && a.IsEnabled, "we want to test the failure {0}", "message");
+                    a => a.Name == "Expected" && a.IsEnabled, "we want to test the failure {0}", "message");
 
             // Assert
             act.Should().Throw<XunitException>()
@@ -400,7 +396,7 @@ namespace FluentAssertions.Specs.Types
 
             // Act
             Action act = () => types.Should()
-                .NotBeDecoratedWithOrInherit<DummyClassAttribute>(a => (a.Name == "Expected") && a.IsEnabled);
+                .NotBeDecoratedWithOrInherit<DummyClassAttribute>(a => a.Name == "Expected" && a.IsEnabled);
 
             // Assert
             act.Should().NotThrow();
@@ -420,11 +416,10 @@ namespace FluentAssertions.Specs.Types
             act.Should().ThrowExactly<ArgumentNullException>()
                 .WithParameterName("isMatchingAttributePredicate");
         }
+    }
 
-        #endregion
-
-        #region BeInNamespace
-
+    public class BeInNamespace
+    {
         [Fact]
         public void When_a_type_is_in_the_expected_namespace_it_should_not_throw()
         {
@@ -509,11 +504,10 @@ namespace FluentAssertions.Specs.Types
                     "Expected all types to be in namespace <null>, but the following types are in a different namespace:" +
                     "*\"*.ClassInDummyNamespace*.ClassNotInDummyNamespace*.OtherClassNotInDummyNamespace\".");
         }
+    }
 
-        #endregion
-
-        #region NotBeInNamespace
-
+    public class NotBeInNamespace
+    {
         [Fact]
         public void When_a_type_is_not_in_the_unexpected_namespace_it_should_not_throw()
         {
@@ -562,11 +556,10 @@ namespace FluentAssertions.Specs.Types
                     "Expected no types to be in namespace \"DummyNamespace\" *failure message*" +
                     ", but the following types are in the namespace:*\"DummyNamespace.ClassInDummyNamespace\".");
         }
+    }
 
-        #endregion
-
-        #region BeUnderNamespace
-
+    public class BeUnderNamespace
+    {
         [Fact]
         public void When_a_type_is_under_the_expected_namespace_it_should_not_throw()
         {
@@ -650,7 +643,7 @@ namespace FluentAssertions.Specs.Types
 
             // Assert
             act.Should().Throw<XunitException>()
-                    .WithMessage("Expected the namespaces of all types to start with \"DummyNamespace\" *failure message*" +
+                .WithMessage("Expected the namespaces of all types to start with \"DummyNamespace\" *failure message*" +
                     ", but the namespaces of the following types do not start with it:*\"*.ClassInDummyNamespaceTwo\".");
         }
 
@@ -674,11 +667,10 @@ namespace FluentAssertions.Specs.Types
                     "Expected the namespaces of all types to start with \"DummyNamespace.InnerDummyNamespace\"" +
                     ", but the namespaces of the following types do not start with it:*\"*.ClassInDummyNamespace\".");
         }
+    }
 
-        #endregion
-
-        #region NotBeUnderNamespace
-
+    public class NotBeUnderNamespace
+    {
         [Fact]
         public void When_a_types_is_not_under_the_unexpected_namespace_it_should_not_throw()
         {
@@ -797,7 +789,26 @@ namespace FluentAssertions.Specs.Types
             // Assert
             act.Should().NotThrow();
         }
+    }
 
-        #endregion
+    public class Miscellaneous
+    {
+        [Fact]
+        public void When_accidentally_using_equals_it_should_throw_a_helpful_error()
+        {
+            // Arrange
+            var types = new TypeSelector(new[]
+            {
+                typeof(ClassWithAttribute)
+            });
+
+            // Act
+            var action = () => types.Should().Equals(null);
+
+            // Assert
+            action.Should().Throw<NotSupportedException>()
+                .WithMessage(
+                    "Equals is not part of Fluent Assertions. Did you mean BeInNamespace() or BeDecoratedWith() instead?");
+        }
     }
 }

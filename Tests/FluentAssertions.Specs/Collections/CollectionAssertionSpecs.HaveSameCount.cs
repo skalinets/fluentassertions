@@ -3,15 +3,15 @@ using FluentAssertions.Execution;
 using Xunit;
 using Xunit.Sdk;
 
-namespace FluentAssertions.Specs.Collections
-{
-    /// <content>
-    /// The [Not]HaveSameCount specs.
-    /// </content>
-    public partial class CollectionAssertionSpecs
-    {
-        #region Have Same Count
+namespace FluentAssertions.Specs.Collections;
 
+/// <content>
+/// The [Not]HaveSameCount specs.
+/// </content>
+public partial class CollectionAssertionSpecs
+{
+    public class HaveSameCount
+    {
         [Fact]
         public void When_both_collections_have_the_same_number_elements_it_should_succeed()
         {
@@ -86,11 +86,10 @@ namespace FluentAssertions.Specs.Collections
             act.Should().Throw<ArgumentNullException>().WithMessage(
                 "Cannot verify count against a <null> collection.*");
         }
+    }
 
-        #endregion
-
-        #region Not Have Same Count
-
+    public class NotHaveSameCount
+    {
         [Fact]
         public void When_asserting_not_same_count_and_collections_have_different_number_elements_it_should_succeed()
         {
@@ -167,7 +166,8 @@ namespace FluentAssertions.Specs.Collections
         }
 
         [Fact]
-        public void When_asserting_collections_to_not_have_same_count_but_both_collections_references_the_same_object_it_should_throw()
+        public void
+            When_asserting_collections_to_not_have_same_count_but_both_collections_references_the_same_object_it_should_throw()
         {
             // Arrange
             var collection = new[] { 1, 2, 3 };
@@ -181,7 +181,5 @@ namespace FluentAssertions.Specs.Collections
             act.Should().Throw<XunitException>().WithMessage(
                 "*not have the same count*because we want to test the behaviour with same objects*but they both reference the same object.");
         }
-
-        #endregion
     }
 }

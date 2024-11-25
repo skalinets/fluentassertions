@@ -1,18 +1,18 @@
 ﻿using System;
-using FluentAssertions.Primitives;
-using FluentAssertions.Types;
+using AssemblyA;
+using AssemblyB;
 using Xunit;
 using Xunit.Sdk;
 
-namespace FluentAssertions.Specs.Types
-{
-    /// <content>
-    /// The [Not]Be specs.
-    /// </content>
-    public partial class TypeAssertionSpecs
-    {
-        #region Be
+namespace FluentAssertions.Specs.Types;
 
+/// <content>
+/// The [Not]Be specs.
+/// </content>
+public partial class TypeAssertionSpecs
+{
+    public class Be
+    {
         [Fact]
         public void When_type_is_equal_to_the_same_type_it_succeeds()
         {
@@ -96,10 +96,10 @@ namespace FluentAssertions.Specs.Types
             // Arrange
 #pragma warning disable 436 // disable the warning on conflicting types, as this is the intention for the spec
 
-            Type typeFromThisAssembly = typeof(AssemblyB.ClassC);
+            Type typeFromThisAssembly = typeof(ClassC);
 
             Type typeFromOtherAssembly =
-                new AssemblyA.ClassA().ReturnClassC().GetType();
+                new ClassA().ReturnClassC().GetType();
 
 #pragma warning restore 436
 
@@ -109,7 +109,8 @@ namespace FluentAssertions.Specs.Types
 
             // Assert
             act.Should().Throw<XunitException>()
-                .WithMessage("Expected type to be [AssemblyB.ClassC, AssemblyB*] *failure message*, but found [AssemblyB.ClassC, FluentAssertions.Specs*].");
+                .WithMessage(
+                    "Expected type to be [AssemblyB.ClassC, AssemblyB*] *failure message*, but found [AssemblyB.ClassC, FluentAssertions.Specs*].");
         }
 
         [Fact]
@@ -140,11 +141,10 @@ namespace FluentAssertions.Specs.Types
             act.Should().Throw<XunitException>()
                 .WithMessage("Expected type to be *.ClassWithoutAttribute *failure message*, but found *.ClassWithAttribute.");
         }
+    }
 
-        #endregion
-
-        #region NotBe
-
+    public class NotBe
+    {
         [Fact]
         public void When_type_is_not_equal_to_the_another_type_it_succeeds()
         {
@@ -219,7 +219,5 @@ namespace FluentAssertions.Specs.Types
             act.Should().Throw<XunitException>()
                 .WithMessage("Expected type not to be [*.ClassWithAttribute*] *failure message*, but it is.");
         }
-
-        #endregion
     }
 }

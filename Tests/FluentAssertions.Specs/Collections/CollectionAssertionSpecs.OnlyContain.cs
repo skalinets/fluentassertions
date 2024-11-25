@@ -5,15 +5,15 @@ using FluentAssertions.Execution;
 using Xunit;
 using Xunit.Sdk;
 
-namespace FluentAssertions.Specs.Collections
-{
-    /// <content>
-    /// The OnlyContain specs.
-    /// </content>
-    public partial class CollectionAssertionSpecs
-    {
-        #region Only Contain
+namespace FluentAssertions.Specs.Collections;
 
+/// <content>
+/// The OnlyContain specs.
+/// </content>
+public partial class CollectionAssertionSpecs
+{
+    public class OnlyContain
+    {
         [Fact]
         public void When_a_collection_does_not_contain_the_unexpected_items_it_should_not_be_enumerated_twice()
         {
@@ -102,7 +102,5 @@ namespace FluentAssertions.Specs.Collections
                     "Expected collection to contain only items matching (i <= 10) *failure message*," +
                     " but the collection is <null>.");
         }
-
-        #endregion
     }
 }

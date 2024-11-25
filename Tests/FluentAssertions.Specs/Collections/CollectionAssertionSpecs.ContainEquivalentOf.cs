@@ -1,18 +1,17 @@
 ﻿using System;
 using FluentAssertions.Execution;
-using FluentAssertions.Specs.Equivalency;
 using Xunit;
 using Xunit.Sdk;
 
-namespace FluentAssertions.Specs.Collections
-{
-    /// <content>
-    /// The [Not]ContainEquivalentOf specs.
-    /// </content>
-    public partial class CollectionAssertionSpecs
-    {
-        #region Contain Equivalent Of
+namespace FluentAssertions.Specs.Collections;
 
+/// <content>
+/// The [Not]ContainEquivalentOf specs.
+/// </content>
+public partial class CollectionAssertionSpecs
+{
+    public class ContainEquivalentOf
+    {
         [Fact]
         public void When_collection_contains_object_equal_of_another_it_should_succeed()
         {
@@ -50,25 +49,27 @@ namespace FluentAssertions.Specs.Collections
         public void When_string_collection_does_contain_same_string_with_other_case_it_should_throw()
         {
             // Arrange
-            string[] collection = new[] { "a", "b", "c" };
+            string[] collection = { "a", "b", "c" };
             string item = "C";
 
             // Act
             Action act = () => collection.Should().ContainEquivalentOf(item);
 
             // Assert
-            act.Should().Throw<XunitException>().WithMessage("Expected collection {\"a\", \"b\", \"c\"} to contain equivalent of \"C\".*");
+            act.Should().Throw<XunitException>()
+                .WithMessage("Expected collection {\"a\", \"b\", \"c\"} to contain equivalent of \"C\".*");
         }
 
         [Fact]
         public void When_string_collection_does_contain_same_string_it_should_throw_with_a_useful_message()
         {
             // Arrange
-            string[] collection = new[] { "a" };
+            string[] collection = { "a" };
             string item = "b";
 
             // Act
-            Action act = () => collection.Should().ContainEquivalentOf(item, "because we want to test the failure {0}", "message");
+            Action act = () =>
+                collection.Should().ContainEquivalentOf(item, "because we want to test the failure {0}", "message");
 
             // Assert
             act.Should().Throw<XunitException>()
@@ -167,6 +168,7 @@ namespace FluentAssertions.Specs.Collections
                     Age = 18
                 }
             };
+
             var item = new Customer { Name = "John", Age = 20 };
 
             // Act
@@ -193,10 +195,38 @@ namespace FluentAssertions.Specs.Collections
                     Age = 18
                 }
             };
+
             var item = new Customer { Name = "John", Age = 20 };
 
             // Act / Assert
             collection.Should().ContainEquivalentOf(item, options => options.Including(x => x.Name));
+        }
+
+        [Fact]
+        public void Tracing_should_be_included_in_the_assertion_output()
+        {
+            // Arrange
+            var collection = new[]
+            {
+                new Customer
+                {
+                    Name = "John",
+                    Age = 18
+                },
+                new Customer
+                {
+                    Name = "Jane",
+                    Age = 18
+                }
+            };
+
+            var item = new Customer { Name = "John", Age = 21 };
+
+            // Act
+            Action act = () => collection.Should().ContainEquivalentOf(item, options => options.WithTracing());
+
+            // Assert
+            act.Should().Throw<XunitException>().WithMessage("*Equivalency was proven*");
         }
 
         [Fact]
@@ -224,11 +254,10 @@ namespace FluentAssertions.Specs.Collections
             // Act / Assert
             collection.Should().ContainEquivalentOf(boxedValue);
         }
+    }
 
-        #endregion
-
-        #region Not Contain Equivalent Of
-
+    public class NotContainEquivalentOf
+    {
         [Fact]
         public void When_collection_contains_object_equal_to_another_it_should_throw()
         {
@@ -237,11 +266,13 @@ namespace FluentAssertions.Specs.Collections
             var collection = new[] { 0, 1 };
 
             // Act
-            Action act = () => collection.Should().NotContainEquivalentOf(item, "because we want to test the failure {0}", "message");
+            Action act = () =>
+                collection.Should().NotContainEquivalentOf(item, "because we want to test the failure {0}", "message");
 
             // Assert
-            act.Should().Throw<XunitException>().WithMessage("Expected collection {0, 1} not to contain*because we want to test the failure message, " +
-                                                             "but found one at index 1.*With configuration*");
+            act.Should().Throw<XunitException>().WithMessage(
+                "Expected collection {0, 1} not to contain*because we want to test the failure message, " +
+                "but found one at index 1.*With configuration*");
         }
 
         [Fact]
@@ -252,11 +283,13 @@ namespace FluentAssertions.Specs.Collections
             var collection = new[] { 0, 1, 1 };
 
             // Act
-            Action act = () => collection.Should().NotContainEquivalentOf(item, "because we want to test the failure {0}", "message");
+            Action act = () =>
+                collection.Should().NotContainEquivalentOf(item, "because we want to test the failure {0}", "message");
 
             // Assert
-            act.Should().Throw<XunitException>().WithMessage("Expected collection {0, 1, 1} not to contain*because we want to test the failure message, " +
-                                                             "but found several at indices {1, 2}.*With configuration*");
+            act.Should().Throw<XunitException>().WithMessage(
+                "Expected collection {0, 1, 1} not to contain*because we want to test the failure message, " +
+                "but found several at indices {1, 2}.*With configuration*");
         }
 
         [Fact]
@@ -345,6 +378,7 @@ namespace FluentAssertions.Specs.Collections
                     Age = 18
                 }
             };
+
             var item = new Customer { Name = "John", Age = 20 };
 
             // Act
@@ -374,9 +408,7 @@ namespace FluentAssertions.Specs.Collections
 
             // Assert
             act.Should().Throw<XunitException>().WithMessage("Expected collection*not to contain*first message*but*.\n" +
-                                                             "Expected*4 item(s)*because*second message*but*.");
+                "Expected*4 item(s)*because*second message*but*.");
         }
-
-        #endregion
     }
 }

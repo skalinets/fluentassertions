@@ -2,15 +2,15 @@
 using Xunit;
 using Xunit.Sdk;
 
-namespace FluentAssertions.Specs.Types
-{
-    /// <content>
-    /// The [Not]HaveExplicitConversionOperator specs.
-    /// </content>
-    public partial class TypeAssertionSpecs
-    {
-        #region HaveExplicitConversionOperator
+namespace FluentAssertions.Specs.Types;
 
+/// <content>
+/// The [Not]HaveExplicitConversionOperator specs.
+/// </content>
+public partial class TypeAssertionSpecs
+{
+    public class HaveExplicitConversionOperator
+    {
         [Fact]
         public void When_asserting_a_type_has_an_explicit_conversion_operator_which_it_does_it_succeeds()
         {
@@ -24,7 +24,7 @@ namespace FluentAssertions.Specs.Types
                 type.Should()
                     .HaveExplicitConversionOperator(sourceType, targetType)
                     .Which.Should()
-                        .NotBeNull();
+                    .NotBeNull();
 
             // Assert
             act.Should().NotThrow();
@@ -97,11 +97,10 @@ namespace FluentAssertions.Specs.Types
             act.Should().ThrowExactly<ArgumentNullException>()
                 .WithParameterName("targetType");
         }
+    }
 
-        #endregion
-
-        #region HaveExplicitConversionOperatorOfT
-
+    public class HaveExplicitConversionOperatorOfT
+    {
         [Fact]
         public void When_asserting_a_type_has_an_explicit_conversion_operatorOfT_which_it_does_it_succeeds()
         {
@@ -113,7 +112,7 @@ namespace FluentAssertions.Specs.Types
                 type.Should()
                     .HaveExplicitConversionOperator<TypeWithConversionOperators, byte>()
                     .Which.Should()
-                        .NotBeNull();
+                    .NotBeNull();
 
             // Assert
             act.Should().NotThrow();
@@ -154,11 +153,10 @@ namespace FluentAssertions.Specs.Types
                     "Expected public static explicit System.String(*.TypeWithConversionOperators) to exist *failure message*" +
                     ", but type is <null>.");
         }
+    }
 
-        #endregion
-
-        #region NotHaveExplicitConversionOperator
-
+    public class NotHaveExplicitConversionOperator
+    {
         [Fact]
         public void When_asserting_a_type_does_not_have_an_explicit_conversion_operator_which_it_does_not_it_succeeds()
         {
@@ -243,11 +241,10 @@ namespace FluentAssertions.Specs.Types
             act.Should().ThrowExactly<ArgumentNullException>()
                 .WithParameterName("targetType");
         }
+    }
 
-        #endregion
-
-        #region NotHaveExplicitConversionOperatorOfT
-
+    public class NotHaveExplicitConversionOperatorOfT
+    {
         [Fact]
         public void When_asserting_a_type_does_not_have_an_explicit_conversion_operatorOfT_which_it_does_not_it_succeeds()
         {
@@ -280,7 +277,5 @@ namespace FluentAssertions.Specs.Types
                     "Expected public static explicit *.Byte(*.TypeWithConversionOperators) to not exist *failure message*" +
                     ", but it does.");
         }
-
-        #endregion
     }
 }

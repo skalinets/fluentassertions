@@ -2,15 +2,16 @@
 using System.Linq.Expressions;
 using System.Reflection;
 using FluentAssertions.Common;
+using FluentAssertions.Execution;
 using Xunit;
 using Xunit.Sdk;
 
-namespace FluentAssertions.Specs.Types
-{
-    public class PropertyInfoAssertionSpecs
-    {
-        #region BeVirtual
+namespace FluentAssertions.Specs.Types;
 
+public class PropertyInfoAssertionSpecs
+{
+    public class BeVirtual
+    {
         [Fact]
         public void When_asserting_that_a_property_is_virtual_and_it_is_then_it_succeeds()
         {
@@ -29,7 +30,8 @@ namespace FluentAssertions.Specs.Types
         public void When_asserting_that_a_property_is_virtual_and_it_is_not_then_it_fails_with_useful_message()
         {
             // Arrange
-            PropertyInfo propertyInfo = typeof(ClassWithNonVirtualPublicProperties).GetRuntimeProperty("PublicNonVirtualProperty");
+            PropertyInfo propertyInfo =
+                typeof(ClassWithNonVirtualPublicProperties).GetRuntimeProperty("PublicNonVirtualProperty");
 
             // Act
             Action act = () =>
@@ -37,10 +39,10 @@ namespace FluentAssertions.Specs.Types
 
             // Assert
             act.Should().Throw<XunitException>()
-               .WithMessage(
-                   "Expected property String FluentAssertions*ClassWithNonVirtualPublicProperties.PublicNonVirtualProperty" +
-                       " to be virtual because we want to test the error message," +
-                       " but it is not.");
+                .WithMessage(
+                    "Expected property String FluentAssertions*ClassWithNonVirtualPublicProperties.PublicNonVirtualProperty" +
+                    " to be virtual because we want to test the error message," +
+                    " but it is not.");
         }
 
         [Fact]
@@ -57,16 +59,16 @@ namespace FluentAssertions.Specs.Types
             act.Should().Throw<XunitException>()
                 .WithMessage("Expected property to be virtual *failure message*, but propertyInfo is <null>.");
         }
+    }
 
-        #endregion
-
-        #region NotBeVirtual
-
+    public class NotBeVirtual
+    {
         [Fact]
         public void When_asserting_that_a_property_is_not_virtual_and_it_is_not_then_it_succeeds()
         {
             // Arrange
-            PropertyInfo propertyInfo = typeof(ClassWithNonVirtualPublicProperties).GetRuntimeProperty("PublicNonVirtualProperty");
+            PropertyInfo propertyInfo =
+                typeof(ClassWithNonVirtualPublicProperties).GetRuntimeProperty("PublicNonVirtualProperty");
 
             // Act
             Action act = () =>
@@ -88,10 +90,10 @@ namespace FluentAssertions.Specs.Types
 
             // Assert
             act.Should().Throw<XunitException>()
-               .WithMessage(
-                   "Expected property *ClassWithAllPropertiesVirtual.PublicVirtualProperty" +
-                       " not to be virtual because we want to test the error message," +
-                       " but it is.");
+                .WithMessage(
+                    "Expected property *ClassWithAllPropertiesVirtual.PublicVirtualProperty" +
+                    " not to be virtual because we want to test the error message," +
+                    " but it is.");
         }
 
         [Fact]
@@ -108,16 +110,16 @@ namespace FluentAssertions.Specs.Types
             act.Should().Throw<XunitException>()
                 .WithMessage("Expected property not to be virtual *failure message*, but propertyInfo is <null>.");
         }
+    }
 
-        #endregion
-
-        #region BeDecortatedWithOfT
-
+    public class BeDecortatedWithOfT
+    {
         [Fact]
         public void When_asserting_a_property_is_decorated_with_attribute_and_it_is_it_succeeds()
         {
             // Arrange
-            PropertyInfo propertyInfo = typeof(ClassWithAllPropertiesDecoratedWithDummyAttribute).GetRuntimeProperty("PublicProperty");
+            PropertyInfo propertyInfo =
+                typeof(ClassWithAllPropertiesDecoratedWithDummyAttribute).GetRuntimeProperty("PublicProperty");
 
             // Act
             Action act = () =>
@@ -131,7 +133,8 @@ namespace FluentAssertions.Specs.Types
         public void When_a_property_is_decorated_with_an_attribute_it_allow_chaining_assertions()
         {
             // Arrange
-            PropertyInfo propertyInfo = typeof(ClassWithAllPropertiesDecoratedWithDummyAttribute).GetRuntimeProperty("PublicProperty");
+            PropertyInfo propertyInfo =
+                typeof(ClassWithAllPropertiesDecoratedWithDummyAttribute).GetRuntimeProperty("PublicProperty");
 
             // Act
             Action act = () =>
@@ -142,10 +145,12 @@ namespace FluentAssertions.Specs.Types
         }
 
         [Fact]
-        public void When_a_property_is_decorated_with_an_attribute_and_multiple_attributes_match_continuation_using_the_matched_value_fail()
+        public void
+            When_a_property_is_decorated_with_an_attribute_and_multiple_attributes_match_continuation_using_the_matched_value_fail()
         {
             // Arrange
-            PropertyInfo propertyInfo = typeof(ClassWithAllPropertiesDecoratedWithDummyAttribute).GetRuntimeProperty("PublicPropertyWithSameAttributeTwice");
+            PropertyInfo propertyInfo = typeof(ClassWithAllPropertiesDecoratedWithDummyAttribute).GetRuntimeProperty(
+                    "PublicPropertyWithSameAttributeTwice");
 
             // Act
             Action act = () =>
@@ -159,7 +164,8 @@ namespace FluentAssertions.Specs.Types
         public void When_asserting_a_property_is_decorated_with_attribute_and_it_is_not_it_throw_with_useful_message()
         {
             // Arrange
-            PropertyInfo propertyInfo = typeof(ClassWithPropertiesThatAreNotDecoratedWithDummyAttribute).GetRuntimeProperty("PublicProperty");
+            PropertyInfo propertyInfo =
+                typeof(ClassWithPropertiesThatAreNotDecoratedWithDummyAttribute).GetRuntimeProperty("PublicProperty");
 
             // Act
             Action act = () =>
@@ -167,38 +173,41 @@ namespace FluentAssertions.Specs.Types
 
             // Assert
             act.Should().Throw<XunitException>()
-               .WithMessage("Expected property String " +
-                   "FluentAssertions*ClassWithPropertiesThatAreNotDecoratedWithDummyAttribute.PublicProperty to be decorated with " +
-                   "FluentAssertions*DummyPropertyAttribute because we want to test the error message, but that attribute was not found.");
+                .WithMessage("Expected property String " +
+                    "FluentAssertions*ClassWithPropertiesThatAreNotDecoratedWithDummyAttribute.PublicProperty to be decorated with " +
+                    "FluentAssertions*DummyPropertyAttribute because we want to test the error message, but that attribute was not found.");
         }
 
         [Fact]
-        public void When_asserting_a_property_is_decorated_with_an_attribute_matching_a_predicate_but_it_is_not_it_throw_with_useful_message()
+        public void
+            When_asserting_a_property_is_decorated_with_an_attribute_matching_a_predicate_but_it_is_not_it_throw_with_useful_message()
         {
             // Arrange
-            PropertyInfo propertyInfo = typeof(ClassWithPropertiesThatAreNotDecoratedWithDummyAttribute).GetRuntimeProperty("PublicProperty");
+            PropertyInfo propertyInfo =
+                typeof(ClassWithPropertiesThatAreNotDecoratedWithDummyAttribute).GetRuntimeProperty("PublicProperty");
 
             // Act
             Action act = () =>
-                propertyInfo.Should().BeDecoratedWith<DummyPropertyAttribute>(d => d.Value == "NotARealValue", "because we want to test the error {0}", "message");
+                propertyInfo.Should().BeDecoratedWith<DummyPropertyAttribute>(d => d.Value == "NotARealValue",
+                    "because we want to test the error {0}", "message");
 
             // Assert
             act.Should().Throw<XunitException>()
                 .WithMessage(
                     "Expected property String FluentAssertions*ClassWithPropertiesThatAreNotDecoratedWithDummyAttribute.PublicProperty to be decorated with " +
-                        "FluentAssertions*DummyPropertyAttribute because we want to test the error message," +
-                        " but that attribute was not found.");
+                    "FluentAssertions*DummyPropertyAttribute because we want to test the error message," +
+                    " but that attribute was not found.");
         }
 
         [Fact]
         public void When_asserting_a_property_is_decorated_with_attribute_matching_a_predicate_and_it_is_it_succeeds()
         {
             // Arrange
-            PropertyInfo propertyInfo = typeof(ClassWithAllPropertiesDecoratedWithDummyAttribute).GetRuntimeProperty("PublicProperty");
+            PropertyInfo propertyInfo =
+                typeof(ClassWithAllPropertiesDecoratedWithDummyAttribute).GetRuntimeProperty("PublicProperty");
 
             // Act
-            Action act = () =>
-                propertyInfo.Should().BeDecoratedWith<DummyPropertyAttribute>(d => d.Value == "Value");
+            Action act = () => propertyInfo.Should().BeDecoratedWith<DummyPropertyAttribute>(d => d.Value == "Value");
 
             // Assert
             act.Should().NotThrow();
@@ -216,14 +225,16 @@ namespace FluentAssertions.Specs.Types
 
             // Assert
             act.Should().Throw<XunitException>()
-                .WithMessage("Expected property to be decorated with *.DummyPropertyAttribute *failure message*, but propertyInfo is <null>.");
+                .WithMessage(
+                    "Expected property to be decorated with *.DummyPropertyAttribute *failure message*, but propertyInfo is <null>.");
         }
 
         [Fact]
         public void When_asserting_property_is_decorated_with_null_it_should_throw()
         {
             // Arrange
-            PropertyInfo propertyInfo = typeof(ClassWithAllPropertiesDecoratedWithDummyAttribute).GetRuntimeProperty("PublicProperty");
+            PropertyInfo propertyInfo =
+                typeof(ClassWithAllPropertiesDecoratedWithDummyAttribute).GetRuntimeProperty("PublicProperty");
 
             // Act
             Action act = () =>
@@ -233,11 +244,10 @@ namespace FluentAssertions.Specs.Types
             act.Should().ThrowExactly<ArgumentNullException>()
                 .WithParameterName("isMatchingAttributePredicate");
         }
+    }
 
-        #endregion
-
-        #region NotBeDecoratedWithOfT
-
+    public class NotBeDecoratedWithOfT
+    {
         [Fact]
         public void When_subject_is_null_not_be_decorated_withOfT_should_fail()
         {
@@ -250,7 +260,8 @@ namespace FluentAssertions.Specs.Types
 
             // Assert
             act.Should().Throw<XunitException>()
-                .WithMessage("Expected property to not be decorated with *.DummyPropertyAttribute *failure message*, but propertyInfo is <null>.");
+                .WithMessage(
+                    "Expected property to not be decorated with *.DummyPropertyAttribute *failure message*, but propertyInfo is <null>.");
         }
 
         [Fact]
@@ -267,11 +278,10 @@ namespace FluentAssertions.Specs.Types
             act.Should().ThrowExactly<ArgumentNullException>()
                 .WithParameterName("isMatchingAttributePredicate");
         }
+    }
 
-        #endregion
-
-        #region BeWritable
-
+    public class BeWritable
+    {
         [Fact]
         public void When_asserting_a_readonly_property_is_writable_it_fails_with_useful_message()
         {
@@ -284,7 +294,8 @@ namespace FluentAssertions.Specs.Types
             // Assert
             action
                 .Should().Throw<XunitException>()
-                .WithMessage("Expected propertyInfo ReadOnlyProperty to have a setter because we want to test the error message.");
+                .WithMessage(
+                    "Expected propertyInfo ReadOnlyProperty to have a setter because we want to test the error message.");
         }
 
         [Fact]
@@ -327,11 +338,10 @@ namespace FluentAssertions.Specs.Types
             act.Should().Throw<XunitException>()
                 .WithMessage("Expected property to have a setter *failure message*, but propertyInfo is <null>.");
         }
+    }
 
-        #endregion
-
-        #region BeReadable
-
+    public class BeReadable
+    {
         [Fact]
         public void When_asserting_a_readonly_property_is_readable_it_succeeds()
         {
@@ -370,7 +380,8 @@ namespace FluentAssertions.Specs.Types
             // Assert
             action
                 .Should().Throw<XunitException>()
-                .WithMessage("Expected property WriteOnlyProperty to have a getter because we want to test the error message, but it does not.");
+                .WithMessage(
+                    "Expected property WriteOnlyProperty to have a getter because we want to test the error message, but it does not.");
         }
 
         [Fact]
@@ -387,11 +398,10 @@ namespace FluentAssertions.Specs.Types
             act.Should().Throw<XunitException>()
                 .WithMessage("Expected property to have a getter *failure message*, but propertyInfo is <null>.");
         }
+    }
 
-        #endregion
-
-        #region NotBeWritable
-
+    public class NotBeWritable
+    {
         [Fact]
         public void When_asserting_a_readonly_property_is_not_writable_it_succeeds()
         {
@@ -417,7 +427,8 @@ namespace FluentAssertions.Specs.Types
             // Assert
             action
                 .Should().Throw<XunitException>()
-                .WithMessage("Expected propertyInfo ReadWriteProperty not to have a setter because we want to test the error message.");
+                .WithMessage(
+                    "Expected propertyInfo ReadWriteProperty not to have a setter because we want to test the error message.");
         }
 
         [Fact]
@@ -432,7 +443,8 @@ namespace FluentAssertions.Specs.Types
             // Assert
             action
                 .Should().Throw<XunitException>()
-                .WithMessage("Expected propertyInfo WriteOnlyProperty not to have a setter because we want to test the error message.");
+                .WithMessage(
+                    "Expected propertyInfo WriteOnlyProperty not to have a setter because we want to test the error message.");
         }
 
         [Fact]
@@ -449,11 +461,10 @@ namespace FluentAssertions.Specs.Types
             act.Should().Throw<XunitException>()
                 .WithMessage("Expected property not to have a setter *failure message*, but propertyInfo is <null>.");
         }
+    }
 
-        #endregion
-
-        #region NotBeReadable
-
+    public class NotBeReadable
+    {
         [Fact]
         public void When_asserting_a_readonly_property_is_not_readable_it_fails_with_useful_message()
         {
@@ -466,7 +477,8 @@ namespace FluentAssertions.Specs.Types
             // Assert
             action
                 .Should().Throw<XunitException>()
-                .WithMessage("Expected propertyInfo ReadOnlyProperty not to have a getter because we want to test the error message.");
+                .WithMessage(
+                    "Expected propertyInfo ReadOnlyProperty not to have a getter because we want to test the error message.");
         }
 
         [Fact]
@@ -481,7 +493,8 @@ namespace FluentAssertions.Specs.Types
             // Assert
             action
                 .Should().Throw<XunitException>()
-                .WithMessage("Expected propertyInfo ReadWriteProperty not to have a getter because we want to test the error message.");
+                .WithMessage(
+                    "Expected propertyInfo ReadWriteProperty not to have a getter because we want to test the error message.");
         }
 
         [Fact]
@@ -511,11 +524,10 @@ namespace FluentAssertions.Specs.Types
             act.Should().Throw<XunitException>()
                 .WithMessage("Expected property not to have a getter *failure message*, but propertyInfo is <null>.");
         }
+    }
 
-        #endregion
-
-        #region BeReadableAccessModifier
-
+    public class BeReadableAccessModifier
+    {
         [Fact]
         public void When_asserting_a_public_read_private_write_property_is_public_readable_it_succeeds()
         {
@@ -536,11 +548,31 @@ namespace FluentAssertions.Specs.Types
             PropertyInfo propertyInfo = typeof(ClassWithProperties).GetRuntimeProperty("WritePrivateReadProperty");
 
             // Act
-            Action action = () => propertyInfo.Should().BeReadable(CSharpAccessModifier.Public, "we want to test the error {0}", "message");
+            Action action = () =>
+                propertyInfo.Should().BeReadable(CSharpAccessModifier.Public, "we want to test the error {0}", "message");
 
             // Assert
             action.Should().Throw<XunitException>()
-                .WithMessage("Expected method get_WritePrivateReadProperty to be Public because we want to test the error message, but it is Private.");
+                .WithMessage(
+                    "Expected method get_WritePrivateReadProperty to be Public because we want to test the error message, but it is Private.");
+        }
+
+        [Fact]
+        public void Do_not_the_check_access_modifier_when_the_property_is_not_readable()
+        {
+            // Arrange
+            PropertyInfo propertyInfo = typeof(ClassWithProperties).GetRuntimeProperty("WriteOnlyProperty");
+
+            // Act
+            Action action = () =>
+            {
+                using var _ = new AssertionScope();
+                propertyInfo.Should().BeReadable(CSharpAccessModifier.Private);
+            };
+
+            // Assert
+            action.Should().Throw<XunitException>()
+                .WithMessage("Expected property WriteOnlyProperty to have a getter, but it does not.");
         }
 
         [Fact]
@@ -572,11 +604,10 @@ namespace FluentAssertions.Specs.Types
             act.Should().ThrowExactly<ArgumentOutOfRangeException>()
                 .WithParameterName("accessModifier");
         }
+    }
 
-        #endregion
-
-        #region BeWritableAccessModifier
-
+    public class BeWritableAccessModifier
+    {
         [Fact]
         public void When_asserting_a_public_write_private_read_property_is_public_writable_it_succeeds()
         {
@@ -597,11 +628,31 @@ namespace FluentAssertions.Specs.Types
             PropertyInfo propertyInfo = typeof(ClassWithProperties).GetRuntimeProperty("ReadPrivateWriteProperty");
 
             // Act
-            Action action = () => propertyInfo.Should().BeWritable(CSharpAccessModifier.Public, "we want to test the error {0}", "message");
+            Action action = () =>
+                propertyInfo.Should().BeWritable(CSharpAccessModifier.Public, "we want to test the error {0}", "message");
 
             // Assert
             action.Should().Throw<XunitException>()
-                .WithMessage("Expected method set_ReadPrivateWriteProperty to be Public because we want to test the error message, but it is Private.");
+                .WithMessage(
+                    "Expected method set_ReadPrivateWriteProperty to be Public because we want to test the error message, but it is Private.");
+        }
+
+        [Fact]
+        public void Do_not_the_check_access_modifier_when_the_property_is_not_writable()
+        {
+            // Arrange
+            PropertyInfo propertyInfo = typeof(ClassWithProperties).GetRuntimeProperty("ReadOnlyProperty");
+
+            // Act
+            Action action = () =>
+            {
+                using var _ = new AssertionScope();
+                propertyInfo.Should().BeWritable(CSharpAccessModifier.Private);
+            };
+
+            // Assert
+            action.Should().Throw<XunitException>()
+                .WithMessage("Expected propertyInfo ReadOnlyProperty to have a setter.");
         }
 
         [Fact]
@@ -633,11 +684,10 @@ namespace FluentAssertions.Specs.Types
             act.Should().ThrowExactly<ArgumentOutOfRangeException>()
                 .WithParameterName("accessModifier");
         }
+    }
 
-        #endregion
-
-        #region Return
-
+    public class Return
+    {
         [Fact]
         public void When_asserting_a_String_property_returns_a_String_it_succeeds()
         {
@@ -663,7 +713,7 @@ namespace FluentAssertions.Specs.Types
             // Assert
             action.Should().Throw<XunitException>()
                 .WithMessage("Expected Type of property StringProperty to be System.Int32 because we want to test the error " +
-                             "message, but it is System.String.");
+                    "message, but it is System.String.");
         }
 
         [Fact]
@@ -695,11 +745,10 @@ namespace FluentAssertions.Specs.Types
             act.Should().ThrowExactly<ArgumentNullException>()
                 .WithParameterName("propertyType");
         }
+    }
 
-        #endregion
-
-        #region ReturnOfT
-
+    public class ReturnOfT
+    {
         [Fact]
         public void When_asserting_a_String_property_returnsOfT_a_String_it_succeeds()
         {
@@ -725,13 +774,12 @@ namespace FluentAssertions.Specs.Types
             // Assert
             action.Should().Throw<XunitException>()
                 .WithMessage("Expected Type of property StringProperty to be System.Int32 because we want to test the error " +
-                             "message, but it is System.String.");
+                    "message, but it is System.String.");
         }
+    }
 
-        #endregion
-
-        #region NotReturn
-
+    public class NotReturn
+    {
         [Fact]
         public void When_asserting_a_String_property_does_not_returns_an_Int32_it_succeeds()
         {
@@ -757,7 +805,7 @@ namespace FluentAssertions.Specs.Types
             // Assert
             action.Should().Throw<XunitException>()
                 .WithMessage("Expected Type of property StringProperty not to be*String*because we want to test the error " +
-                             "message, but it is.");
+                    "message, but it is.");
         }
 
         [Fact]
@@ -789,11 +837,10 @@ namespace FluentAssertions.Specs.Types
             act.Should().ThrowExactly<ArgumentNullException>()
                 .WithParameterName("propertyType");
         }
+    }
 
-        #endregion
-
-        #region NotReturnOfT
-
+    public class NotReturnOfT
+    {
         [Fact]
         public void When_asserting_a_String_property_does_not_returnOfT_an_Int32_it_succeeds()
         {
@@ -819,28 +866,26 @@ namespace FluentAssertions.Specs.Types
             // Assert
             action.Should().Throw<XunitException>()
                 .WithMessage("Expected Type of property StringProperty not to be*String*because we want to test the error " +
-                             "message, but it is.");
+                    "message, but it is.");
         }
-
-        #endregion
-
-        #region Internal classes used in unit tests
-
-        private class ClassWithProperties
-        {
-            public string ReadOnlyProperty { get { return ""; } }
-
-            public string ReadPrivateWriteProperty { get; private set; }
-
-            public string ReadWriteProperty { get; set; }
-
-            public string WritePrivateReadProperty { private get; set; }
-
-            public string WriteOnlyProperty { set { } }
-
-            public string StringProperty { get; set; }
-        }
-
-        #endregion
     }
+
+    #region Internal classes used in unit tests
+
+    private class ClassWithProperties
+    {
+        public string ReadOnlyProperty { get { return ""; } }
+
+        public string ReadPrivateWriteProperty { get; private set; }
+
+        public string ReadWriteProperty { get; set; }
+
+        public string WritePrivateReadProperty { private get; set; }
+
+        public string WriteOnlyProperty { set { } }
+
+        public string StringProperty { get; set; }
+    }
+
+    #endregion
 }

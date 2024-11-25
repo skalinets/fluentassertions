@@ -5,15 +5,15 @@ using FluentAssertions.Execution;
 using Xunit;
 using Xunit.Sdk;
 
-namespace FluentAssertions.Specs.Collections
-{
-    /// <content>
-    /// The [Not]BeEquivalentTo specs.
-    /// </content>
-    public partial class CollectionAssertionSpecs
-    {
-        #region Be Equivalent To
+namespace FluentAssertions.Specs.Collections;
 
+/// <content>
+/// The [Not]BeEquivalentTo specs.
+/// </content>
+public partial class CollectionAssertionSpecs
+{
+    public class BeEquivalentTo
+    {
         [Fact]
         public void When_two_collections_contain_the_same_elements_it_should_treat_them_as_equivalent()
         {
@@ -129,7 +129,8 @@ namespace FluentAssertions.Specs.Collections
 
             // Act
             Action act =
-                () => collection.Should().BeEquivalentTo(collection1, "because we want to test the behaviour with a null subject");
+                () => collection.Should()
+                    .BeEquivalentTo(collection1, "because we want to test the behaviour with a null subject");
 
             // Assert
             act.Should().Throw<XunitException>().WithMessage(
@@ -157,11 +158,10 @@ namespace FluentAssertions.Specs.Collections
             // Act / Assert
             collection.Should().BeEquivalentTo(collection1);
         }
+    }
 
-        #endregion
-
-        #region Not Be Equivalent To
-
+    public class NotBeEquivalentTo
+    {
         [Fact]
         public void When_collection_is_not_equivalent_to_another_smaller_collection_it_should_succeed()
         {
@@ -287,8 +287,8 @@ namespace FluentAssertions.Specs.Collections
 
             // Act
             Action act = () => collection.Should().NotBeEquivalentTo(collection1, opt => opt
-                .Using<double>(ctx => ctx.Subject.Should().BeApproximately(ctx.Expectation, 0.5))
-                .WhenTypeIs<double>(),
+                    .Using<double>(ctx => ctx.Subject.Should().BeApproximately(ctx.Expectation, 0.5))
+                    .WhenTypeIs<double>(),
                 "because we want to test the failure {0}", "message");
 
             // Assert
@@ -301,17 +301,18 @@ namespace FluentAssertions.Specs.Collections
         {
             // Arrange
             int[] actual = null;
+            int[] expectation = { 1, 2, 3 };
 
             // Act
             Action act = () =>
             {
                 using var _ = new AssertionScope();
-                actual.Should().NotBeEquivalentTo(new[] { 1, 2, 3 }, opt => opt, "we want to test the failure {0}", "message");
+                actual.Should().NotBeEquivalentTo(expectation, opt => opt, "we want to test the failure {0}", "message");
             };
 
             // Assert
             act.Should().Throw<XunitException>()
-                .WithMessage("Expected actual not to be equivalent *failure message*, but found <null>.");
+                .WithMessage("Expected actual not to be equivalent *failure message*, but found <null>.*");
         }
 
         [Fact]
@@ -335,7 +336,5 @@ namespace FluentAssertions.Specs.Collections
             // Act / Assert
             collection.Should().NotBeEquivalentTo(collection1);
         }
-
-        #endregion
     }
 }

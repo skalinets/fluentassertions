@@ -2,12 +2,12 @@
 using Xunit;
 using Xunit.Sdk;
 
-namespace FluentAssertions.Specs.Primitives
-{
-    public class GuidAssertionSpecs
-    {
-        #region BeEmpty / NotBeEmpty
+namespace FluentAssertions.Specs.Primitives;
 
+public class GuidAssertionSpecs
+{
+    public class BeEmpty
+    {
         [Fact]
         public void Should_succeed_when_asserting_empty_guid_is_empty()
         {
@@ -31,7 +31,10 @@ namespace FluentAssertions.Specs.Primitives
             act.Should().Throw<XunitException>().WithMessage(
                 "Expected Guid to be empty because we want to test the failure message, but found {12345678-1234-1234-1234-123456789012}.");
         }
+    }
 
+    public class NotBeEmpty
+    {
         [Fact]
         public void Should_succeed_when_asserting_non_empty_guid_is_not_empty()
         {
@@ -55,11 +58,10 @@ namespace FluentAssertions.Specs.Primitives
             act.Should().Throw<XunitException>().WithMessage(
                 "Did not expect Guid.Empty to be empty because we want to test the failure message.");
         }
+    }
 
-        #endregion
-
-        #region Be / NotBe
-
+    public class Be
+    {
         [Fact]
         public void Should_succeed_when_asserting_guid_equals_the_same_guid()
         {
@@ -115,7 +117,10 @@ namespace FluentAssertions.Specs.Primitives
             act.Should().Throw<ArgumentException>()
                 .WithParameterName("expected");
         }
+    }
 
+    public class NotBe
+    {
         [Fact]
         public void Should_succeed_when_asserting_guid_does_not_equal_a_different_guid()
         {
@@ -188,9 +193,10 @@ namespace FluentAssertions.Specs.Primitives
             act.Should().Throw<XunitException>()
                 .WithMessage("Did not expect Guid to be {11111111-aaaa-bbbb-cccc-999999999999} *failure message*.");
         }
+    }
 
-        #endregion
-
+    public class ChainingConstraint
+    {
         [Fact]
         public void Should_support_chaining_constraints_with_and()
         {
@@ -201,6 +207,23 @@ namespace FluentAssertions.Specs.Primitives
             guid.Should()
                 .NotBeEmpty()
                 .And.Be(guid);
+        }
+    }
+
+    public class Miscellaneous
+    {
+        [Fact]
+        public void Should_throw_a_helpful_error_when_accidentally_using_equals()
+        {
+            // Arrange
+            Guid subject = Guid.Empty;
+
+            // Act
+            Action action = () => subject.Should().Equals(subject);
+
+            // Assert
+            action.Should().Throw<NotSupportedException>()
+                .WithMessage("Equals is not part of Fluent Assertions. Did you mean Be() or BeOneOf() instead?");
         }
     }
 }

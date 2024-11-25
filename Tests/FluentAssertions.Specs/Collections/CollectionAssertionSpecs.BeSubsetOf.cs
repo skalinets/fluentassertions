@@ -3,15 +3,15 @@ using FluentAssertions.Execution;
 using Xunit;
 using Xunit.Sdk;
 
-namespace FluentAssertions.Specs.Collections
-{
-    /// <content>
-    /// The [Not]BeSubsetOf specs.
-    /// </content>
-    public partial class CollectionAssertionSpecs
-    {
-        #region Be Subset Of
+namespace FluentAssertions.Specs.Collections;
 
+/// <content>
+/// The [Not]BeSubsetOf specs.
+/// </content>
+public partial class CollectionAssertionSpecs
+{
+    public class BeSubsetOf
+    {
         [Fact]
         public void When_collection_is_subset_of_a_specified_collection_it_should_not_throw()
         {
@@ -36,7 +36,7 @@ namespace FluentAssertions.Specs.Collections
             // Assert
             act.Should().Throw<XunitException>().WithMessage(
                 "Expected subset to be a subset of {1, 2, 4, 5} because we want to test the failure message, " +
-                    "but items {3, 6} are not part of the superset.");
+                "but items {3, 6} are not part of the superset.");
         }
 
         [Fact]
@@ -78,11 +78,10 @@ namespace FluentAssertions.Specs.Collections
             // Act / Assert
             subject.Should().NotBeSubsetOf(otherSet);
         }
+    }
 
-        #endregion
-
-        #region Not Be Subset Of
-
+    public class NotBeSubsetOf
+    {
         [Fact]
         public void When_an_empty_set_is_not_supposed_to_be_a_subset_of_another_set_it_should_throw()
         {
@@ -165,7 +164,5 @@ namespace FluentAssertions.Specs.Collections
             act.Should().Throw<XunitException>().WithMessage(
                 "Cannot assert a <null> collection against a subset.");
         }
-
-        #endregion
     }
 }

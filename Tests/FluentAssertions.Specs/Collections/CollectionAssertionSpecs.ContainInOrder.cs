@@ -3,15 +3,15 @@ using FluentAssertions.Execution;
 using Xunit;
 using Xunit.Sdk;
 
-namespace FluentAssertions.Specs.Collections
-{
-    /// <content>
-    /// The [Not]ContainInOrder specs.
-    /// </content>
-    public partial class CollectionAssertionSpecs
-    {
-        #region Contain In Order
+namespace FluentAssertions.Specs.Collections;
 
+/// <content>
+/// The [Not]ContainInOrder specs.
+/// </content>
+public partial class CollectionAssertionSpecs
+{
+    public class ContainInOrder
+    {
         [Fact]
         public void When_two_collections_contain_the_same_items_in_the_same_order_it_should_not_throw()
         {
@@ -29,7 +29,7 @@ namespace FluentAssertions.Specs.Collections
             var collection = new object[] { 1, null, 2, "string" };
 
             // Act / Assert
-            collection.Should().ContainInOrder(new object[] { 1, null, "string" });
+            collection.Should().ContainInOrder(1, null, "string");
         }
 
         [Fact]
@@ -86,7 +86,22 @@ namespace FluentAssertions.Specs.Collections
             // Assert
             act.Should().Throw<XunitException>().WithMessage(
                 "Expected collection {1, 2, 3} to contain items {4, 1} in order because we failed, " +
-                    "but 4 (index 0) did not appear (in the right order).");
+                "but 4 (index 0) did not appear (in the right order).");
+        }
+
+        [Fact]
+        public void When_a_collection_does_not_contain_items_with_assertion_scope_all_items_are_reported()
+        {
+            // Act
+            Action act = () =>
+            {
+                using var _ = new AssertionScope();
+                new[] { 1, 2, 3 }.Should().ContainInOrder(4).And.ContainInOrder(5);
+            };
+
+            // Assert
+            act.Should().Throw<XunitException>().WithMessage(
+                "*but 4 (index 0)*but 5 (index 0)*");
         }
 
         [Fact]
@@ -98,6 +113,20 @@ namespace FluentAssertions.Specs.Collections
             // Assert
             act.Should().Throw<ArgumentNullException>().WithMessage(
                 "Cannot verify ordered containment against a <null> collection.*");
+        }
+
+        [Fact]
+        public void Collections_contain_the_empty_sequence()
+        {
+            // Assert
+            new[] { 1 }.Should().ContainInOrder();
+        }
+
+        [Fact]
+        public void Collections_do_not_not_contain_the_empty_sequence()
+        {
+            // Assert
+            new[] { 1 }.Should().NotContainInOrder();
         }
 
         [Fact]
@@ -117,11 +146,10 @@ namespace FluentAssertions.Specs.Collections
             act.Should().Throw<XunitException>().WithMessage(
                 "Expected ints to contain {4} in order because we're checking how it reacts to a null subject, but found <null>.");
         }
+    }
 
-        #endregion
-
-        #region Not Contain In Order
-
+    public class NotContainInOrder
+    {
         [Fact]
         public void When_two_collections_contain_the_same_items_but_in_different_order_it_should_not_throw()
         {
@@ -172,7 +200,8 @@ namespace FluentAssertions.Specs.Collections
             Action act = () => collection.Should().NotContainInOrder(4);
 
             // Assert
-            act.Should().Throw<XunitException>().WithMessage("Cannot verify absence of ordered containment in a <null> collection.");
+            act.Should().Throw<XunitException>()
+                .WithMessage("Cannot verify absence of ordered containment in a <null> collection.");
         }
 
         [Fact]
@@ -266,7 +295,5 @@ namespace FluentAssertions.Specs.Collections
             act.Should().Throw<ArgumentNullException>().WithMessage(
                 "Cannot verify absence of ordered containment against a <null> collection.*");
         }
-
-        #endregion
     }
 }

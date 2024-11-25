@@ -1,4 +1,4 @@
-﻿#if NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1
+﻿#if NET6_0_OR_GREATER || NETSTANDARD2_1
 using System;
 using System.IO;
 using FluentAssertions.Execution;
@@ -6,13 +6,13 @@ using Xunit;
 using Xunit.Sdk;
 #endif
 
-namespace FluentAssertions.Specs.Streams
-{
-    public class BufferedStreamAssertionSpecs
-    {
-#if NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1
-        #region HaveBufferSize / NotHaveBufferSize
+namespace FluentAssertions.Specs.Streams;
 
+public class BufferedStreamAssertionSpecs
+{
+#if NET6_0_OR_GREATER || NETSTANDARD2_1
+    public class HaveBufferSize
+    {
         [Fact]
         public void When_a_stream_has_the_expected_buffer_size_it_should_succeed()
         {
@@ -59,7 +59,10 @@ namespace FluentAssertions.Specs.Streams
             act.Should().Throw<XunitException>()
                 .WithMessage("Expected the buffer size of stream to be 10 *failure message*, but found a <null> reference.");
         }
+    }
 
+    public class NotHaveBufferSize
+    {
         [Fact]
         public void When_a_stream_does_not_have_an_unexpected_buffer_size_it_should_succeed()
         {
@@ -106,8 +109,6 @@ namespace FluentAssertions.Specs.Streams
             act.Should().Throw<XunitException>()
                 .WithMessage("Expected the buffer size of stream not to be 10 *failure message*, but found a <null> reference.");
         }
-
-        #endregion
-#endif
     }
+#endif
 }

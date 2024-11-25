@@ -53,9 +53,13 @@ collection.Should().Contain(collection, "", 5, 6); // It should contain the orig
 
 collection.Should().OnlyContain(x => x < 10);
 collection.Should().ContainItemsAssignableTo<int>();
+collection.Should().NotContainItemsAssignableTo<string>()
 
 collection.Should().ContainInOrder(new[] { 1, 5, 8 });
 collection.Should().NotContainInOrder(new[] { 5, 1, 2 });
+
+collection.Should().ContainInConsecutiveOrder(new[] { 2, 5, 8 });
+collection.Should().NotContainInConsecutiveOrder(new[] { 1, 5, 8});
 
 collection.Should().NotContain(82);
 collection.Should().NotContain(new[] { 82, 83 });
@@ -80,6 +84,10 @@ IEnumerable<int> otherCollection = new[] { 1, 2, 5, 8, 1 };
 IEnumerable<int> anotherCollection = new[] { 10, 20, 50, 80, 10 };
 collection.Should().IntersectWith(otherCollection);
 collection.Should().NotIntersectWith(anotherCollection);
+
+var singleEquivalent = new[] { new { Size = 42 } };
+singleEquivalent.Should().ContainSingle()
+    .Which.Should().BeEquivalentTo(new { Size = 42 });
 ```
 
 Asserting that a collection contains items in a certain order is as easy as using one of the several overloads of `BeInAscendingOrder` or `BeInDescendingOrder`. The default overload will use the default `Comparer` for the specified type, but overloads also exist that take an `IComparer<T>`, a property expression to sort by an object's property, or a lambda expression to avoid the need for `IComparer<T>` implementations.
@@ -91,13 +99,23 @@ collection.Should().NotBeInAscendingOrder();
 collection.Should().NotBeInDescendingOrder();
 ```
 
+Since **6.9.0** there is a slight change in how culture is taken into comparison. Now by default `StringComparer.Ordinal` is used to compare strings.
+If you want to overrule this behavior use the `IComparer<T>` overload. The use case is e.g. if you get data from a database ordered by culture aware sort order.
+
+```csharp
+collection.Should().BeInAscendingOrder(item => item.SomeProp, StringComparer.CurrentCulture);
+collection.Should().BeInDescendingOrder(item => item.SomeProp, StringComparer.CurrentCulture);
+collection.Should().NotBeInAscendingOrder(item => item.SomeProp, StringComparer.CurrentCulture);
+collection.Should().NotBeInDescendingOrder(item => item.SomeProp, StringComparer.CurrentCulture);
+```
+ 
 For `String` collections there are specific methods to assert the items. For the `ContainMatch` and `NotContainMatch` methods we support wildcards.
 
 The pattern can be a combination of literal and wildcard characters, but it doesn't support regular expressions.
 
 The following wildcard specifiers are permitted in the pattern:
 
-| Wilcard specifier | Matches                                   |
+| Wildcard specifier | Matches                                   |
 | ----------------- | ----------------------------------------- |
 | * (asterisk)      | Zero or more characters in that position. |
 | ? (question mark) | Exactly one character in that position.   |
@@ -144,9 +162,9 @@ Consider for instance two collections that contain some kind of domain entity pe
 Since the actual object instance is different, if you want to make sure a particular property was properly persisted, you usually do something like this:
 
 ```csharp
-persistedCustomers.Select(c => c.Name).Should().Equal(customers.Select(c => c.Name);
-persistedCustomers.Select(c => c.Name).Should().StartWith(customers.Select(c => c.Name);
-persistedCustomers.Select(c => c.Name).Should().EndWith(customers.Select(c => c.Name);
+persistedCustomers.Select(c => c.Name).Should().Equal(customers.Select(c => c.Name));
+persistedCustomers.Select(c => c.Name).Should().StartWith(customers.Select(c => c.Name));
+persistedCustomers.Select(c => c.Name).Should().EndWith(customers.Select(c => c.Name));
 ```
 
 With these new overloads, you can rewrite them into:
@@ -188,6 +206,22 @@ collection.Should().SatisfyRespectively(
         second.Name.Should().EndWith("e");
         second.Attributes.Should().NotBeEmpty();
     });
+```
+
+If you need to perform the same assertion on all elements of a collection:
+
+```csharp
+var collection = new []
+{
+    new { Id = 1, Name = "John", Attributes = new string[] { } },
+    new { Id = 2, Name = "Jane", Attributes = new string[] { "attr" } }
+};
+collection.Should().AllSatisfy(x =>
+{
+    x.Id.Should().BePositive();
+    x.Name.Should().StartWith("J");
+    x.Attributes.Should().NotBeNull();
+});
 ```
 
 If you need to perform individual assertions on all elements of a collection without setting expectation about the order of elements:

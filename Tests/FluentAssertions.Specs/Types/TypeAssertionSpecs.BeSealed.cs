@@ -2,15 +2,15 @@
 using Xunit;
 using Xunit.Sdk;
 
-namespace FluentAssertions.Specs.Types
-{
-    /// <content>
-    /// The [Not]BeSealed specs.
-    /// </content>
-    public partial class TypeAssertionSpecs
-    {
-        #region BeSealed
+namespace FluentAssertions.Specs.Types;
 
+/// <content>
+/// The [Not]BeSealed specs.
+/// </content>
+public partial class TypeAssertionSpecs
+{
+    public class BeSealed
+    {
         [Fact]
         public void When_type_is_sealed_it_succeeds()
         {
@@ -74,11 +74,10 @@ namespace FluentAssertions.Specs.Types
             act.Should().Throw<XunitException>()
                 .WithMessage("Expected type to be sealed *failure message*, but type is <null>.");
         }
+    }
 
-        #endregion
-
-        #region NotBeSealed
-
+    public class NotBeSealed
+    {
         [Theory]
         [InlineData(typeof(ClassWithoutMembers))]
         [InlineData(typeof(Abstract))]
@@ -145,7 +144,5 @@ namespace FluentAssertions.Specs.Types
             act.Should().Throw<XunitException>()
                 .WithMessage("Expected type not to be sealed *failure message*, but type is <null>.");
         }
-
-        #endregion
     }
 }

@@ -3,25 +3,25 @@ using System.Reflection;
 using Xunit;
 using Xunit.Sdk;
 
-namespace FluentAssertions.Specs.Primitives
+namespace FluentAssertions.Specs.Primitives;
+
+public enum EnumULong : ulong
 {
-    public enum EnumULong : ulong
-    {
-        Int64Max = long.MaxValue,
-        UInt64LessOne = ulong.MaxValue - 1,
-        UInt64Max = ulong.MaxValue
-    }
+    Int64Max = long.MaxValue,
+    UInt64LessOne = ulong.MaxValue - 1,
+    UInt64Max = ulong.MaxValue
+}
 
-    public enum EnumLong : long
-    {
-        Int64Max = long.MaxValue,
-        Int64LessOne = long.MaxValue - 1
-    }
+public enum EnumLong : long
+{
+    Int64Max = long.MaxValue,
+    Int64LessOne = long.MaxValue - 1
+}
 
-    public class EnumAssertionSpecs
+public class EnumAssertionSpecs
+{
+    public class HaveFlag
     {
-        #region HaveFlag / NotHaveFlag
-
         [Fact]
         public void When_enum_has_the_expected_flag_it_should_succeed()
         {
@@ -56,9 +56,13 @@ namespace FluentAssertions.Specs.Primitives
 
             // Assert
             act.Should().Throw<XunitException>()
-                .WithMessage("Expected*have flag TestEnum.Three {value: 4}*because we want to test the failure message*but found TestEnum.One|Two {value: 3}.");
+                .WithMessage(
+                    "Expected*have flag TestEnum.Three {value: 4}*because we want to test the failure message*but found TestEnum.One|Two {value: 3}.");
         }
+    }
 
+    public class NotHaveFlag
+    {
         [Fact]
         public void When_enum_does_not_have_the_unexpected_flag_it_should_succeed()
         {
@@ -80,7 +84,8 @@ namespace FluentAssertions.Specs.Primitives
 
             // Assert
             act.Should().Throw<XunitException>()
-                .WithMessage("Expected*someObject*to not have flag TestEnum.Two {value: 2}*because we want to test the failure message*");
+                .WithMessage(
+                    "Expected*someObject*to not have flag TestEnum.Two {value: 2}*because we want to test the failure message*");
         }
 
         [Fact]
@@ -95,28 +100,27 @@ namespace FluentAssertions.Specs.Primitives
             // Assert
             act.Should().NotThrow();
         }
+    }
 
-        [Flags]
-        public enum TestEnum
-        {
-            None = 0,
-            One = 1,
-            Two = 2,
-            Three = 4
-        }
+    [Flags]
+    public enum TestEnum
+    {
+        None = 0,
+        One = 1,
+        Two = 2,
+        Three = 4
+    }
 
-        [Flags]
-        public enum OtherEnum
-        {
-            Default,
-            First,
-            Second
-        }
+    [Flags]
+    public enum OtherEnum
+    {
+        Default,
+        First,
+        Second
+    }
 
-        #endregion
-
-        #region Be / NotBe
-
+    public class Be
+    {
         [Fact]
         public void When_enums_are_equal_it_should_succeed()
         {
@@ -169,7 +173,7 @@ namespace FluentAssertions.Specs.Primitives
 
             // Assert
             act.Should().Throw<XunitException>()
-                .WithMessage("*because we want to test the failure message*");
+                .WithMessage("*subject*because we want to test the failure message*");
         }
 
         [Theory]
@@ -185,7 +189,10 @@ namespace FluentAssertions.Specs.Primitives
             act.Should().Throw<XunitException>()
                 .WithMessage("*because we want to test the failure message*");
         }
+    }
 
+    public class NotBe
+    {
         [Fact]
         public void When_enums_are_unequal_it_should_succeed()
         {
@@ -254,17 +261,16 @@ namespace FluentAssertions.Specs.Primitives
             act.Should().Throw<XunitException>()
                 .WithMessage("*because we want to test the failure message*");
         }
+    }
 
-        public enum MyEnum
-        {
-            One = 1,
-            Two = 2
-        }
+    public enum MyEnum
+    {
+        One = 1,
+        Two = 2
+    }
 
-        #endregion
-
-        #region HaveValue / NotHaveValue
-
+    public class HaveValue
+    {
         [Fact]
         public void When_enum_has_the_expected_value_it_should_succeed()
         {
@@ -303,6 +309,37 @@ namespace FluentAssertions.Specs.Primitives
         }
 
         [Fact]
+        public void When_nullable_enum_has_value_it_should_be_chainable()
+        {
+            // Arrange
+            MyEnum? subject = MyEnum.One;
+
+            // Act
+            Action act = () => subject.Should().HaveValue()
+                .Which.Should().Be(MyEnum.One);
+
+            // Assert
+            act.Should().NotThrow();
+        }
+
+        [Fact]
+        public void When_nullable_enum_does_not_have_value_it_should_throw()
+        {
+            // Arrange
+            MyEnum? subject = null;
+
+            // Act
+            Action act = () => subject.Should().HaveValue("we want to test the failure {0}", "message");
+
+            // Assert
+            act.Should().Throw<XunitException>()
+                .WithMessage("*because we want to test the failure message*");
+        }
+    }
+
+    public class NotHaveValue
+    {
+        [Fact]
         public void When_enum_does_not_have_the_unexpected_value_it_should_succeed()
         {
             // Arrange
@@ -339,10 +376,36 @@ namespace FluentAssertions.Specs.Primitives
             act.Should().NotThrow();
         }
 
-        #endregion
+        [Fact]
+        public void When_nullable_enum_does_not_have_value_it_should_succeed()
+        {
+            // Arrange
+            MyEnum? subject = null;
 
-        #region HaveSameValueAs / NotHaveSameValueAs
+            // Act
+            Action act = () => subject.Should().NotHaveValue();
 
+            // Assert
+            act.Should().NotThrow();
+        }
+
+        [Fact]
+        public void When_nullable_enum_has_value_it_should_throw()
+        {
+            // Arrange
+            MyEnum? subject = MyEnum.One;
+
+            // Act
+            Action act = () => subject.Should().NotHaveValue("we want to test the failure {0}", "message");
+
+            // Assert
+            act.Should().Throw<XunitException>()
+                .WithMessage("*because we want to test the failure message*");
+        }
+    }
+
+    public class HaveSameValueAs
+    {
         [Fact]
         public void When_enums_have_equal_values_it_should_succeed()
         {
@@ -398,7 +461,10 @@ namespace FluentAssertions.Specs.Primitives
             act.Should().Throw<XunitException>()
                 .WithMessage("*because we want to test the failure message*");
         }
+    }
 
+    public class NotHaveSameValueAs
+    {
         [Fact]
         public void When_enum_have_unequal_values_it_should_succeed()
         {
@@ -454,17 +520,16 @@ namespace FluentAssertions.Specs.Primitives
             act.Should().Throw<XunitException>()
                 .WithMessage("*because we want to test the failure message*");
         }
+    }
 
-        public enum MyEnumOtherName
-        {
-            OtherOne = 1,
-            OtherTwo = 2
-        }
+    public enum MyEnumOtherName
+    {
+        OtherOne = 1,
+        OtherTwo = 2
+    }
 
-        #endregion
-
-        #region HaveSameNameAs / NotHaveSameNameAs
-
+    public class HaveSameNameAs
+    {
         [Fact]
         public void When_enums_have_equal_names_it_should_succeed()
         {
@@ -520,7 +585,10 @@ namespace FluentAssertions.Specs.Primitives
             act.Should().Throw<XunitException>()
                 .WithMessage("*because we want to test the failure message*");
         }
+    }
 
+    public class NotHaveSameNameAs
+    {
         [Fact]
         public void When_senum_have_unequal_names_it_should_succeed()
         {
@@ -576,86 +644,16 @@ namespace FluentAssertions.Specs.Primitives
             act.Should().Throw<XunitException>()
                 .WithMessage("*because we want to test the failure message*");
         }
+    }
 
-        public enum MyEnumOtherValue
-        {
-            One = 11,
-            Two = 22
-        }
+    public enum MyEnumOtherValue
+    {
+        One = 11,
+        Two = 22
+    }
 
-        #endregion
-
-        #region BeNull / NotBeNull
-
-        [Fact]
-        public void When_nullable_enum_has_value_it_should_be_chainable()
-        {
-            // Arrange
-            MyEnum? subject = MyEnum.One;
-
-            // Act
-            Action act = () => subject.Should().HaveValue()
-                .Which.Should().Be(MyEnum.One);
-
-            // Assert
-            act.Should().NotThrow();
-        }
-
-        [Fact]
-        public void When_nullable_enum_is_not_null_it_should_be_chainable()
-        {
-            // Arrange
-            MyEnum? subject = MyEnum.One;
-
-            // Act
-            Action act = () => subject.Should().NotBeNull()
-                .Which.Should().Be(MyEnum.One);
-
-            // Assert
-            act.Should().NotThrow();
-        }
-
-        [Fact]
-        public void When_nullable_enum_does_not_have_value_it_should_throw()
-        {
-            // Arrange
-            MyEnum? subject = null;
-
-            // Act
-            Action act = () => subject.Should().HaveValue("we want to test the failure {0}", "message");
-
-            // Assert
-            act.Should().Throw<XunitException>()
-                .WithMessage("*because we want to test the failure message*");
-        }
-
-        [Fact]
-        public void When_nullable_enum_is_null_it_should_throw()
-        {
-            // Arrange
-            MyEnum? subject = null;
-
-            // Act
-            Action act = () => subject.Should().NotBeNull("we want to test the failure {0}", "message");
-
-            // Assert
-            act.Should().Throw<XunitException>()
-                .WithMessage("*because we want to test the failure message*");
-        }
-
-        [Fact]
-        public void When_nullable_enum_does_not_have_value_it_should_succeed()
-        {
-            // Arrange
-            MyEnum? subject = null;
-
-            // Act
-            Action act = () => subject.Should().NotHaveValue();
-
-            // Assert
-            act.Should().NotThrow();
-        }
-
+    public class BeNull
+    {
         [Fact]
         public void When_nullable_enum_is_null_it_should_succeed()
         {
@@ -667,20 +665,6 @@ namespace FluentAssertions.Specs.Primitives
 
             // Assert
             act.Should().NotThrow();
-        }
-
-        [Fact]
-        public void When_nullable_enum_has_value_it_should_throw()
-        {
-            // Arrange
-            MyEnum? subject = MyEnum.One;
-
-            // Act
-            Action act = () => subject.Should().NotHaveValue("we want to test the failure {0}", "message");
-
-            // Assert
-            act.Should().Throw<XunitException>()
-                .WithMessage("*because we want to test the failure message*");
         }
 
         [Fact]
@@ -696,11 +680,41 @@ namespace FluentAssertions.Specs.Primitives
             act.Should().Throw<XunitException>()
                 .WithMessage("*because we want to test the failure message*");
         }
+    }
 
-        #endregion
+    public class NotBeNull
+    {
+        [Fact]
+        public void When_nullable_enum_is_not_null_it_should_be_chainable()
+        {
+            // Arrange
+            MyEnum? subject = MyEnum.One;
 
-        #region Match
+            // Act
+            Action act = () => subject.Should().NotBeNull()
+                .Which.Should().Be(MyEnum.One);
 
+            // Assert
+            act.Should().NotThrow();
+        }
+
+        [Fact]
+        public void When_nullable_enum_is_null_it_should_throw()
+        {
+            // Arrange
+            MyEnum? subject = null;
+
+            // Act
+            Action act = () => subject.Should().NotBeNull("we want to test the failure {0}", "message");
+
+            // Assert
+            act.Should().Throw<XunitException>()
+                .WithMessage("*because we want to test the failure message*");
+        }
+    }
+
+    public class Match
+    {
         [Fact]
         public void An_enum_matching_the_predicate_should_not_throw()
         {
@@ -733,11 +747,10 @@ namespace FluentAssertions.Specs.Primitives
             // Assert
             act.Should().Throw<ArgumentNullException>().WithMessage("*null*predicate*");
         }
+    }
 
-        #endregion
-
-        #region Be One Of
-
+    public class BeOneOf
+    {
         [Fact]
         public void An_enum_that_is_one_of_the_expected_values_should_not_throw()
         {
@@ -755,7 +768,8 @@ namespace FluentAssertions.Specs.Primitives
             BindingFlags flags = BindingFlags.DeclaredOnly;
 
             // Act / Assert
-            Action act = () => flags.Should().BeOneOf(new[] { BindingFlags.Public, BindingFlags.ExactBinding }, "that's what we need");
+            Action act = () =>
+                flags.Should().BeOneOf(new[] { BindingFlags.Public, BindingFlags.ExactBinding }, "that's what we need");
 
             act.Should()
                 .Throw<XunitException>()
@@ -789,7 +803,104 @@ namespace FluentAssertions.Specs.Primitives
                 .Throw<ArgumentException>()
                 .WithMessage("Cannot*null list of enums*");
         }
+    }
 
-        #endregion
+    public class BeDefined
+    {
+        [Fact]
+        public void A_valid_entry_of_an_enum_is_defined()
+        {
+            // Arrange
+            var dayOfWeek = DayOfWeek.Monday;
+
+            // Act / Assert
+            dayOfWeek.Should().BeDefined();
+        }
+
+        [Fact]
+        public void If_a_value_casted_to_an_enum_type_and_it_does_not_exist_in_the_enum_it_throws()
+        {
+            // Arrange
+            var dayOfWeek = (DayOfWeek)999;
+
+            // Act
+            Action act = () => dayOfWeek.Should().BeDefined("we want to test the failure {0}", "message");
+
+            // Assert
+            act.Should().Throw<XunitException>()
+                .WithMessage("Expected *to be defined in*failure message*, but it is not*");
+        }
+
+        [Fact]
+        public void A_null_entry_of_an_enum_throws()
+        {
+            // Arrange
+            MyEnum? subject = null;
+
+            // Act
+            Action act = () => subject.Should().BeDefined();
+
+            // Assert
+            act.Should().Throw<XunitException>()
+                .WithMessage("Expected *to be defined in*, but found <null>.");
+        }
+    }
+
+    public class NotBeDefined
+    {
+        [Fact]
+        public void An_invalid_entry_of_an_enum_is_not_defined_passes()
+        {
+            // Arrange
+            var dayOfWeek = (DayOfWeek)999;
+
+            // Act / Assert
+            dayOfWeek.Should().NotBeDefined();
+        }
+
+        [Fact]
+        public void A_valid_entry_of_an_enum_is_not_defined_fails()
+        {
+            // Arrange
+            var dayOfWeek = DayOfWeek.Monday;
+
+            // Act
+            Action act = () => dayOfWeek.Should().NotBeDefined();
+
+            // Assert
+            act.Should().Throw<XunitException>()
+                .WithMessage("Did not expect*to be defined in*, but it is.");
+        }
+
+        [Fact]
+        public void A_null_value_of_an_enum_is_not_defined_and_throws()
+        {
+            // Arrange
+            MyEnum? subject = null;
+
+            // Act
+            Action act = () => subject.Should().NotBeDefined();
+
+            // Assert
+            act.Should().Throw<XunitException>()
+                .WithMessage("Did not expect *to be defined in*, but found <null>.");
+        }
+    }
+
+    public class Miscellaneous
+    {
+        [Fact]
+        public void Should_throw_a_helpful_error_when_accidentally_using_equals()
+        {
+            // Arrange
+            MyEnum? subject = null;
+
+            // Act
+            var action = () => subject.Should().Equals(null);
+
+            // Assert
+            action.Should().Throw<NotSupportedException>()
+                .WithMessage("Equals is not part of Fluent Assertions. Did you mean Be() instead?");
+        }
     }
 }

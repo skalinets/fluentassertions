@@ -1,18 +1,17 @@
 ﻿using System;
 using FluentAssertions.Common;
-using FluentAssertions.Specs.Equivalency;
 using Xunit;
 using Xunit.Sdk;
 
-namespace FluentAssertions.Specs.Types
-{
-    /// <content>
-    /// The [Not]HaveConstructor specs.
-    /// </content>
-    public partial class TypeAssertionSpecs
-    {
-        #region HaveConstructor
+namespace FluentAssertions.Specs.Types;
 
+/// <content>
+/// The [Not]HaveConstructor specs.
+/// </content>
+public partial class TypeAssertionSpecs
+{
+    public class HaveConstructor
+    {
         [Fact]
         public void When_asserting_a_type_has_a_constructor_which_it_does_it_succeeds()
         {
@@ -22,9 +21,8 @@ namespace FluentAssertions.Specs.Types
             // Act
             Action act = () =>
                 type.Should()
-                    .HaveConstructor(new Type[] { typeof(string) })
-                    .Which.Should()
-                        .HaveAccessModifier(CSharpAccessModifier.Private);
+                    .HaveConstructor(new[] { typeof(string) })
+                    .Which.Should().HaveAccessModifier(CSharpAccessModifier.Private);
 
             // Assert
             act.Should().NotThrow();
@@ -43,7 +41,7 @@ namespace FluentAssertions.Specs.Types
             // Assert
             act.Should().Throw<XunitException>()
                 .WithMessage(
-                    "Expected constructor *.ClassWithNoMembers(System.Int32, System.Type) to exist *failure message*" +
+                    "Expected constructor *ClassWithNoMembers(System.Int32, System.Type) to exist *failure message*" +
                     ", but it does not.");
         }
 
@@ -76,11 +74,10 @@ namespace FluentAssertions.Specs.Types
             act.Should().ThrowExactly<ArgumentNullException>()
                 .WithParameterName("parameterTypes");
         }
+    }
 
-        #endregion
-
-        #region NotHaveConstructor
-
+    public class NotHaveConstructor
+    {
         [Fact]
         public void When_asserting_a_type_does_not_have_a_constructor_which_it_does_not_it_succeeds()
         {
@@ -90,7 +87,7 @@ namespace FluentAssertions.Specs.Types
             // Act
             Action act = () =>
                 type.Should()
-                    .NotHaveConstructor(new Type[] { typeof(string) });
+                    .NotHaveConstructor(new[] { typeof(string) });
 
             // Assert
             act.Should().NotThrow();
@@ -141,7 +138,5 @@ namespace FluentAssertions.Specs.Types
             act.Should().ThrowExactly<ArgumentNullException>()
                 .WithParameterName("parameterTypes");
         }
-
-        #endregion
     }
 }

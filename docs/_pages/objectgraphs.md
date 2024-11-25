@@ -39,7 +39,7 @@ orderDto.Should().BeEquivalentTo(order, options =>
 
 ### Value Types
 
-To determine whether Fluent Assertions should recurs into an object's properties or fields, it needs to understand what types have value semantics and what types should be treated as reference types. The default behavior is to treat every type that overrides `Object.Equals` as an object that was designed to have value semantics. Anonymous types, records and tuples also override this method, but because the community proved us that they use them quite often in equivalency comparisons, we decided to always compare them by their members.
+To determine whether Fluent Assertions should recurs into an object's properties or fields, it needs to understand what types have value semantics and what types should be treated as reference types. The default behavior is to treat every type that overrides `Object.Equals` as an object that was designed to have value semantics. Anonymous types, `record`s, `record struct`s and tuples also override this method, but because the community proved us that they use them quite often in equivalency comparisons, we decided to always compare them by their members.
 
 You can easily override this by using the `ComparingByValue<T>`, `ComparingByMembers<T>`, `ComparingRecordsByValue` and `ComparingRecordsByMembers` options for individual assertions:
 
@@ -48,7 +48,7 @@ subject.Should().BeEquivalentTo(expected,
    options => options.ComparingByValue<IPAddress>());
 ```
 
-For records, this works like this:
+For `record`s and `record struct`s this works like this:
 
 ```csharp
 actual.Should().BeEquivalentTo(expected, options => options
@@ -130,6 +130,23 @@ orderDto.Should().BeEquivalentTo(order, options =>
     options.Excluding(o => o.Products[1].Status));
 ```
 
+You can use `For` and `Exclude` if you want to exclude a member on each nested object regardless of its index.
+
+```csharp
+orderDto.Should().BeEquivalentTo(order, options =>
+    options.For(o => o.Products)
+           .Exclude(o => o.Status));
+```
+
+Using `For` you can navigate arbitrarily deep. Consider a `Product` has a collection of `Part`s and a `Part` has a name. Using `For` your can also exclude the `Name` of all `Part`s of all `Product`s.
+
+```csharp
+orderDto.Should().BeEquivalentTo(order, options =>
+    options.For(o => o.Products)
+           .For(o => o.Parts)
+           .Exclude(o => o.Name));
+```
+
 Of course, `Excluding()` and `ExcludingMissingMembers()` can be combined.
 
 You can also take a different approach and explicitly tell Fluent Assertions which members to include. You can directly specify a property expression or use a predicate that acts on the provided `ISubjectInfo`.
@@ -173,6 +190,69 @@ orderDto.Should().BeEquivalentTo(order, options => options
 ```
 
 This configuration affects the initial inclusion of members and happens before any `Exclude`s or other `IMemberSelectionRule`s. This configuration also affects matching. For example, that if properties are excluded, properties will not be inspected when looking for a match on the expected object.
+
+### Comparing members with different names
+
+Imagine you want to compare an `Order` and an `OrderDto` using `BeEquivalentTo`, but the first type has a `Name` property and the second has a `OrderName` property. You can map those using the following option:
+
+```csharp
+// Using names with the expectation member name first. Then the subject's member name.
+orderDto.Should().BeEquivalentTo(order, options => options
+    .WithMapping("Name", "OrderName"));
+
+// Using expressions, but again, with expectation first, subject last.
+orderDto.Should().BeEquivalentTo(order, options => options
+    .WithMapping<OrderDto>(e => e.Name, s => s.OrderName));
+```
+
+Another option is to map two deeply nested members to each other. In that case, your path must start at the root:
+
+```csharp
+// Using dotted property paths 
+rootSubject.Should().BeEquivalentTo(rootExpectation, options => options
+    .WithMapping("Parent.Collection[].Member", "Parent.Collection[].Member"));
+
+// Using expressions
+rootSubject.Should().BeEquivalentTo(rootExpectation, options => options
+    .WithMapping<SubjectType>(e => e.Parent.Collection[0].Member, s => s.Parent.Collection[0].Member));
+```
+
+Note that collection indices in string-based paths are not allowed. Within expressions, you must use an index to make it a valid property path, but it'll be ignored. So both the examples are equivalent. Also, such nested paths must have the same parent. So mapping properties or fields at different levels is not (yet) supported.
+
+Now imagine those types appear somewhere in the object graph. Then you can use this overload:
+
+```csharp
+// Using names
+orderDto.Should().BeEquivalentTo(order, options => options
+    .WithMapping<Order, OrderDto>("Name", "OrderName"));
+
+// Using expressions
+orderDto.Should().BeEquivalentTo(order, options => options
+    .WithMapping<Order, OrderDto>(e => e.Name, s => s.OrderName));
+```
+
+Notice that you can also map properties to fields and vice-versa.
+
+### Hidden Members
+
+Sometimes types have members out of necessity, to satisfy a contract, but they aren't logically a part of the type. In this case, they are often marked with the attribute `[EditorBrowsable(EditorBrowsableState.Never)]`, so that the object can satisfy the contract but the members don't show up in IntelliSense when writing code that uses the type.
+
+If you want to compare objects that have such fields, but you want to exclude the non-browsable "hidden" members (for instance, their implementations often simply throw `NotImplementedException`), you can call `ExcludingNonBrowsableMembers` on the options object:
+
+```csharp
+class DataType
+{
+    public int X { get; }
+
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public int Y => throw new NotImplementedException();
+}
+
+DataType original, derived;
+
+derived.Should().BeEquivalentTo(original, options => options
+    .ExcludingNonBrowsableMembers());
+```
 
 ### Equivalency Comparison Behavior
 

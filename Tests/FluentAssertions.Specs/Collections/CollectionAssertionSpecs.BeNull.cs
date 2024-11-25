@@ -3,15 +3,15 @@ using System.Collections.Generic;
 using Xunit;
 using Xunit.Sdk;
 
-namespace FluentAssertions.Specs.Collections
-{
-    /// <content>
-    /// The [Not]BeNull specs.
-    /// </content>
-    public partial class CollectionAssertionSpecs
-    {
-        #region Be Null
+namespace FluentAssertions.Specs.Collections;
 
+/// <content>
+/// The [Not]BeNull specs.
+/// </content>
+public partial class CollectionAssertionSpecs
+{
+    public class BeNull
+    {
         [Fact]
         public void When_collection_is_expected_to_be_null_and_it_is_it_should_not_throw()
         {
@@ -35,11 +35,10 @@ namespace FluentAssertions.Specs.Collections
             act.Should().Throw<XunitException>().WithMessage(
                 "Expected someCollection to be <null> because null is valid, but found {empty}.");
         }
+    }
 
-        #endregion
-
-        #region Not Be Null
-
+    public class NotBeNull
+    {
         [Fact]
         public void When_collection_is_not_expected_to_be_null_and_it_isnt_it_should_not_throw()
         {
@@ -63,7 +62,5 @@ namespace FluentAssertions.Specs.Collections
             act.Should().Throw<XunitException>().WithMessage(
                 "Expected someCollection not to be <null> because someCollection should not.");
         }
-
-        #endregion
     }
 }

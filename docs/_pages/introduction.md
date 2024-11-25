@@ -67,12 +67,12 @@ This chaining can make your unit tests a lot easier to read.
 
 Fluent Assertions supports a lot of different unit testing frameworks. Just add a reference to the corresponding test framework assembly to the unit test project. Fluent Assertions will automatically find the corresponding assembly and use it for throwing the framework-specific exceptions.
 
-If, for some unknown reason, Fluent Assertions fails to find the assembly, and you're running under .NET 4.7 or a .NET Core 3.0 project, try specifying the framework explicitly using a configuration setting in the project’s app.config. If it cannot find any of the supported frameworks, it will fall back to using a custom `AssertFailedException` exception class.
+If, for some unknown reason, Fluent Assertions fails to find the assembly, and you're running under .NET 4.7 or a .NET 6.0 project, try specifying the framework explicitly using a configuration setting in the project’s app.config. If it cannot find any of the supported frameworks, it will fall back to using a custom `AssertFailedException` exception class.
 
 ```xml
 <configuration>
   <appSettings>
-    <!-- Supported values: nunit, xunit2, mstestv2, nspec3 and mspec -->
+    <!-- Supported values: nunit, xunit2, mstestv2 and mspec -->
     <add key="FluentAssertions.TestFramework" value="nunit"/>
   </appSettings>
 </configuration>
@@ -93,7 +93,8 @@ This will throw a test framework-specific exception with the following message:
 
 `Expected username to be "jonas" with a length of 5, but "dennis" has a length of 6, differs near "den" (index 0).`
 
-The way this works is that Fluent Assertions will try to traverse the current stack trace to find the line and column numbers as well as the full path to the source file. Since it needs the debug symbols for that, this will require you to compile the unit tests in debug mode, even on your build servers. Also, since only .NET Standard 2.0 and newer as well as the full .NET Framework support getting direct access to the current stack trace, subject identification only works for the platforms targeting those frameworks.
+The way this works is that Fluent Assertions will try to traverse the current stack trace to find the line and column numbers as well as the full path to the source file. Since it needs the debug symbols for that, this will require you to compile the unit test projects in debug mode, even on your build servers.
+Also, this does not work with [`PathMap`](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/compiler-options/advanced#pathmap) for unit test projects as it assumes that source files are present on the path returned from [`StackFrame.GetFileName()`](https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.stackframe.getfilename).
 
 Now, if you've built your own extensions that use Fluent Assertions directly, you can tell it to skip that extension code while traversing the stack trace. Consider for example the customer assertion:
 

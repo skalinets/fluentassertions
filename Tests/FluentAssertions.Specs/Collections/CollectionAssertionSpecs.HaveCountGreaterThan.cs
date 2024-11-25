@@ -4,15 +4,15 @@ using FluentAssertions.Execution;
 using Xunit;
 using Xunit.Sdk;
 
-namespace FluentAssertions.Specs.Collections
-{
-    /// <content>
-    /// The HaveCountGreaterThan specs.
-    /// </content>
-    public partial class CollectionAssertionSpecs
-    {
-        #region Have Count Greater Than
+namespace FluentAssertions.Specs.Collections;
 
+/// <content>
+/// The HaveCountGreaterThan specs.
+/// </content>
+public partial class CollectionAssertionSpecs
+{
+    public class HaveCountGreaterThan
+    {
         [Fact]
         public void Should_succeed_when_asserting_collection_has_a_count_greater_than_less_the_number_of_items()
         {
@@ -43,11 +43,13 @@ namespace FluentAssertions.Specs.Collections
             var collection = new[] { 1, 2, 3 };
 
             // Act
-            Action action = () => collection.Should().HaveCountGreaterThan(3, "because we want to test the failure {0}", "message");
+            Action action = () =>
+                collection.Should().HaveCountGreaterThan(3, "because we want to test the failure {0}", "message");
 
             // Assert
             action.Should().Throw<XunitException>()
-                .WithMessage("Expected collection to contain more than 3 item(s) because we want to test the failure message, but found 3: {1, 2, 3}.");
+                .WithMessage(
+                    "Expected collection to contain more than 3 item(s) because we want to test the failure message, but found 3: {1, 2, 3}.");
         }
 
         [Fact]
@@ -64,9 +66,8 @@ namespace FluentAssertions.Specs.Collections
             };
 
             // Assert
-            act.Should().Throw<XunitException>().WithMessage("*more than*1*we want to test the behaviour with a null subject*found <null>*");
+            act.Should().Throw<XunitException>()
+                .WithMessage("*more than*1*we want to test the behaviour with a null subject*found <null>*");
         }
-
-        #endregion
     }
 }

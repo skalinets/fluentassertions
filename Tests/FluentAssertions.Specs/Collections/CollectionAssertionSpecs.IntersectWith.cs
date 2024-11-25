@@ -4,15 +4,15 @@ using FluentAssertions.Execution;
 using Xunit;
 using Xunit.Sdk;
 
-namespace FluentAssertions.Specs.Collections
-{
-    /// <content>
-    /// The [Not]IntersectWith specs.
-    /// </content>
-    public partial class CollectionAssertionSpecs
-    {
-        #region Intersect With
+namespace FluentAssertions.Specs.Collections;
 
+/// <content>
+/// The [Not]IntersectWith specs.
+/// </content>
+public partial class CollectionAssertionSpecs
+{
+    public class IntersectWith
+    {
         [Fact]
         public void When_asserting_the_items_in_an_two_intersecting_collections_intersect_it_should_succeed()
         {
@@ -57,11 +57,10 @@ namespace FluentAssertions.Specs.Collections
             act.Should().Throw<XunitException>()
                 .WithMessage("Expected collection to intersect with {4, 5} *failure message*, but found <null>.");
         }
+    }
 
-        #endregion
-
-        #region Not Intersect With
-
+    public class NotIntersectWith
+    {
         [Fact]
         public void When_asserting_the_items_in_an_two_non_intersecting_collections_do_not_intersect_it_should_succeed()
         {
@@ -122,7 +121,5 @@ namespace FluentAssertions.Specs.Collections
             act.Should().Throw<XunitException>()
                 .WithMessage("Did not expect collection to intersect with {4, 5} *failure message*, but found <null>.");
         }
-
-        #endregion
     }
 }

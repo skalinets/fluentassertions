@@ -1,53 +1,72 @@
 name: build
 
-on:
-  pull_request:
-    paths-ignore: 
-      - docs/**
-  push:
-    paths-ignore: 
-      - docs/**
+on: [push, pull_request]
 
 jobs:
   build:
 
     runs-on: windows-latest
 
+    env:
+      DOTNET_NOLOGO: true
+
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         fetch-depth: 0
-    
-    - name: Setup .NET 5
-      uses: actions/setup-dotnet@v1
+
+    - name: Setup .NET SDKs
+      uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: 5.0.x
-    
-    - name: Setup .NET 3.1
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: 3.1.x
-        
-    - name: Setup .NET 2.1
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: 2.1.x
-    
-    - name: Install NUKE
-      run: |
-        dotnet tool install --global Nuke.GlobalTool
-        
+        dotnet-version: |
+          2.1.x
+          3.1.x
+          6.0.x
+          7.0.x
+
     - name: Run NUKE
-      run: nuke
+      run: ./build.ps1
+      env:
+        NuGetApiKey: ${{ secrets.NUGETAPIKEY }}
+
+    - name: Check for 'lcov.info' existence
+      id: check_files
+      uses: andstor/file-existence-action@v2
+      with:
+        files: "TestResults/reports/lcov.info"
+
+    - name: coveralls
+      uses: coverallsapp/github-action@v2
+      if: steps.check_files.outputs.files_exists == 'true'
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        file: TestResults/reports/lcov.info
 
     - name: Upload artifacts
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         path: ./Artifacts/*
-        
-    - name: Push to Nuget
-      run: dotnet nuget push .\artifacts\*.nupkg --api-key "$env:ApiKey" --skip-duplicate --no-symbols true --source https://api.nuget.org/v3/index.json
-      if: contains(github.ref, 'refs/tags/')
-      env:
-        ApiKey: ${{ secrets.NUGETAPIKEY }}
-      
+  only-unit-tests:
+
+    strategy:
+      matrix:
+        os: [ubuntu-22.04, macos-12]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: Setup .NET SDKs
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: |
+          2.1.x
+          3.1.x
+          6.0.x
+          7.0.x
+
+    - name: Run NUKE
+      run: ./build.sh UnitTests

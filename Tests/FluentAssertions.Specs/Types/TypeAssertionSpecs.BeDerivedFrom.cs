@@ -3,15 +3,15 @@ using FluentAssertions.Specs.Primitives;
 using Xunit;
 using Xunit.Sdk;
 
-namespace FluentAssertions.Specs.Types
-{
-    /// <content>
-    /// The [Not]BeDerivedFrom specs.
-    /// </content>
-    public partial class TypeAssertionSpecs
-    {
-        #region BeDerivedFrom
+namespace FluentAssertions.Specs.Types;
 
+/// <content>
+/// The [Not]BeDerivedFrom specs.
+/// </content>
+public partial class TypeAssertionSpecs
+{
+    public class BeDerivedFrom
+    {
         [Fact]
         public void When_asserting_a_type_is_derived_from_its_base_class_it_succeeds()
         {
@@ -117,11 +117,10 @@ namespace FluentAssertions.Specs.Types
             act.Should().ThrowExactly<ArgumentNullException>()
                 .WithParameterName("baseType");
         }
+    }
 
-        #endregion
-
-        #region BeDerivedFromOfT
-
+    public class BeDerivedFromOfT
+    {
         [Fact]
         public void When_asserting_a_type_is_DerivedFromOfT_its_base_class_it_succeeds()
         {
@@ -135,11 +134,10 @@ namespace FluentAssertions.Specs.Types
             // Assert
             act.Should().NotThrow();
         }
+    }
 
-        #endregion
-
-        #region NotBeDerivedFrom
-
+    public class NotBeDerivedFrom
+    {
         [Fact]
         public void When_asserting_a_type_is_not_derived_from_an_unrelated_class_it_succeeds()
         {
@@ -247,11 +245,10 @@ namespace FluentAssertions.Specs.Types
             act.Should().ThrowExactly<ArgumentNullException>()
                 .WithParameterName("baseType");
         }
+    }
 
-        #endregion
-
-        #region NotBeDerivedFromOfT
-
+    public class NotBeDerivedFromOfT
+    {
         [Fact]
         public void When_asserting_a_type_is_not_DerivedFromOfT_an_unrelated_class_it_succeeds()
         {
@@ -265,7 +262,5 @@ namespace FluentAssertions.Specs.Types
             // Assert
             act.Should().NotThrow();
         }
-
-        #endregion
     }
 }

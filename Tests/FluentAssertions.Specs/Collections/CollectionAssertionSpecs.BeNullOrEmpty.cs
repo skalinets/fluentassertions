@@ -2,15 +2,15 @@
 using Xunit;
 using Xunit.Sdk;
 
-namespace FluentAssertions.Specs.Collections
-{
-    /// <content>
-    /// The [Not]BeNullOrEmpty specs.
-    /// </content>
-    public partial class CollectionAssertionSpecs
-    {
-        #region Be Null Or Empty
+namespace FluentAssertions.Specs.Collections;
 
+/// <content>
+/// The [Not]BeNullOrEmpty specs.
+/// </content>
+public partial class CollectionAssertionSpecs
+{
+    public class BeNullOrEmpty
+    {
         [Fact]
         public void
             When_asserting_a_null_collection_to_be_null_or_empty_it_should_succeed()
@@ -46,7 +46,7 @@ namespace FluentAssertions.Specs.Collections
             // Assert
             act.Should().Throw<XunitException>()
                 .WithMessage(
-                    "Expected collection to be null or empty because we want to test the failure message, but found {1, 2, 3}.");
+                    "Expected collection to be null or empty because we want to test the failure message, but found at least one item {1}.");
         }
 
         [Fact]
@@ -62,10 +62,24 @@ namespace FluentAssertions.Specs.Collections
             collection.GetEnumeratorCallCount.Should().Be(1);
         }
 
-        #endregion
+        [Fact]
+        public void When_asserting_non_empty_collection_is_null_or_empty_it_should_enumerate_only_once()
+        {
+            // Arrange
+            var collection = new CountingGenericEnumerable<int>(new[] { 1, 2, 3 });
 
-        #region Not Be Null Or Empty
+            // Act
+            Action act = () => collection.Should().BeNullOrEmpty();
 
+            // Assert
+            act.Should().Throw<XunitException>()
+                .WithMessage("*to be null or empty, but found at least one item {1}.");
+            collection.GetEnumeratorCallCount.Should().Be(1);
+        }
+    }
+
+    public class NotBeNullOrEmpty
+    {
         [Fact]
         public void
             When_asserting_non_empty_collection_to_not_be_null_or_empty_it_should_succeed()
@@ -117,7 +131,5 @@ namespace FluentAssertions.Specs.Collections
             // Assert
             collection.GetEnumeratorCallCount.Should().Be(1);
         }
-
-        #endregion
     }
 }

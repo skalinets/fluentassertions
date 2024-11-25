@@ -1,6 +1,3 @@
-﻿namespace AssemblyB
-{
-    public class ClassC
-    {
-    }
-}
+﻿namespace AssemblyB;
+
+public class ClassC;

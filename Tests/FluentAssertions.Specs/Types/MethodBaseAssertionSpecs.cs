@@ -4,12 +4,12 @@ using FluentAssertions.Common;
 using Xunit;
 using Xunit.Sdk;
 
-namespace FluentAssertions.Specs.Types
-{
-    public class MethodBaseAssertionSpecs
-    {
-        #region Return
+namespace FluentAssertions.Specs.Types;
 
+public class MethodBaseAssertionSpecs
+{
+    public class Return
+    {
         [Fact]
         public void When_asserting_an_int_method_returns_int_it_succeeds()
         {
@@ -37,7 +37,7 @@ namespace FluentAssertions.Specs.Types
             // Assert
             act.Should().Throw<XunitException>()
                 .WithMessage("Expected the return type of method IntMethod to be System.String because we want to test the " +
-                             "error message, but it is \"System.Int32\".");
+                    "error message, but it is \"System.Int32\".");
         }
 
         [Fact]
@@ -53,7 +53,7 @@ namespace FluentAssertions.Specs.Types
             // Assert
             act.Should().Throw<XunitException>()
                 .WithMessage("Expected the return type of method VoidMethod to be System.String because we want to test the " +
-                             "error message, but it is \"System.Void\".");
+                    "error message, but it is \"System.Void\".");
         }
 
         [Fact]
@@ -86,11 +86,10 @@ namespace FluentAssertions.Specs.Types
             act.Should().ThrowExactly<ArgumentNullException>()
                 .WithParameterName("returnType");
         }
+    }
 
-        #endregion
-
-        #region NotReturn
-
+    public class NotReturn
+    {
         [Fact]
         public void When_asserting_an_int_method_does_not_return_string_it_succeeds()
         {
@@ -118,7 +117,7 @@ namespace FluentAssertions.Specs.Types
             // Assert
             act.Should().Throw<XunitException>()
                 .WithMessage("Expected the return type of*IntMethod*not to be System.Int32*because we want to test the " +
-                             "error message, but it is.");
+                    "error message, but it is.");
         }
 
         [Fact]
@@ -133,7 +132,8 @@ namespace FluentAssertions.Specs.Types
 
             // Assert
             act.Should().Throw<XunitException>()
-                .WithMessage("Expected the return type of method not to be *.String *failure message*, but methodInfo is <null>.");
+                .WithMessage(
+                    "Expected the return type of method not to be *.String *failure message*, but methodInfo is <null>.");
         }
 
         [Fact]
@@ -150,11 +150,10 @@ namespace FluentAssertions.Specs.Types
             act.Should().ThrowExactly<ArgumentNullException>()
                 .WithParameterName("returnType");
         }
+    }
 
-        #endregion
-
-        #region ReturnOfT
-
+    public class ReturnOfT
+    {
         [Fact]
         public void When_asserting_an_int_method_returnsOfT_int_it_succeeds()
         {
@@ -182,7 +181,7 @@ namespace FluentAssertions.Specs.Types
             // Assert
             act.Should().Throw<XunitException>()
                 .WithMessage("Expected the return type of method IntMethod to be System.String because we want to test the " +
-                             "error message, but it is \"System.Int32\".");
+                    "error message, but it is \"System.Int32\".");
         }
 
         [Fact]
@@ -199,11 +198,10 @@ namespace FluentAssertions.Specs.Types
             act.Should().Throw<XunitException>()
                 .WithMessage("Expected the return type of method to be *.String *failure message*, but methodInfo is <null>.");
         }
+    }
 
-        #endregion
-
-        #region NotReturnOfT
-
+    public class NotReturnOfT
+    {
         [Fact]
         public void When_asserting_an_int_method_does_not_returnsOfT_string_it_succeeds()
         {
@@ -231,7 +229,7 @@ namespace FluentAssertions.Specs.Types
             // Assert
             act.Should().Throw<XunitException>()
                 .WithMessage("Expected the return type of*IntMethod*not to be System.Int32*because we want to test the " +
-                             "error message, but it is.");
+                    "error message, but it is.");
         }
 
         [Fact]
@@ -246,13 +244,13 @@ namespace FluentAssertions.Specs.Types
 
             // Assert
             act.Should().Throw<XunitException>()
-                .WithMessage("Expected the return type of method not to be *.String *failure message*, but methodInfo is <null>.");
+                .WithMessage(
+                    "Expected the return type of method not to be *.String *failure message*, but methodInfo is <null>.");
         }
+    }
 
-        #endregion
-
-        #region ReturnVoid
-
+    public class ReturnVoid
+    {
         [Fact]
         public void When_asserting_a_void_method_returns_void_it_succeeds()
         {
@@ -279,8 +277,9 @@ namespace FluentAssertions.Specs.Types
 
             // Assert
             act.Should().Throw<XunitException>()
-                .WithMessage("Expected the return type of method IntMethod to be void because we want to test the error message " +
-                             "message, but it is \"System.Int32\".");
+                .WithMessage(
+                    "Expected the return type of method IntMethod to be void because we want to test the error message " +
+                    "message, but it is \"System.Int32\".");
         }
 
         [Fact]
@@ -297,11 +296,10 @@ namespace FluentAssertions.Specs.Types
             act.Should().Throw<XunitException>()
                 .WithMessage("Expected the return type of method to be void *failure message*, but methodInfo is <null>.");
         }
+    }
 
-        #endregion
-
-        #region NotReturnVoid
-
+    public class NotReturnVoid
+    {
         [Fact]
         public void When_asserting_an_int_method_does_not_return_void_it_succeeds()
         {
@@ -345,11 +343,10 @@ namespace FluentAssertions.Specs.Types
             act.Should().Throw<XunitException>()
                 .WithMessage("Expected the return type of method not to be void *failure message*, but methodInfo is <null>.");
         }
+    }
 
-        #endregion
-
-        #region HaveAccessModifier
-
+    public class HaveAccessModifier
+    {
         [Fact]
         public void When_asserting_a_private_member_is_private_it_succeeds()
         {
@@ -386,12 +383,14 @@ namespace FluentAssertions.Specs.Types
 
             // Act
             Action act = () =>
-                methodInfo.Should().HaveAccessModifier(CSharpAccessModifier.Protected, "we want to test the error {0}", "message");
+                methodInfo.Should()
+                    .HaveAccessModifier(CSharpAccessModifier.Protected, "we want to test the error {0}", "message");
 
             // Assert
             act.Should().Throw<XunitException>()
-                .WithMessage("Expected method PrivateMethod to be Protected because we want to test the error message, but it is " +
-                             "Private.");
+                .WithMessage(
+                    "Expected method PrivateMethod to be Protected because we want to test the error message, but it is " +
+                    "Private.");
         }
 
         [Fact]
@@ -426,8 +425,9 @@ namespace FluentAssertions.Specs.Types
 
             // Assert
             act.Should().Throw<XunitException>()
-                .WithMessage("Expected method set_ProtectedSetProperty to be Public because we want to test the error message, but it" +
-                             " is Protected.");
+                .WithMessage(
+                    "Expected method set_ProtectedSetProperty to be Public because we want to test the error message, but it" +
+                    " is Protected.");
         }
 
         [Fact]
@@ -462,8 +462,9 @@ namespace FluentAssertions.Specs.Types
 
             // Assert
             act.Should().Throw<XunitException>()
-                .WithMessage("Expected method get_PublicGetProperty to be Internal because we want to test the error message, but it" +
-                             " is Public.");
+                .WithMessage(
+                    "Expected method get_PublicGetProperty to be Internal because we want to test the error message, but it" +
+                    " is Public.");
         }
 
         [Fact]
@@ -489,12 +490,13 @@ namespace FluentAssertions.Specs.Types
             // Act
             Action act = () =>
                 methodInfo.Should().HaveAccessModifier(CSharpAccessModifier.ProtectedInternal, "because we want to test the" +
-                                                                                                " error {0}", "message");
+                    " error {0}", "message");
 
             // Assert
             act.Should().Throw<XunitException>()
-                .WithMessage("Expected method InternalMethod to be ProtectedInternal because we want to test the error message, but" +
-                             " it is Internal.");
+                .WithMessage(
+                    "Expected method InternalMethod to be ProtectedInternal because we want to test the error message, but" +
+                    " it is Internal.");
         }
 
         [Fact]
@@ -523,8 +525,9 @@ namespace FluentAssertions.Specs.Types
 
             // Assert
             act.Should().Throw<XunitException>()
-                .WithMessage("Expected method ProtectedInternalMethod to be Private because we want to test the error message, but it is " +
-                             "ProtectedInternal.");
+                .WithMessage(
+                    "Expected method ProtectedInternalMethod to be Private because we want to test the error message, but it is " +
+                    "ProtectedInternal.");
         }
 
         [Fact]
@@ -556,11 +559,10 @@ namespace FluentAssertions.Specs.Types
             act.Should().ThrowExactly<ArgumentOutOfRangeException>()
                 .WithParameterName("accessModifier");
         }
+    }
 
-        #endregion
-
-        #region NotHaveAccessModifier
-
+    public class NotHaveAccessModifier
+    {
         [Fact]
         public void When_asserting_a_private_member_is_not_protected_it_succeeds()
         {
@@ -597,7 +599,8 @@ namespace FluentAssertions.Specs.Types
 
             // Act
             Action act = () =>
-                methodInfo.Should().NotHaveAccessModifier(CSharpAccessModifier.Private, "we want to test the error {0}", "message");
+                methodInfo.Should()
+                    .NotHaveAccessModifier(CSharpAccessModifier.Private, "we want to test the error {0}", "message");
 
             // Assert
             act.Should().Throw<XunitException>()
@@ -634,7 +637,8 @@ namespace FluentAssertions.Specs.Types
 
             // Assert
             act.Should().Throw<XunitException>()
-                .WithMessage("Expected method set_ProtectedSetProperty not to be Protected*because we want to test the error message*");
+                .WithMessage(
+                    "Expected method set_ProtectedSetProperty not to be Protected*because we want to test the error message*");
         }
 
         [Fact]
@@ -708,7 +712,7 @@ namespace FluentAssertions.Specs.Types
             // Act
             Action act = () =>
                 methodInfo.Should().NotHaveAccessModifier(CSharpAccessModifier.Internal, "because we want to test the" +
-                                                                                                " error {0}", "message");
+                    " error {0}", "message");
 
             // Assert
             act.Should().Throw<XunitException>()
@@ -737,11 +741,13 @@ namespace FluentAssertions.Specs.Types
 
             // Act
             Action act = () =>
-                methodInfo.Should().NotHaveAccessModifier(CSharpAccessModifier.ProtectedInternal, "we want to test the error {0}", "message");
+                methodInfo.Should().NotHaveAccessModifier(CSharpAccessModifier.ProtectedInternal, "we want to test the error {0}",
+                    "message");
 
             // Assert
             act.Should().Throw<XunitException>()
-                .WithMessage("Expected method ProtectedInternalMethod not to be ProtectedInternal*because we want to test the error message*");
+                .WithMessage(
+                    "Expected method ProtectedInternalMethod not to be ProtectedInternal*because we want to test the error message*");
         }
 
         [Fact]
@@ -774,32 +780,30 @@ namespace FluentAssertions.Specs.Types
             act.Should().ThrowExactly<ArgumentOutOfRangeException>()
                 .WithParameterName("accessModifier");
         }
-
-        #endregion
     }
-
-    #region Internal classes used in unit tests
-
-    internal class TestClass
-    {
-        public void VoidMethod() { }
-
-        public int IntMethod() { return 0; }
-
-        private void PrivateMethod() { }
-
-        public string PublicGetProperty { get; private set; }
-
-        protected string ProtectedSetProperty { private get; set; }
-
-        public string PublicGetPrivateProtectedSet { get; private protected set; }
-
-        internal string InternalMethod() { return null; }
-
-        protected internal void ProtectedInternalMethod() { }
-
-        private protected void PrivateProtectedMethod() { }
-    }
-
-    #endregion
 }
+
+#region Internal classes used in unit tests
+
+internal class TestClass
+{
+    public void VoidMethod() { }
+
+    public int IntMethod() { return 0; }
+
+    private void PrivateMethod() { }
+
+    public string PublicGetProperty { get; private set; }
+
+    protected string ProtectedSetProperty { private get; set; }
+
+    public string PublicGetPrivateProtectedSet { get; private protected set; }
+
+    internal string InternalMethod() { return null; }
+
+    protected internal void ProtectedInternalMethod() { }
+
+    private protected void PrivateProtectedMethod() { }
+}
+
+#endregion

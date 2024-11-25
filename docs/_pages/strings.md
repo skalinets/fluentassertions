@@ -18,11 +18,18 @@ theString.Should().NotBeEmpty("because the string is not empty");
 theString.Should().HaveLength(0);
 theString.Should().BeNullOrWhiteSpace(); // either null, empty or whitespace only
 theString.Should().NotBeNullOrWhiteSpace();
+```
+
+To ensure the characters in a string are all (not) upper or lower cased, you can use the following assertions.
+
+```csharp
 theString.Should().BeUpperCased();
 theString.Should().NotBeUpperCased();
 theString.Should().BeLowerCased();
 theString.Should().NotBeLowerCased();
 ```
+
+However, be careful that numbers and special characters don't have casing, so `BeUpperCased` and `BeLowerCased` will always fail on a string that contains anything but alphabetic characters. In those cases, we recommend using `NotBeUpperCased` or `NotBeLowerCased`.
 
 Obviously you’ll find all the methods you would expect for string assertions.
 
@@ -74,7 +81,7 @@ The pattern can be a combination of literal and wildcard characters, but it does
 
 The following wildcard specifiers are permitted in the pattern:
 
-| Wilcard specifier | Matches                                   |
+| Wildcard specifier | Matches                                   |
 | ----------------- | ----------------------------------------- |
 | * (asterisk)      | Zero or more characters in that position. |
 | ? (question mark) | Exactly one character in that position.   |
@@ -97,7 +104,22 @@ And if wildcards aren't enough for you, you can always use some regular expressi
 
 ```csharp
 someString.Should().MatchRegex("h.*\\sworld.$");
-someString.Should().MatchRegex(new System.Text.RegularExpressions.Regex("h.*\\sworld.$"));
-subject.Should().NotMatchRegex(new System.Text.RegularExpressions.Regex(".*earth.*"));
+someString.Should().MatchRegex(new Regex("h.*\\sworld.$"));
+subject.Should().NotMatchRegex(new Regex(".*earth.*"));
 subject.Should().NotMatchRegex(".*earth.*");
+```
+
+And if that's not enough, you can assert on the number of matches of a regular expression:
+
+```csharp
+someString.Should().MatchRegex("h.*\\sworld.$", Exactly.Once());
+someString.Should().MatchRegex(new Regex("h.*\\sworld.$"), AtLeast.Twice());
+```
+
+If you prefer a more fluent syntax than `Exactly.Times(4)`, `AtLeast.Times(4)` and `AtMost.Times(4)` reads, you can do the following:
+
+```csharp
+theString.Should().Contain("is a", 4.TimesExactly()); // equivalent to Exactly.Times(4)
+theString.Should().Contain("is a", 4.TimesOrMore());  // equivalent to AtLeast.Times(4)
+theString.Should().Contain("is a", 4.TimesOrLess());  // equivalent to AtMost.Times(4)
 ```

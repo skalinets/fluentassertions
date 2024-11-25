@@ -5,15 +5,15 @@ using FluentAssertions.Execution;
 using Xunit;
 using Xunit.Sdk;
 
-namespace FluentAssertions.Specs.Collections
-{
-    /// <content>
-    /// The [Not]BeEmpty specs.
-    /// </content>
-    public partial class CollectionAssertionSpecs
-    {
-        #region Be Empty
+namespace FluentAssertions.Specs.Collections;
 
+/// <content>
+/// The [Not]BeEmpty specs.
+/// </content>
+public partial class CollectionAssertionSpecs
+{
+    public class BeEmpty
+    {
         [Fact]
         public void When_collection_is_empty_as_expected_it_should_not_throw()
         {
@@ -35,7 +35,7 @@ namespace FluentAssertions.Specs.Collections
 
             // Assert
             act.Should().Throw<XunitException>()
-                .WithMessage("*to be empty because that's what we expect, but found*1*2*3*");
+                .WithMessage("*to be empty because that's what we expect, but found at least one item*1*");
         }
 
         [Fact]
@@ -120,6 +120,21 @@ namespace FluentAssertions.Specs.Collections
         }
 
         [Fact]
+        public void When_asserting_non_empty_collection_is_empty_it_should_enumerate_only_once()
+        {
+            // Arrange
+            var collection = new CountingGenericEnumerable<int>(new[] { 1, 2, 3 });
+
+            // Act
+            Action act = () => collection.Should().BeEmpty();
+
+            // Assert
+            act.Should().Throw<XunitException>()
+                .WithMessage("*to be empty, but found at least one item {1}.");
+            collection.GetEnumeratorCallCount.Should().Be(1);
+        }
+
+        [Fact]
         public void When_asserting_collection_to_not_be_empty_but_collection_is_null_it_should_throw()
         {
             // Arrange
@@ -149,11 +164,10 @@ namespace FluentAssertions.Specs.Collections
             // Assert
             act.Should().Throw<XunitException>();
         }
+    }
 
-        #endregion
-
-        #region Not Be Empty
-
+    public class NotBeEmpty
+    {
         [Fact]
         public void When_asserting_collection_to_be_not_empty_but_collection_is_null_it_should_throw()
         {
@@ -180,27 +194,25 @@ namespace FluentAssertions.Specs.Collections
             // Assert
             collection.GetEnumeratorCallCount.Should().Be(1);
         }
+    }
 
-        #endregion
+    private sealed class InfiniteEnumerable : IEnumerable<object>
+    {
+        public IEnumerator<object> GetEnumerator() => new InfiniteEnumerator();
 
-        private class InfiniteEnumerable : IEnumerable<object>
-        {
-            public IEnumerator<object> GetEnumerator() => new InfiniteEnumerator();
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+    }
 
-            IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-        }
+    private sealed class InfiniteEnumerator : IEnumerator<object>
+    {
+        public bool MoveNext() => true;
 
-        private class InfiniteEnumerator : IEnumerator<object>
-        {
-            public bool MoveNext() => true;
+        public void Reset() { }
 
-            public void Reset() { }
+        public object Current => new();
 
-            public object Current => new object();
+        object IEnumerator.Current => Current;
 
-            object IEnumerator.Current => Current;
-
-            public void Dispose() { }
-        }
+        public void Dispose() { }
     }
 }

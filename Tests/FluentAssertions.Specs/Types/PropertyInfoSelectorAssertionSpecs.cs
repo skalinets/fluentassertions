@@ -3,12 +3,12 @@ using FluentAssertions.Types;
 using Xunit;
 using Xunit.Sdk;
 
-namespace FluentAssertions.Specs.Types
-{
-    public class PropertyInfoSelectorAssertionSpecs
-    {
-        #region BeVirtual
+namespace FluentAssertions.Specs.Types;
 
+public class PropertyInfoSelectorAssertionSpecs
+{
+    public class BeVirtual
+    {
         [Fact]
         public void When_asserting_properties_are_virtual_and_they_are_it_should_succeed()
         {
@@ -16,7 +16,7 @@ namespace FluentAssertions.Specs.Types
             var propertyInfoSelector = new PropertyInfoSelector(typeof(ClassWithAllPropertiesVirtual));
 
             // Act
-            Action act = () =>
+            var act = () =>
                 propertyInfoSelector.Should().BeVirtual();
 
             // Assert
@@ -50,18 +50,17 @@ namespace FluentAssertions.Specs.Types
 
             // Assert
             act.Should().Throw<XunitException>()
-               .WithMessage("Expected all selected properties" +
-                   " to be virtual because we want to test the error message," +
-                   " but the following properties are not virtual:*" +
-                   "String FluentAssertions*ClassWithNonVirtualPublicProperties.PublicNonVirtualProperty*" +
-                   "String FluentAssertions*ClassWithNonVirtualPublicProperties.InternalNonVirtualProperty*" +
-                   "String FluentAssertions*ClassWithNonVirtualPublicProperties.ProtectedNonVirtualProperty");
+                .WithMessage("Expected all selected properties" +
+                    " to be virtual because we want to test the error message," +
+                    " but the following properties are not virtual:*" +
+                    "String FluentAssertions*ClassWithNonVirtualPublicProperties.PublicNonVirtualProperty*" +
+                    "String FluentAssertions*ClassWithNonVirtualPublicProperties.InternalNonVirtualProperty*" +
+                    "String FluentAssertions*ClassWithNonVirtualPublicProperties.ProtectedNonVirtualProperty");
         }
+    }
 
-        #endregion
-
-        #region NotBeVirtual
-
+    public class NotBeVirtual
+    {
         [Fact]
         public void When_asserting_properties_are_not_virtual_and_they_are_not_it_should_succeed()
         {
@@ -103,18 +102,17 @@ namespace FluentAssertions.Specs.Types
 
             // Assert
             act.Should().Throw<XunitException>()
-               .WithMessage("Expected all selected properties" +
-                   " not to be virtual because we want to test the error message," +
-                   " but the following properties are virtual*" +
-                   "*ClassWithAllPropertiesVirtual.PublicVirtualProperty" +
-                   "*ClassWithAllPropertiesVirtual.InternalVirtualProperty" +
-                   "*ClassWithAllPropertiesVirtual.ProtectedVirtualProperty");
+                .WithMessage("Expected all selected properties" +
+                    " not to be virtual because we want to test the error message," +
+                    " but the following properties are virtual*" +
+                    "*ClassWithAllPropertiesVirtual.PublicVirtualProperty" +
+                    "*ClassWithAllPropertiesVirtual.InternalVirtualProperty" +
+                    "*ClassWithAllPropertiesVirtual.ProtectedVirtualProperty");
         }
+    }
 
-        #endregion
-
-        #region BeDecoratedWith
-
+    public class BeDecoratedWith
+    {
         [Fact]
         public void When_asserting_properties_are_decorated_with_attribute_and_they_are_it_should_succeed()
         {
@@ -154,22 +152,21 @@ namespace FluentAssertions.Specs.Types
             // Act
             Action act = () =>
                 propertyInfoSelector.Should()
-                                    .BeDecoratedWith<DummyPropertyAttribute>("because we want to test the error {0}", "message");
+                    .BeDecoratedWith<DummyPropertyAttribute>("because we want to test the error {0}", "message");
 
             // Assert
             act.Should().Throw<XunitException>()
                 .WithMessage("Expected all selected properties to be decorated with" +
-                   " FluentAssertions*DummyPropertyAttribute because we want to test the error message," +
-                   " but the following properties are not:*" +
-                   "String FluentAssertions*ClassWithPropertiesThatAreNotDecoratedWithDummyAttribute.PublicProperty*" +
-                   "String FluentAssertions*ClassWithPropertiesThatAreNotDecoratedWithDummyAttribute.InternalProperty*" +
-                   "String FluentAssertions*ClassWithPropertiesThatAreNotDecoratedWithDummyAttribute.ProtectedProperty");
+                    " FluentAssertions*DummyPropertyAttribute because we want to test the error message," +
+                    " but the following properties are not:*" +
+                    "String FluentAssertions*ClassWithPropertiesThatAreNotDecoratedWithDummyAttribute.PublicProperty*" +
+                    "String FluentAssertions*ClassWithPropertiesThatAreNotDecoratedWithDummyAttribute.InternalProperty*" +
+                    "String FluentAssertions*ClassWithPropertiesThatAreNotDecoratedWithDummyAttribute.ProtectedProperty");
         }
+    }
 
-        #endregion
-
-        #region NotBeDecoratedWith
-
+    public class NotBeDecoratedWith
+    {
         [Fact]
         public void When_asserting_properties_are_not_decorated_with_attribute_and_they_are_not_it_should_succeed()
         {
@@ -209,22 +206,21 @@ namespace FluentAssertions.Specs.Types
             // Act
             Action act = () =>
                 propertyInfoSelector.Should()
-                                    .NotBeDecoratedWith<DummyPropertyAttribute>("because we want to test the error {0}", "message");
+                    .NotBeDecoratedWith<DummyPropertyAttribute>("because we want to test the error {0}", "message");
 
             // Assert
             act.Should().Throw<XunitException>()
                 .WithMessage("Expected all selected properties not to be decorated*" +
-                   "DummyPropertyAttribute*" +
-                   "because we want to test the error message*" +
-                   "ClassWithAllPropertiesDecoratedWithDummyAttribute.PublicProperty*" +
-                   "ClassWithAllPropertiesDecoratedWithDummyAttribute.InternalProperty*" +
-                   "ClassWithAllPropertiesDecoratedWithDummyAttribute.ProtectedProperty*");
+                    "DummyPropertyAttribute*" +
+                    "because we want to test the error message*" +
+                    "ClassWithAllPropertiesDecoratedWithDummyAttribute.PublicProperty*" +
+                    "ClassWithAllPropertiesDecoratedWithDummyAttribute.InternalProperty*" +
+                    "ClassWithAllPropertiesDecoratedWithDummyAttribute.ProtectedProperty*");
         }
+    }
 
-        #endregion
-
-        #region BeWritable
-
+    public class BeWritable
+    {
         [Fact]
         public void When_a_read_only_property_is_expected_to_be_writable_it_should_throw_with_descriptive_message()
         {
@@ -256,11 +252,10 @@ namespace FluentAssertions.Specs.Types
             // Assert
             action.Should().NotThrow();
         }
+    }
 
-        #endregion
-
-        #region NotBeWritable
-
+    public class NotBeWritable
+    {
         [Fact]
         public void When_a_writable_property_is_expected_to_be_read_only_it_should_throw_with_descriptive_message()
         {
@@ -292,89 +287,104 @@ namespace FluentAssertions.Specs.Types
             // Assert
             action.Should().NotThrow();
         }
-
-        #endregion
     }
 
-    #region Internal classes used in unit tests
-
-    internal class ClassWithAllPropertiesVirtual
+    public class Miscellaneous
     {
-        public virtual string PublicVirtualProperty { set { } }
+        [Fact]
+        public void When_accidentally_using_equals_it_should_throw_a_helpful_error()
+        {
+            // Arrange
+            var someObject = new PropertyInfoSelectorAssertions();
 
-        internal virtual string InternalVirtualProperty { get { return null; } }
+            // Act
+            var action = () => someObject.Equals(null);
 
-        protected virtual string ProtectedVirtualProperty { get; set; }
+            // Assert
+            action.Should().Throw<NotSupportedException>()
+                .WithMessage("Equals is not part of Fluent Assertions. Did you mean Be() instead?");
+        }
     }
-
-    internal interface IInterfaceWithProperty
-    {
-        string PublicNonVirtualProperty { get; set; }
-    }
-
-    internal class ClassWithNonVirtualPublicProperties : IInterfaceWithProperty
-    {
-        public string PublicNonVirtualProperty { get; set; }
-
-        internal string InternalNonVirtualProperty { get; set; }
-
-        protected string ProtectedNonVirtualProperty { get; set; }
-    }
-
-    internal class ClassWithReadOnlyProperties
-    {
-        public string ReadOnlyProperty { get { return ""; } }
-
-        public string ReadOnlyProperty2 { get { return ""; } }
-
-        public string ReadWriteProperty { get { return ""; } set { } }
-    }
-
-    internal class ClassWithWritableProperties
-    {
-        public string ReadOnlyProperty { get { return ""; } }
-
-        public string ReadWriteProperty { get { return ""; } set { } }
-
-        public string ReadWriteProperty2 { get { return ""; } set { } }
-    }
-
-    internal class ClassWithOnlyWritableProperties
-    {
-        public string ReadWriteProperty { set { } }
-    }
-
-    internal class ClassWithOnlyReadOnlyProperties
-    {
-        public string ReadOnlyProperty { get { return ""; } }
-
-        public string ReadOnlyProperty2 { get { return ""; } }
-    }
-
-    internal class ClassWithAllPropertiesDecoratedWithDummyAttribute
-    {
-        [DummyProperty("Value")]
-        public string PublicProperty { get; set; }
-
-        [DummyProperty("Value")]
-        [DummyProperty("OtherValue")]
-        public string PublicPropertyWithSameAttributeTwice { get; set; }
-
-        [DummyProperty]
-        internal string InternalProperty { get; set; }
-
-        [DummyProperty]
-        protected string ProtectedProperty { get; set; }
-    }
-
-    internal class ClassWithPropertiesThatAreNotDecoratedWithDummyAttribute
-    {
-        public string PublicProperty { get; set; }
-
-        internal string InternalProperty { get; set; }
-
-        protected string ProtectedProperty { get; set; }
-    }
-
-    #endregion
 }
+
+#region Internal classes used in unit tests
+
+internal class ClassWithAllPropertiesVirtual
+{
+    public virtual string PublicVirtualProperty { set { } }
+
+    internal virtual string InternalVirtualProperty => null;
+
+    protected virtual string ProtectedVirtualProperty { get; set; }
+}
+
+internal interface IInterfaceWithProperty
+{
+    string PublicNonVirtualProperty { get; set; }
+}
+
+internal class ClassWithNonVirtualPublicProperties : IInterfaceWithProperty
+{
+    public string PublicNonVirtualProperty { get; set; }
+
+    internal string InternalNonVirtualProperty { get; set; }
+
+    protected string ProtectedNonVirtualProperty { get; set; }
+}
+
+internal class ClassWithReadOnlyProperties
+{
+    public string ReadOnlyProperty => "";
+
+    public string ReadOnlyProperty2 => "";
+
+    public string ReadWriteProperty { get => ""; set { } }
+}
+
+internal class ClassWithWritableProperties
+{
+    public string ReadOnlyProperty => "";
+
+    public string ReadWriteProperty { get => ""; set { } }
+
+    public string ReadWriteProperty2 { get => ""; set { } }
+}
+
+internal class ClassWithOnlyWritableProperties
+{
+    public string ReadWriteProperty { set { } }
+}
+
+internal class ClassWithOnlyReadOnlyProperties
+{
+    public string ReadOnlyProperty => "";
+
+    public string ReadOnlyProperty2 => "";
+}
+
+internal class ClassWithAllPropertiesDecoratedWithDummyAttribute
+{
+    [DummyProperty("Value")]
+    public string PublicProperty { get; set; }
+
+    [DummyProperty("Value")]
+    [DummyProperty("OtherValue")]
+    public string PublicPropertyWithSameAttributeTwice { get; set; }
+
+    [DummyProperty]
+    internal string InternalProperty { get; set; }
+
+    [DummyProperty]
+    protected string ProtectedProperty { get; set; }
+}
+
+internal class ClassWithPropertiesThatAreNotDecoratedWithDummyAttribute
+{
+    public string PublicProperty { get; set; }
+
+    internal string InternalProperty { get; set; }
+
+    protected string ProtectedProperty { get; set; }
+}
+
+#endregion

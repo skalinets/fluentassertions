@@ -2,9 +2,11 @@
 using Xunit;
 using Xunit.Sdk;
 
-namespace FluentAssertions.Specs.Primitives
+namespace FluentAssertions.Specs.Primitives;
+
+public class BooleanAssertionSpecs
 {
-    public class BooleanAssertionSpecs
+    public class BeTrue
     {
         [Fact]
         public void Should_succeed_when_asserting_boolean_value_true_is_true()
@@ -39,9 +41,12 @@ namespace FluentAssertions.Specs.Primitives
             // Assert
             action
                 .Should().Throw<XunitException>()
-                .WithMessage("Expected boolean to be true because we want to test the failure message, but found False.");
+                .WithMessage("Expected boolean to be True because we want to test the failure message, but found False.");
         }
+    }
 
+    public class BeFalse
+    {
         [Fact]
         public void Should_succeed_when_asserting_boolean_value_false_is_false()
         {
@@ -73,9 +78,12 @@ namespace FluentAssertions.Specs.Primitives
 
             // Assert
             action.Should().Throw<XunitException>()
-                .WithMessage("Expected boolean to be false because we want to test the failure message, but found True.");
+                .WithMessage("Expected boolean to be False because we want to test the failure message, but found True.");
         }
+    }
 
+    public class Be
+    {
         [Fact]
         public void Should_succeed_when_asserting_boolean_value_to_be_equal_to_the_same_value()
         {
@@ -109,7 +117,10 @@ namespace FluentAssertions.Specs.Primitives
             action.Should().Throw<XunitException>()
                 .WithMessage("*Expected*boolean*True*because we want to test the failure message, but found False.*");
         }
+    }
 
+    public class NotBe
+    {
         [Fact]
         public void Should_succeed_when_asserting_boolean_value_not_to_be_equal_to_the_same_value()
         {
@@ -142,6 +153,44 @@ namespace FluentAssertions.Specs.Primitives
             // Assert
             action.Should().Throw<XunitException>()
                 .WithMessage("*Expected*boolean*True*because we want to test the failure message, but found True.*");
+        }
+
+        [Fact]
+        public void Should_throw_a_helpful_error_when_accidentally_using_equals()
+        {
+            // Act
+            Action action = () => true.Should().Equals(true);
+
+            // Assert
+            action.Should().Throw<NotSupportedException>()
+                .WithMessage("Equals is not part of Fluent Assertions. Did you mean Be() instead?");
+        }
+    }
+
+    public class Imply
+    {
+        [Theory]
+        [InlineData(false, false)]
+        [InlineData(false, true)]
+        [InlineData(true, true)]
+        public void Antecedent_implies_consequent(bool? antecedent, bool consequent)
+        {
+            // Act / Assert
+            antecedent.Should().Imply(consequent);
+        }
+
+        [Theory]
+        [InlineData(null, true)]
+        [InlineData(null, false)]
+        [InlineData(true, false)]
+        public void Antecedent_does_not_imply_consequent(bool? antecedent, bool consequent)
+        {
+            // Act
+            Action act = () => antecedent.Should().Imply(consequent, "because we want to test the {0}", "failure");
+
+            // Assert
+            act.Should().Throw<XunitException>()
+                .WithMessage("Expected antecedent*to imply consequent*test the failure*but*");
         }
     }
 }

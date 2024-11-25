@@ -14,10 +14,11 @@ Fluent Assertions have several ways to compare enums.
 The basic ones, `Be` and `HaveFlag`, just calls directly into `Enum.Equals` and `Enum.HasFlag`.
 
 ```csharp
-enum MyEnum { One = 1, Two = 2}
+enum MyEnum { One = 1, Two = 2, Three = 3}
 
 enum.Should().Be(MyEnum.One);
 enum.Should().NotBe(MyEnum.Two);
+enum.Should().BeOneOf(MyEnum.One, MyEnum.Two);
 
 regexOptions.Should().HaveFlag(RegexOptions.Global);
 regexOptions.Should().NotHaveFlag(RegexOptions.CaseInsensitive);
@@ -41,4 +42,12 @@ Lastly, if you want to verify than an enum has a specific integral value, you ca
 ```csharp
 MyEnum.One.Should().HaveValue(1);
 MyEnum.One.Should().NotHaveValue(2);
+```
+
+```csharp
+var myEnum = (MyEnum)1;
+myEnum.Should().BeDefined();
+
+myEnum = (MyEnum)99;
+myEnum.Should().NotBeDefined();
 ```

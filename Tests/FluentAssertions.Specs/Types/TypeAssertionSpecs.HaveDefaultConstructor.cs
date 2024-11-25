@@ -1,18 +1,17 @@
 ﻿using System;
 using FluentAssertions.Common;
-using FluentAssertions.Specs.Equivalency;
 using Xunit;
 using Xunit.Sdk;
 
-namespace FluentAssertions.Specs.Types
-{
-    /// <content>
-    /// The [Not]HaveDefaultConstructor specs.
-    /// </content>
-    public partial class TypeAssertionSpecs
-    {
-        #region HaveDefaultConstructor
+namespace FluentAssertions.Specs.Types;
 
+/// <content>
+/// The [Not]HaveDefaultConstructor specs.
+/// </content>
+public partial class TypeAssertionSpecs
+{
+    public class HaveDefaultConstructor
+    {
         [Fact]
         public void When_asserting_a_type_has_a_default_constructor_which_it_does_it_succeeds()
         {
@@ -24,7 +23,7 @@ namespace FluentAssertions.Specs.Types
                 type.Should()
                     .HaveDefaultConstructor()
                     .Which.Should()
-                        .HaveAccessModifier(CSharpAccessModifier.ProtectedInternal);
+                    .HaveAccessModifier(CSharpAccessModifier.ProtectedInternal);
 
             // Assert
             act.Should().NotThrow();
@@ -41,7 +40,7 @@ namespace FluentAssertions.Specs.Types
                 type.Should()
                     .HaveDefaultConstructor()
                     .Which.Should()
-                        .HaveAccessModifier(CSharpAccessModifier.Public);
+                    .HaveAccessModifier(CSharpAccessModifier.Public);
 
             // Assert
             act.Should().NotThrow();
@@ -55,14 +54,15 @@ namespace FluentAssertions.Specs.Types
 
             // Act
             type.Should()
-                    .HaveDefaultConstructor()
-                    .Which.Should()
-                        .HaveAccessModifier(CSharpAccessModifier.Public);
+                .HaveDefaultConstructor()
+                .Which.Should()
+                .HaveAccessModifier(CSharpAccessModifier.Public);
+
             Action act = () =>
                 type.Should()
                     .HaveDefaultConstructor()
                     .Which.Should()
-                        .HaveAccessModifier(CSharpAccessModifier.Public);
+                    .HaveAccessModifier(CSharpAccessModifier.Public);
 
             // Assert
             act.Should().NotThrow();
@@ -81,7 +81,7 @@ namespace FluentAssertions.Specs.Types
             // Assert
             act.Should().Throw<XunitException>()
                 .WithMessage(
-                    "Expected constructor *.ClassWithCctorAndNonDefaultConstructor() to exist *failure message*" +
+                    "Expected constructor *ClassWithCctorAndNonDefaultConstructor() to exist *failure message*" +
                     ", but it does not.");
         }
 
@@ -99,11 +99,10 @@ namespace FluentAssertions.Specs.Types
             act.Should().Throw<XunitException>()
                 .WithMessage("Expected constructor type() to exist *failure message*, but type is <null>.");
         }
+    }
 
-        #endregion
-
-        #region NotHaveDefaultConstructor
-
+    public class NotHaveDefaultConstructor
+    {
         [Fact]
         public void When_asserting_a_type_does_not_have_a_default_constructor_which_it_does_not_it_succeeds()
         {
@@ -147,7 +146,7 @@ namespace FluentAssertions.Specs.Types
 
             // Assert
             act.Should().Throw<XunitException>()
-                .WithMessage("Expected constructor *.ClassWithCctor*() not to exist *failure message*, but it does.");
+                .WithMessage("Expected constructor *ClassWithCctor*() not to exist *failure message*, but it does.");
         }
 
         [Fact]
@@ -178,7 +177,14 @@ namespace FluentAssertions.Specs.Types
             act.Should().Throw<XunitException>()
                 .WithMessage("Expected constructor type() not to exist *failure message*, but type is <null>.");
         }
+    }
 
-        #endregion
+    internal class ClassWithNoMembers;
+
+    internal class ClassWithCctor;
+
+    internal class ClassWithCctorAndNonDefaultConstructor
+    {
+        public ClassWithCctorAndNonDefaultConstructor(int _) { }
     }
 }

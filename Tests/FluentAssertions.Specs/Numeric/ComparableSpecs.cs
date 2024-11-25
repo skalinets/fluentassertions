@@ -3,12 +3,12 @@ using System.Globalization;
 using Xunit;
 using Xunit.Sdk;
 
-namespace FluentAssertions.Specs.Numeric
-{
-    public class ComparableSpecs
-    {
-        #region Be / Not Be
+namespace FluentAssertions.Specs.Numeric;
 
+public class ComparableSpecs
+{
+    public class Be
+    {
         [Fact]
         public void When_two_instances_are_equal_it_should_succeed()
         {
@@ -21,20 +21,18 @@ namespace FluentAssertions.Specs.Numeric
         }
 
         [Fact]
-        public void When_two_instances_are_the_same_reference_but_are_not_considered_equal_it_should_not_succeed()
+        public void When_two_instances_are_the_same_reference_but_are_not_considered_equal_it_should_succeed()
         {
             // Arrange
             var subject = new SameInstanceIsNotEqualClass();
             var other = subject;
 
             // Act
-            Action act = () => subject.Should().Be(other, "they have the same property values");
+            Action act = () => subject.Should().Be(other);
 
             // Assert
-            act
-                .Should().Throw<XunitException>()
-                .WithMessage(
-                    "Expected*SameInstanceIsNotEqualClass*because they have the same property values, but found*SameInstanceIsNotEqualClass*.");
+            act.Should().NotThrow(
+                "This is inconsistent with the behavior ObjectAssertions.Be but is how ComparableTypeAssertions.Be has always worked.");
         }
 
         [Fact]
@@ -53,9 +51,12 @@ namespace FluentAssertions.Specs.Numeric
                 .WithMessage(
                     "Expected*2*because they have the same property values, but found*1*.");
         }
+    }
 
+    public class NotBe
+    {
         [Fact]
-        public void When_two_references_to_the_same_instance_are_not_equal_it_should_succeed()
+        public void When_two_references_to_the_same_instance_are_not_equal_it_should_throw()
         {
             // Arrange
             var subject = new SameInstanceIsNotEqualClass();
@@ -65,7 +66,8 @@ namespace FluentAssertions.Specs.Numeric
             Action act = () => subject.Should().NotBe(other);
 
             // Assert
-            act.Should().NotThrow();
+            act.Should().Throw<XunitException>(
+                "This is inconsistent with the behavior ObjectAssertions.Be but is how ComparableTypeAssertions.Be has always worked.");
         }
 
         [Fact]
@@ -98,16 +100,63 @@ namespace FluentAssertions.Specs.Numeric
             // Assert
             act.Should().NotThrow();
         }
+    }
 
-        #endregion
+    public class BeOneOf
+    {
+        [Fact]
+        public void When_a_value_is_not_equal_to_one_of_the_specified_values_it_should_throw()
+        {
+            // Arrange
+            var value = new EquatableOfInt(3);
 
-        #region BeEquivalentTo
+            // Act
+            Action act = () => value.Should().BeOneOf(new[] { new EquatableOfInt(4), new EquatableOfInt(5) },
+                "because those are the valid {0}", "values");
+
+            // Assert
+            act
+                .Should().Throw<XunitException>()
+                .WithMessage("Expected value to be one of {4, 5} because those are the valid values, but found 3.");
+        }
+
+        [Fact]
+        public void When_two_instances_are_the_same_reference_but_are_not_considered_equal_it_should_succeed()
+        {
+            // Arrange
+            var subject = new SameInstanceIsNotEqualClass();
+            var other = subject;
+
+            // Act
+            Action act = () => subject.Should().BeOneOf(other);
+
+            // Assert
+            act.Should().NotThrow(
+                "This is inconsistent with the behavior ObjectAssertions.Be but is how ComparableTypeAssertions.Be has always worked.");
+        }
+
+        [Fact]
+        public void When_a_value_is_equal_to_one_of_the_specified_values_it_should_succeed()
+        {
+            // Arrange
+            var value = new EquatableOfInt(4);
+
+            // Act
+            Action act = () => value.Should().BeOneOf(new EquatableOfInt(4), new EquatableOfInt(5));
+
+            // Assert
+            act.Should().NotThrow();
+        }
+    }
+
+    public class BeEquivalentTo
+    {
         [Fact]
         public void When_two_instances_are_equivalent_it_should_succeed()
         {
             // Arrange
             var subject = new ComparableCustomer(42);
-            var expected = new CustomerDTO(42);
+            var expected = new CustomerDto(42);
 
             // Act / Assert
             subject.Should().BeEquivalentTo(expected);
@@ -118,7 +167,7 @@ namespace FluentAssertions.Specs.Numeric
         {
             // Arrange
             var subject = new ComparableCustomer(42);
-            var expected = new CustomerDTO(42);
+            var expected = new CustomerDto(42);
 
             // Act / Assert
             subject.Should().BeEquivalentTo(expected)
@@ -130,7 +179,7 @@ namespace FluentAssertions.Specs.Numeric
         {
             // Arrange
             var subject = new ComparableCustomer(42);
-            var expected = new CustomerDTO(42);
+            var expected = new CustomerDto(42);
 
             // Act / Assert
             subject.Should().BeEquivalentTo(expected, opt => opt)
@@ -142,7 +191,8 @@ namespace FluentAssertions.Specs.Numeric
         {
             // Arrange
             var subject = new ComparableCustomer(42);
-            var expected = new AnotherCustomerDTO(42)
+
+            var expected = new AnotherCustomerDto(42)
             {
                 SomeOtherProperty = 1337
             };
@@ -158,7 +208,7 @@ namespace FluentAssertions.Specs.Numeric
         {
             // Arrange
             var subject = new ComparableCustomer(42);
-            var expected = new AnotherCustomerDTO(42);
+            var expected = new AnotherCustomerDto(42);
 
             // Act
             Action act = () => subject.Should().BeEquivalentTo(expected, config: null);
@@ -173,7 +223,8 @@ namespace FluentAssertions.Specs.Numeric
         {
             // Arrange
             var subject = new ComparableCustomer(42);
-            var expected = new AnotherCustomerDTO(42)
+
+            var expected = new AnotherCustomerDto(42)
             {
                 SomeOtherProperty = 1337
             };
@@ -187,10 +238,10 @@ namespace FluentAssertions.Specs.Numeric
                 .WithMessage(
                     "Expectation has property subject.SomeOtherProperty*that the other object does not have*");
         }
-        #endregion
+    }
 
-        #region BeNull / NotBeNull
-
+    public class BeNull
+    {
         [Fact]
         public void When_assertion_an_instance_to_be_null_and_it_is_null_it_should_succeed()
         {
@@ -219,7 +270,10 @@ namespace FluentAssertions.Specs.Numeric
             action.Should().Throw<XunitException>()
                 .WithMessage("Expected subject to be <null>, but found*");
         }
+    }
 
+    public class NotBeNull
+    {
         [Fact]
         public void When_assertion_an_instance_not_to_be_null_and_it_is_not_null_it_should_succeed()
         {
@@ -248,11 +302,10 @@ namespace FluentAssertions.Specs.Numeric
             action.Should().Throw<XunitException>()
                 .WithMessage("Expected subject not to be <null>.");
         }
+    }
 
-        #endregion
-
-        #region BeInRange
-
+    public class BeInRange
+    {
         [Fact]
         public void When_assertion_an_instance_to_be_in_a_certain_range_and_it_is_it_should_succeed()
         {
@@ -295,11 +348,10 @@ namespace FluentAssertions.Specs.Numeric
             action.Should().Throw<XunitException>()
                 .WithMessage("Expected subject to be between*and*, but found *.");
         }
+    }
 
-        #endregion
-
-        #region NotBeInRange
-
+    public class NotBeInRange
+    {
         [Fact]
         public void When_assertion_an_instance_to_not_be_in_a_certain_range_and_it_is_not_it_should_succeed()
         {
@@ -342,11 +394,10 @@ namespace FluentAssertions.Specs.Numeric
             // Assert
             action.Should().Throw<XunitException>();
         }
+    }
 
-        #endregion
-
-        #region Be Ranked As Equal To
-
+    public class BeRankedEquallyTo
+    {
         [Fact]
         public void When_subect_is_ranked_equal_to_another_subject_and_that_is_expected_it_should_not_throw()
         {
@@ -374,13 +425,13 @@ namespace FluentAssertions.Specs.Numeric
             // Assert
             act
                 .Should().Throw<XunitException>()
-                .WithMessage("Expected subject*42*to be ranked as equal to*Forty two*because they represent the same number.");
+                .WithMessage(
+                    "Expected subject*42*to be ranked as equal to*Forty two*because they represent the same number.");
         }
+    }
 
-        #endregion
-
-        #region Not Be Ranked As Equal To
-
+    public class NotBeRankedEquallyTo
+    {
         [Fact]
         public void When_subect_is_not_ranked_equal_to_another_subject_and_that_is_expected_it_should_not_throw()
         {
@@ -408,13 +459,13 @@ namespace FluentAssertions.Specs.Numeric
             // Assert
             act
                 .Should().Throw<XunitException>()
-                .WithMessage("Expected subject*Lead*not to be ranked as equal to*Lead*because they represent different concepts.");
+                .WithMessage(
+                    "Expected subject*Lead*not to be ranked as equal to*Lead*because they represent different concepts.");
         }
+    }
 
-        #endregion
-
-        #region Be Less Than
-
+    public class BeLessThan
+    {
         [Fact]
         public void When_subject_is_less_than_another_subject_and_that_is_expected_it_should_not_throw()
         {
@@ -458,11 +509,10 @@ namespace FluentAssertions.Specs.Numeric
             // Assert
             act.Should().Throw<XunitException>();
         }
+    }
 
-        #endregion
-
-        #region Be Less Than Or Equal To
-
+    public class BeLessThanOrEqualTo
+    {
         [Fact]
         public void When_subject_is_greater_than_another_subject_and_that_is_not_expected_it_should_throw()
         {
@@ -506,11 +556,10 @@ namespace FluentAssertions.Specs.Numeric
             // Assert
             act.Should().NotThrow();
         }
+    }
 
-        #endregion
-
-        #region Be Greater Than
-
+    public class BeGreaterThan
+    {
         [Fact]
         public void When_subject_is_greater_than_another_subject_and_that_is_expected_it_should_not_throw()
         {
@@ -554,11 +603,10 @@ namespace FluentAssertions.Specs.Numeric
                 .Should().Throw<XunitException>()
                 .WithMessage("Expected subject*abc*to be greater than*def*because 'a' is smaller then 'e'.");
         }
+    }
 
-        #endregion
-
-        #region Be Greater Than Or Equal To
-
+    public class BeGreaterThanOrEqualTo
+    {
         [Fact]
         public void When_subject_is_less_than_another_subject_and_that_is_not_expected_it_should_throw()
         {
@@ -602,126 +650,126 @@ namespace FluentAssertions.Specs.Numeric
             // Assert
             act.Should().NotThrow();
         }
-
-        #endregion
     }
+}
 
-    public class ComparableOfString : IComparable<ComparableOfString>
+public class ComparableOfString : IComparable<ComparableOfString>
+{
+    public string Value { get; set; }
+
+    public ComparableOfString(string value)
     {
-        public string Value { get; set; }
-
-        public ComparableOfString(string value)
-        {
-            Value = value;
-        }
-
-        public int CompareTo(ComparableOfString other)
-        {
-            return string.CompareOrdinal(Value, other.Value);
-        }
-
-        public override string ToString()
-        {
-            return Value;
-        }
+        Value = value;
     }
 
-    public class SameInstanceIsNotEqualClass
+    public int CompareTo(ComparableOfString other)
     {
-        public SameInstanceIsNotEqualClass()
-        {
-        }
-
-        public override bool Equals(object obj)
-        {
-            return false;
-        }
-
-        public override int GetHashCode()
-        {
-            return 1;
-        }
+        return string.CompareOrdinal(Value, other.Value);
     }
 
-    public class EquatableOfInt
+    public override string ToString()
     {
-        public int Value { get; set; }
-
-        public EquatableOfInt(int value)
-        {
-            Value = value;
-        }
-
-        public override bool Equals(object obj)
-        {
-            return Value == ((EquatableOfInt)obj).Value;
-        }
-
-        public override int GetHashCode()
-        {
-            return Value.GetHashCode();
-        }
-
-        public override string ToString()
-        {
-            return Value.ToString(CultureInfo.InvariantCulture);
-        }
+        return Value;
     }
+}
 
-    public class ComparableOfInt : IComparable<ComparableOfInt>
+public class SameInstanceIsNotEqualClass : IComparable<SameInstanceIsNotEqualClass>
+{
+    public override bool Equals(object obj)
     {
-        public int Value { get; set; }
-
-        public ComparableOfInt(int value)
-        {
-            Value = value;
-        }
-
-        public int CompareTo(ComparableOfInt other)
-        {
-            return Value.CompareTo(other.Value);
-        }
-
-        public override string ToString()
-        {
-            return Value.ToString(CultureInfo.InvariantCulture);
-        }
+        return false;
     }
 
-    public class ComparableCustomer : IComparable<ComparableCustomer>
+    public override int GetHashCode()
     {
-        public ComparableCustomer(int id)
-        {
-            Id = id;
-        }
-
-        public int Id { get; }
-
-        public int CompareTo(ComparableCustomer other)
-        {
-            return Id.CompareTo(other.Id);
-        }
+        return 1;
     }
 
-    public class CustomerDTO
+    int IComparable<SameInstanceIsNotEqualClass>.CompareTo(SameInstanceIsNotEqualClass other) =>
+        throw new NotSupportedException("This type is meant for assertions using Equals()");
+}
+
+public class EquatableOfInt : IComparable<EquatableOfInt>
+{
+    public int Value { get; set; }
+
+    public EquatableOfInt(int value)
     {
-        public CustomerDTO(int id)
-        {
-            Id = id;
-        }
-
-        public int Id { get; }
+        Value = value;
     }
 
-    public class AnotherCustomerDTO
+    public override bool Equals(object obj)
     {
-        public AnotherCustomerDTO(int id)
-        {
-            Id = id;
-        }
-
-        public int Id { get; }
-
-        public int SomeOtherProperty { get; set; }
+        return Value == ((EquatableOfInt)obj).Value;
     }
+
+    public override int GetHashCode()
+    {
+        return Value.GetHashCode();
+    }
+
+    public override string ToString()
+    {
+        return Value.ToString(CultureInfo.InvariantCulture);
+    }
+
+    int IComparable<EquatableOfInt>.CompareTo(EquatableOfInt other) =>
+        throw new NotSupportedException("This type is meant for assertions using Equals()");
+}
+
+public class ComparableOfInt : IComparable<ComparableOfInt>
+{
+    public int Value { get; set; }
+
+    public ComparableOfInt(int value)
+    {
+        Value = value;
+    }
+
+    public int CompareTo(ComparableOfInt other)
+    {
+        return Value.CompareTo(other.Value);
+    }
+
+    public override string ToString()
+    {
+        return Value.ToString(CultureInfo.InvariantCulture);
+    }
+}
+
+public class ComparableCustomer : IComparable<ComparableCustomer>
+{
+    public ComparableCustomer(int id)
+    {
+        Id = id;
+    }
+
+    public int Id { get; }
+
+    public int CompareTo(ComparableCustomer other)
+    {
+        return Id.CompareTo(other.Id);
+    }
+}
+
+public class CustomerDto
+{
+    public CustomerDto(int id)
+    {
+        Id = id;
+    }
+
+    public int Id { get; }
+}
+
+public class AnotherCustomerDto
+{
+    public AnotherCustomerDto(int id)
+    {
+        Id = id;
+    }
+
+    public int Id { get; }
+
+    public int SomeOtherProperty { get; set; }
 }

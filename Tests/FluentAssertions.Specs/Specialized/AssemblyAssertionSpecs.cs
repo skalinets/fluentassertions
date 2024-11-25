@@ -6,12 +6,12 @@ using FluentAssertions.Specs.Types;
 using Xunit;
 using Xunit.Sdk;
 
-namespace FluentAssertions.Specs.Specialized
-{
-    public class AssemblyAssertionSpecs
-    {
-        #region NotReference
+namespace FluentAssertions.Specs.Specialized;
 
+public class AssemblyAssertionSpecs
+{
+    public class NotReference
+    {
         [Fact]
         public void When_an_assembly_is_not_referenced_and_should_not_reference_is_asserted_it_should_succeed()
         {
@@ -84,11 +84,10 @@ namespace FluentAssertions.Specs.Specialized
             act.Should().ThrowExactly<ArgumentNullException>()
                 .WithParameterName("assembly");
         }
+    }
 
-        #endregion
-
-        #region Reference
-
+    public class Reference
+    {
         [Fact]
         public void When_an_assembly_is_referenced_and_should_reference_is_asserted_it_should_succeed()
         {
@@ -161,11 +160,10 @@ namespace FluentAssertions.Specs.Specialized
             act.Should().ThrowExactly<ArgumentNullException>()
                 .WithParameterName("assembly");
         }
+    }
 
-        #endregion
-
-        #region DefineType
-
+    public class DefineType
+    {
         [Fact]
         public void When_an_assembly_defines_a_type_and_Should_DefineType_is_asserted_it_should_succeed()
         {
@@ -182,7 +180,8 @@ namespace FluentAssertions.Specs.Specialized
         }
 
         [Fact]
-        public void When_an_assembly_does_not_define_a_type_and_Should_DefineType_is_asserted_it_should_fail_with_a_useful_message()
+        public void
+            When_an_assembly_does_not_define_a_type_and_Should_DefineType_is_asserted_it_should_fail_with_a_useful_message()
         {
             // Arrange
             var thisAssembly = GetType().Assembly;
@@ -194,8 +193,8 @@ namespace FluentAssertions.Specs.Specialized
             // Assert
             act.Should().Throw<XunitException>()
                 .WithMessage($"Expected assembly \"{thisAssembly.FullName}\" " +
-                             "to define type \"FakeNamespace\".\"FakeName\" " +
-                             "because we want to test the failure message, but it does not.");
+                    "to define type \"FakeNamespace\".\"FakeName\" " +
+                    "because we want to test the failure message, but it does not.");
         }
 
         [Fact]
@@ -240,14 +239,13 @@ namespace FluentAssertions.Specs.Specialized
             Action act = () => thisAssembly.Should().DefineType(GetType().Namespace, string.Empty);
 
             // Assert
-            act.Should().ThrowExactly<ArgumentNullException>()
+            act.Should().ThrowExactly<ArgumentException>()
                 .WithParameterName("name");
         }
+    }
 
-        #endregion
-
-        #region BeNull
-
+    public class BeNull
+    {
         [Fact]
         public void When_an_assembly_is_null_and_Should_BeNull_is_asserted_it_should_succeed()
         {
@@ -261,12 +259,111 @@ namespace FluentAssertions.Specs.Specialized
             // Assert
             act.Should().NotThrow();
         }
-
-        #endregion
     }
 
-    [DummyClass("name", true)]
-    public class WellKnownClassWithAttribute
+    public class BeUnsigned
     {
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        public void Guards_for_unsigned_assembly(string noKey)
+        {
+            // Arrange
+            var unsignedAssembly = FindAssembly.Stub(noKey);
+
+            // Act & Assert
+            unsignedAssembly.Should().BeUnsigned();
+        }
+
+        [Fact]
+        public void Throws_for_signed_assembly()
+        {
+            // Arrange
+            var signedAssembly = FindAssembly.Stub("0123456789ABCEF007");
+
+            // Act
+            Action act = () => signedAssembly.Should().BeUnsigned("this assembly is never shipped");
+
+            // Assert
+            act.Should().Throw<XunitException>()
+                .WithMessage("Did not expect the assembly * to be signed because this assembly is never shipped, but it is.");
+        }
+
+        [Fact]
+        public void Throws_for_null_subject()
+        {
+            // Arrange
+            Assembly nullAssembly = null;
+
+            // Act
+            Action act = () => nullAssembly.Should().BeUnsigned();
+
+            // Assert
+            act.Should().Throw<XunitException>()
+                .WithMessage("Can't check for assembly signing if nullAssembly reference is <null>.");
+        }
+    }
+
+    public class BeSignedWithPublicKey
+    {
+        [Theory]
+        [InlineData("0123456789ABCEF007")]
+        [InlineData("0123456789abcef007")]
+        [InlineData("0123456789ABcef007")]
+        public void Guards_for_signed_assembly_with_expected_public_key(string publicKey)
+        {
+            // Arrange
+            var signedAssembly = FindAssembly.Stub("0123456789ABCEF007");
+
+            // Act & Assert
+            signedAssembly.Should().BeSignedWithPublicKey(publicKey);
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        public void Throws_for_unsigned_assembly(string noKey)
+        {
+            // Arrange
+            var unsignedAssembly = FindAssembly.Stub(noKey);
+
+            // Act
+            Action act = () => unsignedAssembly.Should().BeSignedWithPublicKey("1234", "signing is part of the contract");
+
+            // Assert
+            act.Should().Throw<XunitException>()
+                .WithMessage("Expected assembly * to have public key \"1234\" because signing is part of the contract, but it is unsigned.");
+        }
+
+        [Fact]
+        public void Throws_signed_assembly_with_different_public_key()
+        {
+            // Arrange
+            var signedAssembly = FindAssembly.Stub("0123456789ABCEF007");
+
+            // Act
+            Action act = () => signedAssembly.Should().BeSignedWithPublicKey("1234", "signing is part of the contract");
+
+            // Assert
+            act.Should().Throw<XunitException>()
+                .WithMessage("Expected assembly * to have public key \"1234\" because signing is part of the contract, but it has * instead.");
+        }
+
+        [Fact]
+        public void Throws_for_null_assembly()
+        {
+            // Arrange
+            Assembly nullAssembly = null;
+
+            // Act
+            Action act = () => nullAssembly.Should().BeSignedWithPublicKey("1234");
+
+            // Assert
+            act.Should().Throw<XunitException>()
+                .WithMessage("Can't check for assembly signing if nullAssembly reference is <null>.");
+        }
     }
 }
+
+[DummyClass("name", true)]
+public class WellKnownClassWithAttribute;

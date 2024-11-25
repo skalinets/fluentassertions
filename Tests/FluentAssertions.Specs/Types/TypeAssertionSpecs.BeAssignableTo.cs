@@ -3,15 +3,15 @@ using FluentAssertions.Specs.Primitives;
 using Xunit;
 using Xunit.Sdk;
 
-namespace FluentAssertions.Specs.Types
-{
-    /// <content>
-    /// The [Not]BeAssignableTo specs.
-    /// </content>
-    public partial class TypeAssertionSpecs
-    {
-        #region BeAssignableTo
+namespace FluentAssertions.Specs.Types;
 
+/// <content>
+/// The [Not]BeAssignableTo specs.
+/// </content>
+public partial class TypeAssertionSpecs
+{
+    public class BeAssignableTo
+    {
         [Fact]
         public void When_its_own_type_it_succeeds()
         {
@@ -126,6 +126,7 @@ namespace FluentAssertions.Specs.Types
         {
             // Arrange
             Type someType = typeof(ClassWithAttribute);
+
             Action act = () =>
                 someType.Should().BeAssignableTo(typeof(DummyBaseType<>), "we want to test the failure {0}", "message");
 
@@ -155,11 +156,10 @@ namespace FluentAssertions.Specs.Types
             act.Should().ThrowExactly<ArgumentNullException>()
                 .WithParameterName("type");
         }
+    }
 
-        #endregion
-
-        #region NotBeAssignableTo
-
+    public class NotBeAssignableTo
+    {
         [Fact]
         public void When_its_own_type_and_asserting_not_assignable_it_fails()
         {
@@ -335,7 +335,5 @@ namespace FluentAssertions.Specs.Types
             act.Should().ThrowExactly<ArgumentNullException>()
                 .WithParameterName("type");
         }
-
-        #endregion
     }
 }

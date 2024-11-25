@@ -1,16 +1,17 @@
 ﻿using System;
+using FluentAssertions.Execution;
 using Xunit;
 using Xunit.Sdk;
 
-namespace FluentAssertions.Specs.Types
-{
-    /// <content>
-    /// The [Not]HaveExplicitProperty specs.
-    /// </content>
-    public partial class TypeAssertionSpecs
-    {
-        #region HaveExplicitProperty
+namespace FluentAssertions.Specs.Types;
 
+/// <content>
+/// The [Not]HaveExplicitProperty specs.
+/// </content>
+public partial class TypeAssertionSpecs
+{
+    public class HaveExplicitProperty
+    {
         [Fact]
         public void When_asserting_a_type_explicitly_implements_a_property_which_it_does_it_succeeds()
         {
@@ -29,7 +30,8 @@ namespace FluentAssertions.Specs.Types
         }
 
         [Fact]
-        public void When_asserting_a_type_explicitly_implements_a_property_which_it_implements_implicitly_and_explicitly_it_succeeds()
+        public void
+            When_asserting_a_type_explicitly_implements_a_property_which_it_implements_implicitly_and_explicitly_it_succeeds()
         {
             // Arrange
             var type = typeof(ClassExplicitlyImplementingInterface);
@@ -164,14 +166,26 @@ namespace FluentAssertions.Specs.Types
                 type.Should().HaveExplicitProperty(typeof(IExplicitInterface), string.Empty);
 
             // Assert
-            act.Should().ThrowExactly<ArgumentNullException>()
+            act.Should().ThrowExactly<ArgumentException>()
                 .WithParameterName("name");
         }
 
-        #endregion
+        [Fact]
+        public void Does_not_continue_assertion_on_explicit_interface_implementation_if_not_implemented_at_all()
+        {
+            var act = () =>
+            {
+                using var _ = new AssertionScope();
+                typeof(int).Should().HaveExplicitProperty(typeof(IExplicitInterface), "Foo");
+            };
 
-        #region HaveExplicitPropertyOfT
+            act.Should().Throw<XunitException>()
+                .WithMessage("Expected type System.Int32 to*implement *IExplicitInterface, but it does not.");
+        }
+    }
 
+    public class HaveExplicitPropertyOfT
+    {
         [Fact]
         public void When_asserting_a_type_explicitlyOfT_implements_a_property_which_it_does_it_succeeds()
         {
@@ -213,7 +227,7 @@ namespace FluentAssertions.Specs.Types
                 type.Should().HaveExplicitProperty<IExplicitInterface>(string.Empty);
 
             // Assert
-            act.Should().ThrowExactly<ArgumentNullException>()
+            act.Should().ThrowExactly<ArgumentException>()
                 .WithParameterName("name");
         }
 
@@ -234,11 +248,10 @@ namespace FluentAssertions.Specs.Types
                     "Expected type to explicitly implement *.IExplicitInterface.ExplicitStringProperty *failure message*" +
                     ", but type is <null>.");
         }
+    }
 
-        #endregion
-
-        #region NotHaveExplicitProperty
-
+    public class NotHaveExplicitProperty
+    {
         [Fact]
         public void When_asserting_a_type_does_not_explicitly_implement_a_property_which_it_does_it_fails()
         {
@@ -260,7 +273,8 @@ namespace FluentAssertions.Specs.Types
         }
 
         [Fact]
-        public void When_asserting_a_type_does_not_explicitly_implement_a_property_which_it_implements_implicitly_and_explicitly_it_fails()
+        public void
+            When_asserting_a_type_does_not_explicitly_implement_a_property_which_it_implements_implicitly_and_explicitly_it_fails()
         {
             // Arrange
             var type = typeof(ClassExplicitlyImplementingInterface);
@@ -392,14 +406,28 @@ namespace FluentAssertions.Specs.Types
                 type.Should().NotHaveExplicitProperty(typeof(IExplicitInterface), string.Empty);
 
             // Assert
-            act.Should().ThrowExactly<ArgumentNullException>()
+            act.Should().ThrowExactly<ArgumentException>()
                 .WithParameterName("name");
         }
 
-        #endregion
+        [Fact]
+        public void Does_not_continue_assertion_on_explicit_interface_implementation_if_implemented()
+        {
+            var act = () =>
+            {
+                using var _ = new AssertionScope();
+                typeof(ClassExplicitlyImplementingInterface)
+                    .Should().NotHaveExplicitProperty(typeof(IExplicitInterface), "ExplicitStringProperty");
+            };
 
-        #region NotHaveExplicitPropertyOfT
+            act.Should().Throw<XunitException>()
+                .WithMessage("Expected *ClassExplicitlyImplementingInterface* to*implement " +
+                    "*IExplicitInterface.ExplicitStringProperty, but it does.");
+        }
+    }
 
+    public class NotHaveExplicitPropertyOfT
+    {
         [Fact]
         public void When_asserting_a_type_does_not_explicitlyOfT_implement_a_property_which_it_does_it_fails()
         {
@@ -462,10 +490,8 @@ namespace FluentAssertions.Specs.Types
                 type.Should().NotHaveExplicitProperty<IExplicitInterface>(string.Empty);
 
             // Assert
-            act.Should().ThrowExactly<ArgumentNullException>()
+            act.Should().ThrowExactly<ArgumentException>()
                 .WithParameterName("name");
         }
-
-        #endregion
     }
 }

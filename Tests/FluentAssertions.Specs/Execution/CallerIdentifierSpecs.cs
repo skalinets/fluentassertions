@@ -1,11 +1,16 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
+using FluentAssertions.Equivalency;
 using FluentAssertions.Execution;
 using FluentAssertions.Extensions;
 using Xunit;
 using Xunit.Sdk;
+
+#pragma warning disable RCS1192, RCS1214, S4144 // verbatim string literals and interpolated strings
 
 namespace FluentAssertions.Specs.Execution
 {
@@ -69,7 +74,7 @@ namespace FluentAssertions.Specs.Execution
 
             // Assert
             await action.Should().ThrowAsync<XunitException>()
-                .WithMessage("Expected bob to not complete within 1s because test testArg.");
+                .WithMessage("Did not expect bob to complete within 1s because test testArg.");
         }
 
         [Fact]
@@ -158,7 +163,7 @@ namespace FluentAssertions.Specs.Execution
 
             // Assert
             act.Should().Throw<XunitException>()
-                .WithMessage("Expected foo.GetFoo(test1).GetFooStatic(\"test\"+2).GetFoo(foo.Field) to be <null>*");
+                .WithMessage("Expected foo.GetFoo(test1).GetFooStatic(\"test\" + 2).GetFoo(foo.Field) to be <null>*");
         }
 
         [Fact]
@@ -181,7 +186,7 @@ namespace FluentAssertions.Specs.Execution
 
             // Assert
             act.Should().Throw<XunitException>()
-                .WithMessage("Expected foo.GetFoo(test1).GetFooStatic(\"test\"+2).GetFoo(foo.Field) to be <null>*");
+                .WithMessage("Expected foo.GetFoo(test1).GetFooStatic(\"test\" + 2).GetFoo(foo.Field) to be <null>*");
         }
 
         [Fact]
@@ -221,10 +226,12 @@ namespace FluentAssertions.Specs.Execution
             var foo = new Foo();
 
             // Act
+#pragma warning disable format
             Action act = () =>
             {
                 var foo2 = foo; foo2.Should().BeNull();
             };
+#pragma warning restore format
 
             // Assert
             act.Should().Throw<XunitException>()
@@ -256,7 +263,7 @@ namespace FluentAssertions.Specs.Execution
 
             // Assert
             act.Should().Throw<XunitException>()
-                .WithMessage("Expected foo.BarMethod(@\"test\",argument2:$@\"test2\",argument3:@$\"test3\") to be <null>*");
+                .WithMessage("Expected foo.BarMethod(@\"test\", argument2: $@\"test2\", argument3: @$\"test3\") to be <null>*");
         }
 
         [Fact]
@@ -302,7 +309,7 @@ namespace FluentAssertions.Specs.Execution
 
             // Assert
             act.Should().Throw<XunitException>()
-                .WithMessage("Expected foo.BarMethod(\"1\"+2) to be <null>*");
+                .WithMessage("Expected foo.BarMethod(\"1\" + 2) to be <null>*");
         }
 
         [Fact]
@@ -319,7 +326,7 @@ namespace FluentAssertions.Specs.Execution
 
             // Assert
             act.Should().Throw<XunitException>()
-                .WithMessage("Expected foo.BarMethod(\"abc\"+\"def\") to be <null>*");
+                .WithMessage("Expected foo.BarMethod(\"abc\"+ \"def\") to be <null>*");
         }
 
         [Fact]
@@ -453,30 +460,127 @@ namespace FluentAssertions.Specs.Execution
                 .WithMessage("Expected foo.ShouldReturnSomeBool() to be false*");
         }
 
-        [UIFact]
-        public async Task Caller_identification_should_also_work_for_statements_following_async_code()
+        [Collection("UIFacts")]
+        public class UIFacts
+        {
+            [UIFact]
+            public async Task Caller_identification_should_also_work_for_statements_following_async_code()
+            {
+                // Arrange
+                const string someText = "Hello";
+                Func<Task> task = async () => await Task.Yield();
+
+                // Act
+                await task.Should().NotThrowAsync();
+                Action act = () => someText.Should().Be("Hi");
+
+                // Assert
+                act.Should().Throw<XunitException>()
+                    .WithMessage("*someText*", "it should capture the variable name");
+            }
+        }
+
+        [Fact]
+        public void A_method_taking_an_array_initializer_is_an_identifier()
         {
             // Arrange
-            const string someText = "Hello";
-            Func<Task> task = async () => await Task.Yield();
+            var foo = new Foo();
 
             // Act
-            await task.Should().NotThrowAsync();
-            Action act = () => someText.Should().Be("Hi");
+            Action act = () => foo.GetFoo(new[] { 1, 2, 3 }.Sum() + "")
+                .Should()
+                .BeNull();
 
             // Assert
             act.Should().Throw<XunitException>()
-                .WithMessage("*someText*", "it should capture the variable name");
+                .WithMessage("Expected foo.GetFoo(new[] { 1, 2, 3 }.Sum() + \"\") to be <null>*");
         }
+
+        [Fact]
+        public void A_method_taking_a_target_typed_new_expression_is_an_identifier()
+        {
+            // Arrange
+            var foo = new Foo();
+
+            // Act
+            Action act = () => foo.GetFoo(new('a', 10))
+                .Should()
+                .BeNull();
+
+            // Assert
+            act.Should().Throw<XunitException>()
+                .WithMessage("Expected foo.GetFoo(new('a', 10)) to be <null>*");
+        }
+
+        [Fact]
+        public void A_method_taking_a_list_is_an_identifier()
+        {
+            // Arrange
+            var foo = new Foo();
+
+            // Act
+            Action act = () => foo.GetFoo(new List<int> { 1, 2, 3 }.Sum() + "")
+                .Should()
+                .BeNull();
+
+            // Assert
+            act.Should().Throw<XunitException>()
+                .WithMessage("Expected foo.GetFoo(new List<int> { 1, 2, 3 }*");
+        }
+
+        [Fact]
+        public void An_array_initializer_preceding_an_assertion_is_not_an_identifier()
+        {
+            // Act
+            Action act = () => new[] { 1, 2, 3 }.Should().BeEmpty();
+
+            // Assert
+            act.Should().Throw<XunitException>()
+                .WithMessage("Expected collection to be empty*");
+        }
+
+        [Fact]
+        public void An_object_initializer_preceding_an_assertion_is_not_an_identifier()
+        {
+            // Act
+            Action act = () => new { Property = "blah" }.Should().BeNull();
+
+            // Assert
+            act.Should().Throw<XunitException>()
+                .WithMessage("Expected object to be*");
+        }
+
+        [Fact]
+        public void All_core_code_anywhere_in_the_stack_trace_is_ignored()
+        {
+            /*
+             We want to test this specific scenario.
+
+                1. CallerIdentifier.DetermineCallerIdentity
+                2. FluentAssertions code
+                3. Custom extension <--- pointed to by lastUserStackFrameBeforeFluentAssertionsCodeIndex
+                4. FluentAssertions code  <--- this is where DetermineCallerIdentity tried to get the variable name from before the fix
+                5. Test
+             */
+
+            var node = Node.From<Foo>(GetSubjectId);
+
+            // Assert
+            node.Description.Should().StartWith("node.Description");
+        }
+
+        [CustomAssertion]
+        private string GetSubjectId() => AssertionScope.Current.CallerIdentity;
     }
 
+#pragma warning disable IDE0060, RCS1163 // Remove unused parameter
     [SuppressMessage("The name of a C# element does not begin with an upper-case letter", "SA1300")]
     [SuppressMessage("Parameter is never used", "CA1801")]
     public class Foo
     {
         public string Field = "bar";
 
-        public string Bar { get; } = "bar";
+        public string Bar => "bar";
 
         public string BarMethod() => Bar;
 
@@ -494,6 +598,7 @@ namespace FluentAssertions.Specs.Execution
     {
         public static Foo GetFooStatic(this Foo foo, string prm) => foo;
     }
+#pragma warning restore IDE0060, RCS1163 // Remove unused parameter
 }
 
 namespace System

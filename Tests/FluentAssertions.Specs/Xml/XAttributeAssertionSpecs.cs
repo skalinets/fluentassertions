@@ -3,12 +3,12 @@ using System.Xml.Linq;
 using Xunit;
 using Xunit.Sdk;
 
-namespace FluentAssertions.Specs.Xml
-{
-    public class XAttributeAssertionSpecs
-    {
-        #region Be / NotBe
+namespace FluentAssertions.Specs.Xml;
 
+public class XAttributeAssertionSpecs
+{
+    public class Be
+    {
         [Fact]
         public void When_asserting_an_xml_attribute_is_equal_to_the_same_xml_attribute_it_should_succeed()
         {
@@ -25,7 +25,8 @@ namespace FluentAssertions.Specs.Xml
         }
 
         [Fact]
-        public void When_asserting_an_xml_attribute_is_equal_to_a_different_xml_attribute_it_should_fail_with_descriptive_message()
+        public void
+            When_asserting_an_xml_attribute_is_equal_to_a_different_xml_attribute_it_should_fail_with_descriptive_message()
         {
             // Arrange
             var theAttribute = new XAttribute("name", "value");
@@ -69,7 +70,7 @@ namespace FluentAssertions.Specs.Xml
         [Fact]
         public void When_the_attribute_is_expected_to_equal_null_it_fails()
         {
-            XAttribute theAttribute = new XAttribute("name", "value");
+            XAttribute theAttribute = new("name", "value");
 
             // Act
             Action act = () => theAttribute.Should().Be(null, "we want to test the failure {0}", "message");
@@ -78,7 +79,10 @@ namespace FluentAssertions.Specs.Xml
             act.Should().Throw<XunitException>()
                 .WithMessage("Expected theAttribute to be <null> *failure message*, but found name=\"value\".");
         }
+    }
 
+    public class NotBe
+    {
         [Fact]
         public void When_asserting_an_xml_attribute_is_not_equal_to_a_different_xml_attribute_it_should_succeed()
         {
@@ -111,7 +115,8 @@ namespace FluentAssertions.Specs.Xml
         }
 
         [Fact]
-        public void When_asserting_an_xml_attribute_is_not_equal_to_the_same_xml_attribute_it_should_throw_with_descriptive_message()
+        public void
+            When_asserting_an_xml_attribute_is_not_equal_to_the_same_xml_attribute_it_should_throw_with_descriptive_message()
         {
             // Arrange
             var theAttribute = new XAttribute("name", "value");
@@ -143,7 +148,7 @@ namespace FluentAssertions.Specs.Xml
         public void When_an_attribute_is_not_supposed_to_be_null_it_succeeds()
         {
             // Arrange
-            XAttribute theAttribute = new XAttribute("name", "value");
+            XAttribute theAttribute = new("name", "value");
 
             // Act
             Action act = () => theAttribute.Should().NotBe(null);
@@ -165,11 +170,10 @@ namespace FluentAssertions.Specs.Xml
             act.Should().Throw<XunitException>()
                 .WithMessage("Did not expect theAttribute to be <null> *failure message*.");
         }
+    }
 
-        #endregion
-
-        #region BeNull / NotBeNull
-
+    public class BeNull
+    {
         [Fact]
         public void When_asserting_a_null_xml_attribute_is_null_it_should_succeed()
         {
@@ -213,7 +217,10 @@ namespace FluentAssertions.Specs.Xml
             act.Should().Throw<XunitException>().WithMessage(
                 $"Expected theAttribute to be <null> because we want to test the failure message, but found {theAttribute}.");
         }
+    }
 
+    public class NotBeNull
+    {
         [Fact]
         public void When_asserting_a_non_null_xml_attribute_is_not_null_it_should_succeed()
         {
@@ -257,11 +264,10 @@ namespace FluentAssertions.Specs.Xml
             act.Should().Throw<XunitException>().WithMessage(
                 "Expected theAttribute not to be <null> because we want to test the failure message.");
         }
+    }
 
-        #endregion
-
-        #region HaveValue
-
+    public class HaveValue
+    {
         [Fact]
         public void When_asserting_attribute_has_a_specific_value_and_it_does_it_should_succeed()
         {
@@ -292,7 +298,8 @@ namespace FluentAssertions.Specs.Xml
         }
 
         [Fact]
-        public void When_asserting_attribute_has_a_specific_value_but_it_has_a_different_value_it_should_throw_with_descriptive_message()
+        public void
+            When_asserting_attribute_has_a_specific_value_but_it_has_a_different_value_it_should_throw_with_descriptive_message()
         {
             // Arrange
             var theAttribute = new XAttribute("age", "36");
@@ -319,7 +326,5 @@ namespace FluentAssertions.Specs.Xml
             act.Should().Throw<XunitException>()
                 .WithMessage("Expected the attribute to have value \"value\" *failure message*, but theAttribute is <null>.");
         }
-
-        #endregion
     }
 }

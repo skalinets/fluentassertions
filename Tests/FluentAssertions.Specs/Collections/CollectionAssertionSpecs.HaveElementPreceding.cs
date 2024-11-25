@@ -5,15 +5,15 @@ using FluentAssertions.Execution;
 using Xunit;
 using Xunit.Sdk;
 
-namespace FluentAssertions.Specs.Collections
-{
-    /// <content>
-    /// The HaveElementPreceding specs.
-    /// </content>
-    public partial class CollectionAssertionSpecs
-    {
-        #region HaveElementPreceding
+namespace FluentAssertions.Specs.Collections;
 
+/// <content>
+/// The HaveElementPreceding specs.
+/// </content>
+public partial class CollectionAssertionSpecs
+{
+    public class HaveElementPreceding
+    {
         [Fact]
         [SuppressMessage("ReSharper", "StringLiteralTypo")]
         public void When_collection_has_the_correct_element_preceding_another_it_should_not_throw()
@@ -146,7 +146,5 @@ namespace FluentAssertions.Specs.Collections
                 .WithMessage(
                     "Expected collection to have \"cris\" precede \"mick\" *failure message*, but the collection is <null>.");
         }
-
-        #endregion
     }
 }

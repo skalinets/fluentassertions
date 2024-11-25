@@ -2,19 +2,18 @@
 using System.Collections.Generic;
 using System.Linq;
 using FluentAssertions.Execution;
-using FluentAssertions.Specs.Equivalency;
 using Xunit;
 using Xunit.Sdk;
 
-namespace FluentAssertions.Specs.Collections
-{
-    /// <content>
-    /// The SatisfyRespectively specs.
-    /// </content>
-    public partial class CollectionAssertionSpecs
-    {
-        #region Satisfy Respectively
+namespace FluentAssertions.Specs.Collections;
 
+/// <content>
+/// The SatisfyRespectively specs.
+/// </content>
+public partial class CollectionAssertionSpecs
+{
+    public class SatisfyRespectively
+    {
         [Fact]
         public void When_collection_asserting_against_null_inspectors_it_should_throw_with_clear_explanation()
         {
@@ -53,11 +52,9 @@ namespace FluentAssertions.Specs.Collections
             Action act = () =>
             {
                 using var _ = new AssertionScope();
+
                 collection.Should().SatisfyRespectively(
-                    new Action<int>[]
-                    {
-                        x => x.Should().Be(1)
-                    }, "because we want to test the failure {0}", "message");
+                    new Action<int>[] { x => x.Should().Be(1) }, "because we want to test the failure {0}", "message");
             };
 
             // Assert
@@ -72,10 +69,8 @@ namespace FluentAssertions.Specs.Collections
             var collection = Enumerable.Empty<int>();
 
             // Act
-            Action act = () => collection.Should().SatisfyRespectively(new Action<int>[]
-            {
-                x => x.Should().Be(1)
-            }, "because we want to test the failure {0}", "message");
+            Action act = () => collection.Should().SatisfyRespectively(new Action<int>[] { x => x.Should().Be(1) },
+                "because we want to test the failure {0}", "message");
 
             // Assert
             act.Should().Throw<XunitException>().WithMessage(
@@ -86,11 +81,7 @@ namespace FluentAssertions.Specs.Collections
         public void When_asserting_collection_satisfies_all_inspectors_it_should_succeed()
         {
             // Arrange
-            var collection = new[]
-            {
-                new Customer { Age = 21, Name = "John" },
-                new Customer { Age = 22, Name = "Jane" }
-            };
+            var collection = new[] { new Customer { Age = 21, Name = "John" }, new Customer { Age = 22, Name = "Jane" } };
 
             // Act / Assert
             collection.Should().SatisfyRespectively(
@@ -104,11 +95,6 @@ namespace FluentAssertions.Specs.Collections
                     value.Age.Should().Be(22);
                     value.Name.Should().Be("Jane");
                 });
-        }
-
-        private class CustomerWithItems : Customer
-        {
-            public int[] Items { get; set; }
         }
 
         [Fact]
@@ -128,6 +114,7 @@ namespace FluentAssertions.Specs.Collections
                     customer =>
                     {
                         customer.Age.Should().BeLessThan(21);
+
                         customer.Items.Should().SatisfyRespectively(
                             item => item.Should().Be(2),
                             item => item.Should().Be(1));
@@ -141,7 +128,7 @@ namespace FluentAssertions.Specs.Collections
 
             // Assert
             act.Should().Throw<XunitException>().WithMessage(
-@"Expected customers to satisfy all inspectors because we want to test nested assertions, but some inspectors are not satisfied:
+                @"Expected customers to satisfy all inspectors because we want to test nested assertions, but some inspectors are not satisfied:
 *At index 0:
 *Expected customer.Age to be less than 21, but found 21
 *Expected customer.Items to satisfy all inspectors, but some inspectors are not satisfied:
@@ -154,7 +141,7 @@ namespace FluentAssertions.Specs.Collections
 *Expected customer.Items to satisfy all inspectors, but some inspectors are not satisfied:
 *At index 0:
 *Expected item to be 2, but found 3"
-);
+            );
         }
 
         [Fact]
@@ -178,11 +165,8 @@ namespace FluentAssertions.Specs.Collections
 
             // Act
             Action act = () => collection.Should().SatisfyRespectively(
-                new Action<int>[]
-                {
-                    value => value.Should().Be(1),
-                    value => value.Should().Be(2)
-                }, "because we want to test the failure {0}", "message");
+                new Action<int>[] { value => value.Should().Be(1), value => value.Should().Be(2) },
+                "because we want to test the failure {0}", "message");
 
             // Assert
             act.Should().Throw<XunitException>().WithMessage(
@@ -197,14 +181,44 @@ namespace FluentAssertions.Specs.Collections
 
             // Act
             Action act = () => collection.Should().SatisfyRespectively(
-                new Action<int>[]
-                {
-                    value => value.Should().Be(1),
-                }, "because we want to test the failure {0}", "message");
+                new Action<int>[] { value => value.Should().Be(1), }, "because we want to test the failure {0}", "message");
 
             // Assert
             act.Should().Throw<XunitException>().WithMessage("*because we want to test the failure*");
         }
-        #endregion
+    }
+
+    private class Customer
+    {
+        private string PrivateProperty { get; }
+
+        protected string ProtectedProperty { get; set; }
+
+        public string Name { get; set; }
+
+        public int Age { get; set; }
+
+        public DateTime Birthdate { get; set; }
+
+        public long Id { get; set; }
+
+        public void SetProtected(string value)
+        {
+            ProtectedProperty = value;
+        }
+
+        public Customer()
+        {
+        }
+
+        public Customer(string privateProperty)
+        {
+            PrivateProperty = privateProperty;
+        }
+    }
+
+    private class CustomerWithItems : Customer
+    {
+        public int[] Items { get; set; }
     }
 }

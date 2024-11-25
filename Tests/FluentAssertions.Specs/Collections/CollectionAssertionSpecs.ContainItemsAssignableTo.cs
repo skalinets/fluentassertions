@@ -4,15 +4,15 @@ using FluentAssertions.Execution;
 using Xunit;
 using Xunit.Sdk;
 
-namespace FluentAssertions.Specs.Collections
-{
-    /// <content>
-    /// The ContainItemsAssignableTo specs.
-    /// </content>
-    public partial class CollectionAssertionSpecs
-    {
-        #region Contain Items Assignable To
+namespace FluentAssertions.Specs.Collections;
 
+/// <content>
+/// The ContainItemsAssignableTo specs.
+/// </content>
+public partial class CollectionAssertionSpecs
+{
+    public class ContainItemsAssignableTo
+    {
         [Fact]
         public void Should_succeed_when_asserting_collection_with_all_items_of_same_type_only_contains_item_of_one_type()
         {
@@ -65,7 +65,9 @@ namespace FluentAssertions.Specs.Collections
             Action act = () => collection.Should().ContainItemsAssignableTo<int>();
 
             // Assert
-            act.Should().Throw<XunitException>().WithMessage("Expected collection to contain at least one element assignable to type \"System.Int32\", but found {empty}.");
+            act.Should().Throw<XunitException>()
+                .WithMessage(
+                    "Expected collection to contain at least one element assignable to type \"System.Int32\", but found {empty}.");
         }
 
         [Fact]
@@ -76,9 +78,8 @@ namespace FluentAssertions.Specs.Collections
             Action act = () => collection.Should().ContainItemsAssignableTo<int>();
 
             act.Should().Throw<XunitException>()
-                .WithMessage("Expected collection to contain at least one element assignable to type \"System.Int32\", but found {System.String, System.Decimal}.");
+                .WithMessage(
+                    "Expected collection to contain at least one element assignable to type \"System.Int32\", but found {System.String, System.Decimal}.");
         }
-
-        #endregion
     }
 }

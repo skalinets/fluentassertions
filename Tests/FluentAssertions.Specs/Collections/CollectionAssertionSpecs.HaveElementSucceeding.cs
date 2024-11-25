@@ -5,15 +5,15 @@ using FluentAssertions.Execution;
 using Xunit;
 using Xunit.Sdk;
 
-namespace FluentAssertions.Specs.Collections
-{
-    /// <content>
-    /// The HaveElementSucceeding specs.
-    /// </content>
-    public partial class CollectionAssertionSpecs
-    {
-        #region HaveElementSucceeding
+namespace FluentAssertions.Specs.Collections;
 
+/// <content>
+/// The HaveElementSucceeding specs.
+/// </content>
+public partial class CollectionAssertionSpecs
+{
+    public class HaveElementSucceeding
+    {
         [Fact]
         [SuppressMessage("ReSharper", "StringLiteralTypo")]
         public void When_collection_has_the_correct_element_succeeding_another_it_should_not_throw()
@@ -144,7 +144,5 @@ namespace FluentAssertions.Specs.Collections
                 .WithMessage(
                     "Expected collection to have \"cris\" succeed \"mick\" *failure message*, but the collection is <null>.");
         }
-
-        #endregion
     }
 }

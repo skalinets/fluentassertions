@@ -7,35 +7,212 @@ sidebar:
   nav: "sidebar"
 ---
 
-## Unreleased
+## 7.0.0
+
+### Breaking Changes
+
+* Dropped direct support for .NET Core 2.x and .NET Core 3.x - [#2302](https://github.com/fluentassertions/fluentassertions/pull/2302)
+* Dropped support for `NSpec3` test framework - [#2356](https://github.com/fluentassertions/fluentassertions/pull/2356)
+
+### Fixes
+
+* Fixed a problem in `BeEquivalentTo` where write-only properties would cause a `NullReferenceException` - [#2836](https://github.com/fluentassertions/fluentassertions/pull/2836)
+
+## 6.12.3
+
+### Fixes
+
+* The expectation node identified as a cyclic reference is still compared to the subject node using simple equality - [2819](https://github.com/fluentassertions/fluentassertions/pull/2819)
+
+## 6.12.2
+
+### Fixes
+* Better handling of normal vs explicitly implemented vs default interface properties - [2794](https://github.com/fluentassertions/fluentassertions/pull/2794)
+
+## 6.12.1
+
+### Improvements
+* Improve `BeEmpty()` and `BeNullOrEmpty()` performance for `IEnumerable<T>`, by materializing only the first item - [#2530](https://github.com/fluentassertions/fluentassertions/pull/2530)
+
+### Fixes
+* Fixed formatting error when checking nullable `DateTimeOffset` with
+`BeWithin(...).Before(...)` - [#2312](https://github.com/fluentassertions/fluentassertions/pull/2312)
+* `BeEquivalentTo` will now find and can map subject properties that are implemented through an explicitly-implemented interface - [#2152](https://github.com/fluentassertions/fluentassertions/pull/2152)
+* Fixed that the `because` and `becauseArgs` were not passed down the equivalency tree - [#2318](https://github.com/fluentassertions/fluentassertions/pull/2318)
+* `BeEquivalentTo` can again compare a non-generic `IDictionary` with a generic one - [#2358](https://github.com/fluentassertions/fluentassertions/pull/2358)
+* Fixed that the `FormattingOptions` were not respected in inner `AssertionScope` - [#2329](https://github.com/fluentassertions/fluentassertions/pull/2329)
+* Capitalize `true` and `false` in failure messages and make them formattable to a custom `BooleanFormatter` - [#2390](https://github.com/fluentassertions/fluentassertions/pull/2390), [#2393](https://github.com/fluentassertions/fluentassertions/pull/2393)
+* Improved the failure message for `NotBeOfType` when wrapped in an `AssertionScope` and the subject is null  - [#2399](https://github.com/fluentassertions/fluentassertions/pull/2399)
+* Improved the failure message for `BeWritable`/`BeReadable` when wrapped in an `AssertionScope` and the subject is read-only/write-only - [#2399](https://github.com/fluentassertions/fluentassertions/pull/2399)
+* Improved the failure message for `ThrowExactly[Async]` when wrapped in an `AssertionScope` and no exception is thrown - [#2398](https://github.com/fluentassertions/fluentassertions/pull/2398)
+* Improved the failure message for `[Not]HaveExplicitProperty` when wrapped in an `AssertionScope` and not implementing the interface - [#2403](https://github.com/fluentassertions/fluentassertions/pull/2403)
+* Improved the failure message for `[Not]HaveExplicitMethod` when wrapped in an `AssertionScope` and not implementing the interface - [#2403](https://github.com/fluentassertions/fluentassertions/pull/2403)
+* Changed `BeEquivalentTo` to exclude `private protected` members from the comparison - [#2417](https://github.com/fluentassertions/fluentassertions/pull/2417)
+* Fixed using `BeEquivalentTo` on an empty `ArraySegment` - [#2445](https://github.com/fluentassertions/fluentassertions/pull/2445), [#2511](https://github.com/fluentassertions/fluentassertions/pull/2511)
+* `BeEquivalentTo` with a custom comparer can now handle null values - [#2489](https://github.com/fluentassertions/fluentassertions/pull/2489)
+* Ensured that nested calls to `AssertionScope(context)` create a chained context - [#2607](https://github.com/fluentassertions/fluentassertions/pull/2607)
+* One overload of the `AssertionScope` constructor would not create an actual scope associated with the thread - [#2607](https://github.com/fluentassertions/fluentassertions/pull/2607)
+* Fixed `ThrowWithinAsync` not respecting `OperationCanceledException` - [#2614](https://github.com/fluentassertions/fluentassertions/pull/2614)
+* Fixed using `BeEquivalentTo` with an `IEqualityComparer` targeting nullable types - [#2648](https://github.com/fluentassertions/fluentassertions/pull/2648)
+
+## 6.12.0
+
+### What's new
+* Added `Be`, `NotBe` and `BeOneOf` for object comparisons with custom comparer - [#2111](https://github.com/fluentassertions/fluentassertions/pull/2111)
+* Added `BeSignedWithPublicKey()` and `BeUnsigned()` for assertions on `Assembly` - [#2207](https://github.com/fluentassertions/fluentassertions/pull/2207)
+* Added `NotContainItemsAssignableTo` for asserting that a collection does not contain any items assignable to a specific type - [#2266](https://github.com/fluentassertions/fluentassertions/pull/2266)
+
+### Fixes
+* `because` and `becauseArgs` were not included in the error message when collections of enums were not equivalent - [#2214](https://github.com/fluentassertions/fluentassertions/pull/2214)
+* Improve caller identification for tests written in Visual Basic - [#2254](https://github.com/fluentassertions/fluentassertions/pull/2254)
+* Improved auto conversion to enums for objects of different integral type - [#2261](https://github.com/fluentassertions/fluentassertions/pull/2261)
+* Fixed exceptions when trying to auto convert strings or enums of different type to enums- [#2261](https://github.com/fluentassertions/fluentassertions/pull/2261)
+* Format records and anonymous objects with their member values instead of the generated `ToString` - [#2144](https://github.com/fluentassertions/fluentassertions/pull/2144)
+
+## 6.11.0
+
+### What's new
+* Added `ThrowWithinAsync` for assertions on `Task` - [#1974](https://github.com/fluentassertions/fluentassertions/pull/1974)
+* Added support for converting integers to enums using `AutoConversion` - [#2147](https://github.com/fluentassertions/fluentassertions/pull/2147)
+* Changed exception formatting to include any inner exception - [#2150](https://github.com/fluentassertions/fluentassertions/pull/2150)
+* Added an expression overload for `WithoutStrictOrderingFor` - [#2151](https://github.com/fluentassertions/fluentassertions/pull/2151)
+
+### Fixes
+* Improved robustness of several assertions when they're wrapped in an `AssertionScope` - [#2133](https://github.com/fluentassertions/fluentassertions/pull/2133)
+* The maximum depth `BeEquivalentTo` uses for recursive comparisons was 9 instead of the expected 10 - [#2145](https://github.com/fluentassertions/fluentassertions/pull/2145)
+* Fixed `.Excluding()` and `.For().Exclude()` not working if root is a collection - [#2135](https://github.com/fluentassertions/fluentassertions/pull/2135)
+* Prevent `InvalidOperationException` when formatting a lambda expression calling a constructor - [#2176](https://github.com/fluentassertions/fluentassertions/pull/2176)
+
+## 6.10.0
+
+### Fixes
+* Fixed hanging of `CompleteWithinAsync` when used with `WithResult` and `AssertionScope` - [#2101](https://github.com/fluentassertions/fluentassertions/pull/2101)
+* `BeEquivalentTo` no longer crashes on fields hiding base-class fields - [#1990](https://github.com/fluentassertions/fluentassertions/pull/1990)
+* Fixed System.Net.Http dependency declaration for net47 target framework to be a framework dependency instead of a nuget dependency - [#2122](https://github.com/fluentassertions/fluentassertions/pull/2122)
+
+## 6.9.0
+
+### What's new
+* Added `ThatAre[Not]ValueTypes` method for filtering the types - [#2083](https://github.com/fluentassertions/fluentassertions/pull/2083)
+* Added `Imply` method to `BooleanAssertions` - [#2074](https://github.com/fluentassertions/fluentassertions/pull/2074)
+* Added `ThatAre[Not]Interfaces` method for filtering the types - [#2057](https://github.com/fluentassertions/fluentassertions/pull/2057)
+* Added `ThatAre[Not]Abstract` method for filtering the types - [#2058](https://github.com/fluentassertions/fluentassertions/pull/2058)
+* Added `ThatAre[Not]Sealed` method for filtering the types - [#2059](https://github.com/fluentassertions/fluentassertions/pull/2059)
+* Added `ThatAre[Not]Abstract` methods to `MethodInfoSelector.cs` for filtering the methods - [#2060](https://github.com/fluentassertions/fluentassertions/pull/2060)
+* Added `ThatAre[Not]Abstract`, `ThatAre[Not]Static` and `ThatAre[Not]Virtual` properties for filtering in `PropertyInfoSelector.cs` - [#2054](https://github.com/fluentassertions/fluentassertions/pull/2054)
+* Added `BeOneOf` methods for object comparisons and `IComparable`s - [#2028](https://github.com/fluentassertions/fluentassertions/pull/2028)
+* Added `BeCloseTo` and `NotBeCloseTo` to `TimeOnly` - [#2030](https://github.com/fluentassertions/fluentassertions/pull/2030)
+* Added new extension methods to be able to write `Exactly.Times(n)`, `AtLeast.Times(n)` and `AtMost.Times(n)` in a more fluent way - [#2047](https://github.com/fluentassertions/fluentassertions/pull/2047)
+* Changed `BeEquivalentTo` to treat record structs like records, thus comparing them by member by default - [#2009](https://github.com/fluentassertions/fluentassertions/pull/2009)
+
+### Fixes
+* `PropertyInfoSelector.ThatArePublicOrInternal` now takes the setter into account when determining if a property is `public` or `internal` - [#2082](https://github.com/fluentassertions/fluentassertions/pull/2082)
+* Quering properties on classes, e.g. `typeof(MyClass).Properties()`, now also includes static properties - [#2054](https://github.com/fluentassertions/fluentassertions/pull/2054)
+* Nested AssertionScopes now print the inner scope reportables - [#2044](https://github.com/fluentassertions/fluentassertions/pull/2044)
+* Throw `ArgumentException` instead of `ArgumentNullException` when a required `string` argument is empty - [#2023](https://github.com/fluentassertions/fluentassertions/pull/2023)
+* Assertions on the ordering of a collection of `string`s now uses ordinal comparison when an `IComparer<T>` is not provided - [#2075](https://github.com/fluentassertions/fluentassertions/pull/2075)
+
+## 6.8.0
+
+### What's new
+* Added `ContainInConsecutiveOrder` and `NotContainInConsecutiveOrder` assertions to check if a collection contains items in a specific order and to be consecutive - [#1963](https://github.com/fluentassertions/fluentassertions/pull/1963)
+* Added `NotCompleteWithinAsync` for assertions on `Task` - [#1967](https://github.com/fluentassertions/fluentassertions/pull/1967)
+* Added `CompleteWithinAsync` and `NotCompleteWithinAsync` for non-generic `TaskCompletionSource` (.NET 6 and above) - [#1961](https://github.com/fluentassertions/fluentassertions/pull/1961)
+* Added a `ParentType` to `IObjectInfo` to help determining the parent in a call to `Using`/`When` constructs - [#1950](https://github.com/fluentassertions/fluentassertions/pull/1950)
+* Added a `Monitor` to `EventAssertions` to enable writing extension methods for event assertions. - [#2008](https://github.com/fluentassertions/fluentassertions/pull/2008)
+
+### Improvements
+* Updated exception messages to provide suggestions when incorrectly using `Equals()` - [#2006](https://github.com/fluentassertions/fluentassertions/pull/2006)
+* Included the time difference in the error message of `BeCloseTo` - [#2013](https://github.com/fluentassertions/fluentassertions/pull/2013)
+
+### Fixes
+* Fixed `For`/`Exclude` not excluding properties in objects in a collection - [#1953](https://github.com/fluentassertions/fluentassertions/pull/1953)
+* Changed `MatchEquivalentOf` to use `CultureInfo.InvariantCulture` instead of `CultureInfo.CurrentCulture` - [#1985](https://github.com/fluentassertions/fluentassertions/pull/1985).
+* Fixed `BeEquivalentTo` not taking into account any `record` equivalency settings coming from the `AssertionOptions` - [#1984](https://github.com/fluentassertions/fluentassertions/pull/1984)
+* Fixed `ExecutionTimeOf` formatting failing when the expression includes {} - [#1994](https://github.com/fluentassertions/fluentassertions/pull/1994)
+
+## 6.7.0
+
+### What's new
+* Added `BeDefined` and `NotBeDefined` to assert on existence of an enum value - [#1888](https://github.com/fluentassertions/fluentassertions/pull/1888)
+* Added the ability to exclude fields & properties marked as non-browsable in the code editor from structural equality comparisons - [#1807](https://github.com/fluentassertions/fluentassertions/pull/1807) & [#1812](https://github.com/fluentassertions/fluentassertions/pull/1812)
+* Assertions on the collection types in System.Data (`DataSet.Tables`, `DataTable.Columns`, `DataTable.Rows`) have been restored - [#1812](https://github.com/fluentassertions/fluentassertions/pull/1812)
+* Added `For`/`Exclude` to allow exclusion of members inside a collection - [#1782](https://github.com/fluentassertions/fluentassertions/pull/1782)
+* Added overload for `HaveElement` for `XDocument` and `XElement` to assert on number of XML nodes - [#1880](https://github.com/fluentassertions/fluentassertions/pull/1880)
+
+### Fixes
+* Fixed the failure message for regex matches (occurrence overload) to include the missing subject - [#1913](https://github.com/fluentassertions/fluentassertions/pull/1913)
+* Fixed `WithArgs` matching too many events when at least one argument matched the expected type - [#1920](https://github.com/fluentassertions/fluentassertions/pull/1920)
+
+## 6.6.0
 
 ### What's New
-* Adding `ThatAreStatic()` and `ThatAreNotStatic()` for filtering in method assertions - [#1740](https://github.com/fluentassertions/fluentassertions/pull/1740)
-* Adding new assertions for the `HttpStatusCode` of an `HttpResponseMessage` - [#1737](https://github.com/fluentassertions/fluentassertions/pull/1737)
-* Adding non-generic overloads for `WithInnerExceptionExactly` and `WithInnerException` - [#1769](https://github.com/fluentassertions/fluentassertions/pull/1769)
+* Annotated `[Not]MatchRegex(string)` with `[StringSyntax("Regex")]` which IDEs can use to colorize the regular expression argument - [#1816](https://github.com/fluentassertions/fluentassertions/pull/1816)
+* Added support for .NET6 `DateOnly` struct - [#1844](https://github.com/fluentassertions/fluentassertions/pull/1844)
+* Added support for .NET6 `TimeOnly` struct - [#1848](https://github.com/fluentassertions/fluentassertions/pull/1848)
+* Added `NotBe` for nullable boolean values - [#1865](https://github.com/fluentassertions/fluentassertions/pull/1865)
+* Added a new overload to `MatchRegex()` to assert on the number of regex matches - [#1869](https://github.com/fluentassertions/fluentassertions/pull/1869)
+* Added difference to numeric assertion failure messages - [#1859](https://github.com/fluentassertions/fluentassertions/pull/1859)
+
+### Fixes
+* `EnumAssertions.Be` did not determine the caller name - [#1835](https://github.com/fluentassertions/fluentassertions/pull/1835)
+* Ensure `ExcludingMissingMembers` doesn't undo usage of `WithMapping` in `BeEquivalentTo` - [#1838](https://github.com/fluentassertions/fluentassertions/pull/1838)
+* Better handling of NaN in various numeric assertions - [#1822](https://github.com/fluentassertions/fluentassertions/pull/1822) & [#1867](https://github.com/fluentassertions/fluentassertions/pull/1867)
+* `WithMapping` in `BeEquivalentTo` now also works when the root is a collection - [#1858](https://github.com/fluentassertions/fluentassertions/pull/1858)
+
+## 6.5.1
+
+### Fixes
+* Fixed regression introduced in 6.5.0 where `collection.Should().BeInAscendingOrder(x => x)` would fail - [#1802](https://github.com/fluentassertions/fluentassertions/pull/1802)
+
+## 6.5.0
+
+### What's New
+* Added `AllSatisfy` for asserting all items in a collection satisfy an inspector - [#1790](https://github.com/fluentassertions/fluentassertions/pull/1790)
+* Added `WithMapping` option to `BeEquivalentTo` to map members with different names between the subject and expectation - [#1742](https://github.com/fluentassertions/fluentassertions/pull/1742)
+
+### Fixes
+* Improved the documentation on `BeLowerCased` and `BeUpperCased` for strings with non-alphabetic characters - [#1792](https://github.com/fluentassertions/fluentassertions/pull/1792)
+* Caller identification does not handle all arguments using `new` - [#1794](https://github.com/fluentassertions/fluentassertions/pull/1794)
+* Resolved an issue preventing `HaveAccessModifier` from correctly recognizing internal interfaces and enums - [#1793](https://github.com/fluentassertions/fluentassertions/issues/1793)
+* Improved tracing for nested `AssertionScope`s - [#1797](https://github.com/fluentassertions/fluentassertions/pull/1797)
+
+### Fixes (Extensibility)
+* Fixed a continuation issue when using `ClearExpectation` - [#1791](https://github.com/fluentassertions/fluentassertions/pull/1791)
+
+## 6.4.0
+
+### What's New
+* Added `ThatAreStatic()` and `ThatAreNotStatic()` for filtering in method assertions - [#1740](https://github.com/fluentassertions/fluentassertions/pull/1740)
+* Added new assertions for the `HttpStatusCode` of an `HttpResponseMessage` - [#1737](https://github.com/fluentassertions/fluentassertions/pull/1737)
+* Added non-generic overloads for `WithInnerExceptionExactly` and `WithInnerException` - [#1769](https://github.com/fluentassertions/fluentassertions/pull/1769)
 
 ### Fixes
 * `ContainItemsAssignableTo` now expects at least one item assignable to `T` - [#1765](https://github.com/fluentassertions/fluentassertions/pull/1765)
 * Querying methods on classes, e.g. `typeof(MyController).Methods()`, now also includes static methods - [#1740](https://github.com/fluentassertions/fluentassertions/pull/1740)
 * Variable name is not captured after await assertion - [#1770](https://github.com/fluentassertions/fluentassertions/pull/1770)
+* `OccurredEvent` ordering on monitored object is now done via thread-safe counter - [#1773](https://github.com/fluentassertions/fluentassertions/pull/1773)
+* Avoid a `NullReferenceException` when testing an application compiled with .NET Native - [#1776](https://github.com/fluentassertions/fluentassertions/pull/1776)
+* `[Not]Contain(key, value)` for dictionary-like enumerables incorrectly checked if the key was present - [#1786](https://github.com/fluentassertions/fluentassertions/pull/1786)
+* Avoid throwing a `FormatException` when caller name determination returns an unformattable string - [#1788](https://github.com/fluentassertions/fluentassertions/pull/1788)
 
 ## 6.3.0
 
 ### What's New
-* Adding `ThatAreAsync()` and `ThatAreNotAsync()` for filtering in method assertions - [#1725](https://github.com/fluentassertions/fluentassertions/pull/1725)
-* Adding `ThatAreVirtual()` and `ThatAreNotVirtual()` for filtering in method assertions - [#1744](https://github.com/fluentassertions/fluentassertions/pull/1744)
-* Adding collection content to assertion messages for `HaveCountGreaterThan()`, `HaveCountGreaterThanOrEqualTo()`, `HaveCountLessThan()` and `HaveCountLessThanOrEqualTo()` - [#1760](https://github.com/fluentassertions/fluentassertions/pull/1760)
+* Added `ThatAreAsync()` and `ThatAreNotAsync()` for filtering in method assertions - [#1725](https://github.com/fluentassertions/fluentassertions/pull/1725)
+* Added `ThatAreVirtual()` and `ThatAreNotVirtual()` for filtering in method assertions - [#1744](https://github.com/fluentassertions/fluentassertions/pull/1744)
+* Added collection content to assertion messages for `HaveCountGreaterThan()`, `HaveCountGreaterThanOrEqualTo()`, `HaveCountLessThan()` and `HaveCountLessThanOrEqualTo()` - [#1760](https://github.com/fluentassertions/fluentassertions/pull/1760)
 
 ### Fixes
 * Prevent multiple enumeration of `IEnumerable`s in parameter-less `ContainSingle()` - [#1753](https://github.com/fluentassertions/fluentassertions/pull/1753)
-* Change `HaveCount()` assertion message order to state expected and actual collection count before dumping its content` - [#1760](https://github.com/fluentassertions/fluentassertions/pull/1760)
+* Changed `HaveCount()` assertion message order to state expected and actual collection count before dumping its content` - [#1760](https://github.com/fluentassertions/fluentassertions/pull/1760)
 * `CompleteWithinAsync` did not take initial sync computation into account when measuring execution time - [1762](https://github.com/fluentassertions/fluentassertions/pull/1762).
 
 ## 6.2.0
 
 ### What's New
 
-* Adding new overloads to all `GreaterOrEqualTo` and `LessOrEqualTo` assertions, adding the word `Than` - [#1673](https://github.com/fluentassertions/fluentassertions/pull/1673)
+* Added new overloads to all `GreaterOrEqualTo` and `LessOrEqualTo` assertions, adding the word `Than` - [#1673](https://github.com/fluentassertions/fluentassertions/pull/1673)
 * `BeAsync()` and `NotBeAsync()` are now also available on `MethodInfoSelectorAssertions` - [#1700](https://github.com/fluentassertions/fluentassertions/pull/1700)
 
 ### Fixes
@@ -120,7 +297,7 @@ sidebar:
 
 ### Fixes
 
-* Reported actual value when it contained `{{{{` or `}}}}` - [#1234](https://github.com/fluentassertions/fluentassertions/pull/1234).
+* Reported actual value when it contained {% raw %}`{{{{` or `}}}}`{% endraw %} - [#1234](https://github.com/fluentassertions/fluentassertions/pull/1234).
 * Changed dictionary assertion `NotContainKeys` to honour the key comparer if applicable - [#1233](https://github.com/fluentassertions/fluentassertions/pull/1233).
 * Ensures that date time assertions like "a is less than an hour after b" don't succeed when `a - b == -30.Minutes()` [#1313](https://github.com/fluentassertions/fluentassertions/pull/1313).
 * Event raising assertions like `WithSender` and `WithArgs` will only return the events that match the constraints - [#1321](https://github.com/fluentassertions/fluentassertions/pull/1321)
@@ -324,7 +501,7 @@ Kudos to [conklinb](https://github.com/conklinb) and [Amaury Levé](https://gith
 * `BeOfType` does not attach to the `AssertionScope` correctly - [#1002](https://github.com/fluentassertions/fluentassertions/pull/1002)
 * Event monitoring did not detect events on interfaces - [#821](https://github.com/fluentassertions/fluentassertions/pull/821)
 * Fix continuation on `NotThrow(After)` in chained `AssertionScope` invocations - [#1031](https://github.com/fluentassertions/fluentassertions/pull/1031)
-* Allow nesting equivalency checks in custom assertion rules when using `BeEquivalentTo` - [#1031](https://github.com/fluentassertions/fluentassertions/pull/1031)
+* Allow nesting equivalency checks in custom assertion rules when using `BeEquivalentTo` - [#1033](https://github.com/fluentassertions/fluentassertions/pull/1033)
 * Removed redundant use of the thread pool in async assertions - [#1020](https://github.com/fluentassertions/fluentassertions/pull/1020)
 * Improved formatting of multidimensional arrays - [#1044](https://github.com/fluentassertions/fluentassertions/pull/1044)
 * Better handling of exceptions wrapped in `AggregateException`s - [#1041](https://github.com/fluentassertions/fluentassertions/pull/1041)

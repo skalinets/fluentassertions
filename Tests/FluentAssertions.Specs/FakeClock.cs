@@ -2,46 +2,57 @@
 using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions.Common;
+#if NET8_0_OR_GREATER
+using ITimer = FluentAssertions.Common.ITimer;
+#endif
 
-namespace FluentAssertions.Specs
+namespace FluentAssertions.Specs;
+
+/// <summary>
+/// Implementation of <see cref="IClock"/> for testing purposes only.
+/// </summary>
+/// <remarks>
+/// It allows you to control the "current" date and time for test purposes.
+/// </remarks>
+internal class FakeClock : IClock
 {
-    /// <summary>
-    /// Implementation of <see cref="IClock"/> for testing purposes only.
-    /// </summary>
-    /// <remarks>
-    /// It allows you to control the "current" time.
-    /// </remarks>
-    internal class FakeClock : IClock
+    private readonly TaskCompletionSource<bool> delayTask = new();
+
+    private TimeSpan elapsedTime = TimeSpan.Zero;
+
+    Task IClock.DelayAsync(TimeSpan delay, CancellationToken cancellationToken)
     {
-        private readonly TaskCompletionSource<bool> delayTask = new();
+        elapsedTime += delay;
+        return delayTask.Task;
+    }
 
-        private TimeSpan elapsedTime = TimeSpan.Zero;
+    public ITimer StartTimer() => new TestTimer(() => elapsedTime);
 
-        Task IClock.DelayAsync(TimeSpan delay, CancellationToken cancellationToken)
-        {
-            elapsedTime += delay;
-            return delayTask.Task;
-        }
+    /// <summary>
+    /// Advances the internal clock.
+    /// </summary>
+    public void Delay(TimeSpan timeToDelay)
+    {
+        elapsedTime += timeToDelay;
+    }
 
-        public ITimer StartTimer() => new TestTimer(() => elapsedTime);
+    /// <summary>
+    /// Simulates the completion of the pending delay task.
+    /// </summary>
+    public void Complete()
+    {
+        // the value is not relevant
+        delayTask.SetResult(true);
+    }
 
-        public void Delay(TimeSpan timeToDelay)
-        {
-            elapsedTime += timeToDelay;
-        }
+    /// <summary>
+    /// Simulates the completion of the pending delay task after the internal clock has been advanced.
+    /// </summary>
+    public void CompleteAfter(TimeSpan timeSpan)
+    {
+        Delay(timeSpan);
 
-        public void Complete()
-        {
-            // the value is not relevant
-            delayTask.SetResult(true);
-        }
-
-        public void CompleteAfter(TimeSpan timeSpan)
-        {
-            Delay(timeSpan);
-
-            // the value is not relevant
-            delayTask.SetResult(true);
-        }
+        // the value is not relevant
+        delayTask.SetResult(true);
     }
 }

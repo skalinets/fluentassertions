@@ -2,15 +2,15 @@
 using Xunit;
 using Xunit.Sdk;
 
-namespace FluentAssertions.Specs.Types
-{
-    /// <content>
-    /// The [Not]Implement specs.
-    /// </content>
-    public partial class TypeAssertionSpecs
-    {
-        #region Implement
+namespace FluentAssertions.Specs.Types;
 
+/// <content>
+/// The [Not]Implement specs.
+/// </content>
+public partial class TypeAssertionSpecs
+{
+    public class Implement
+    {
         [Fact]
         public void When_asserting_a_type_implements_an_interface_which_it_does_then_it_succeeds()
         {
@@ -74,10 +74,23 @@ namespace FluentAssertions.Specs.Types
                 .WithParameterName("interfaceType");
         }
 
-        #endregion
+        [Fact]
+        public void An_interface_does_not_implement_itself()
+        {
+            // Arrange
+            var type = typeof(IDummyInterface);
 
-        #region ImplementOfT
+            // Act
+            Action act = () =>
+                type.Should().Implement(typeof(IDummyInterface));
 
+            // Assert
+            act.Should().Throw<XunitException>();
+        }
+    }
+
+    public class ImplementOfT
+    {
         [Fact]
         public void When_asserting_a_type_implementsOfT_an_interface_which_it_does_then_it_succeeds()
         {
@@ -91,11 +104,10 @@ namespace FluentAssertions.Specs.Types
             // Assert
             act.Should().NotThrow();
         }
+    }
 
-        #endregion
-
-        #region NotImplement
-
+    public class NotImplement
+    {
         [Fact]
         public void When_asserting_a_type_does_not_implement_an_interface_which_it_does_not_then_it_succeeds()
         {
@@ -159,10 +171,19 @@ namespace FluentAssertions.Specs.Types
                 .WithParameterName("interfaceType");
         }
 
-        #endregion
+        [Fact]
+        public void An_interface_does_not_implement_itself()
+        {
+            // Arrange
+            var type = typeof(IDummyInterface);
 
-        #region NotImplementOfT
+            // Act / Assert
+            type.Should().NotImplement(typeof(IDummyInterface));
+        }
+    }
 
+    public class NotImplementOfT
+    {
         [Fact]
         public void When_asserting_a_type_does_not_implementOfT_an_interface_which_it_does_not_then_it_succeeds()
         {
@@ -176,7 +197,5 @@ namespace FluentAssertions.Specs.Types
             // Assert
             act.Should().NotThrow();
         }
-
-        #endregion
     }
 }

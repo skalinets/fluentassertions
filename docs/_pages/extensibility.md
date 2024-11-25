@@ -36,6 +36,7 @@ public class DirectoryInfoAssertions :
 
     protected override string Identifier => "directory";
 
+    [CustomAssertion]
     public AndConstraint<DirectoryInfoAssertions> ContainFile(
         string filename, string because = "", params object[] becauseArgs)
     {
@@ -57,6 +58,7 @@ public class DirectoryInfoAssertions :
 This is quite an elaborate example which shows some of the more advanced extensibility features. Let me highlight some things:
 
 * The `Subject` property is used to give the base-class extensions access to the current `DirectoryInfo` object.
+* `[CustomAssertion]` attribute enables correct subject identification, allowing Fluent Assertions to render more meaningful test fail messages
 * `Execute.Assertion` is the point of entrance into the internal fluent assertion API.
 * The optional `because` parameter can contain `string.Format` style place holders which will be filled using the values provided to the `becauseArgs`. They can be used by the caller to provide a reason why the assertion should succeed. By passing those into the `BecauseOf` method, you can refer to the expanded result using the `{reason}` tag in the `FailWith` method.
 * The `Then` property is just there to chain multiple assertions together. You can have more than one.
@@ -104,11 +106,11 @@ void Format(object value, FormattedObjectGraph formattedGraph, FormattingContext
 
 Next to the actual value that needs rendering, this method accepts a couple of parameters worth mentioning.
 
-* `formattedGraph` is the object that collects the textual representation of the entire graph. It supports adding fragments of text, full lines and deals with automatic identation using its `WithIndentation` method. It also protects the performance of the rendering by throwing a `MaxLinesExceededException` when the textual representation has exceeded the configured maximum.  
+* `formattedGraph` is the object that collects the textual representation of the entire graph. It supports adding fragments of text, full lines and deals with automatic indentation using its `WithIndentation` method. It also protects the performance of the rendering by throwing a `MaxLinesExceededException` when the textual representation has exceeded the configured maximum.  
 * `context.UseLineBreaks` denotes that the value should be prefixed by a newline. It is used by some assertion code to force displaying the various elements of the failure message on a separate line.
 * `formatChild` is used when rendering a complex object that would involve multiple, potentially recursive, nested calls through `Formatter`.
 
-This is what an implementation for the DirectoryInfo would look like.
+This is what an implementation for the `DirectoryInfo` would look like.
 
 ```csharp
 public class DirectoryInfoValueFormatter : IValueFormatter
@@ -253,3 +255,78 @@ Notice the override of `ToString`. The output of that is included in the message
 Another interface, `IMemberMatchingRule`, is used to map a member of the subject to the member of the expectation object with which it should be compared with. It's not something you likely need to implement, but if you do, checkout the built-in implementations `MustMatchByNameRule` and `TryMatchByNameRule`. It receives a `IMember` of the subject's property, the expectation to which you need to map a property, the dotted path to it and the configuration object uses everywhere.
 
 The final interface, the `IOrderingRule`, is used to determine whether FA should be strict about the order of items in collections. The `ByteArrayOrderingRule` is the one used by default, will ensure that FA isn't strict about the order, unless it involves a `byte[]`. The reason behind that is when ordering is treated as irrelevant, FA needs to compare every item in the one collection with every item in the other collection. Each of these comparisons might involve a recursive and nested comparison on the object graph represented by the item. This proved to cause a performance issue with large byte arrays. So I figured that byte arrays are generally used for raw data where ordering is important.
+
+## Thread Safety
+
+The classes `AssertionOptions` and `Formatter` control the global configuration by having static state, so one must be careful when they are mutated. 
+They are both designed to be configured from a single setup point in your test project and not from within individual unit tests. 
+Not following this could change the outcome of tests depending on the order they are run in or throw unexpected exceptions when run parallel.
+
+In order to ensure they are configured exactly once, a test framework specific solution might be required depending on the version of .NET you are using.
+
+### .NET 5+
+
+.NET 5 introduced the [`ModuleInitializerAttribute`](https://docs.microsoft.com/en-us/dotnet/api/system.runtime.compilerservices.moduleinitializerattribute) which can be used to setup the defaults _exactly_ once before any tests are run.
+
+```csharp
+internal static class Initializer
+{
+    [ModuleInitializer]
+    public static void SetDefaults()
+    {
+        AssertionOptions.AssertEquivalencyUsing(
+            options => { <configure here> });
+    }
+}
+```
+
+### MSTest
+
+MSTest provides the `AssemblyInitializeAttribute` to annotate that a method in a `TestClass` should be run once per assembly.
+
+```csharp
+[TestClass]
+public static class TestInitializer
+{
+    [AssemblyInitialize]
+    public static void SetDefaults(TestContext context)
+    {
+        AssertionOptions.AssertEquivalencyUsing(
+            options => { <configure here> });
+    }
+}
+```
+
+### xUnit.net
+
+Create a custom [xUnit.net test framework](https://xunit.net/docs/running-tests-in-parallel#runners-and-test-frameworks) where you configure equivalency assertions.
+This class can be shared between multiple test projects using assembly references.
+
+```csharp
+namespace MyNamespace
+{
+    using Xunit.Abstractions;
+    using Xunit.Sdk;
+
+    public class MyFramework: XunitTestFramework
+    {
+        public MyFramework(IMessageSink messageSink)
+            : base(messageSink)
+        {
+            AssertionOptions.AssertEquivalencyUsing(
+                options => { <configure here> });
+        }
+    }
+}
+```
+
+Add the assembly level attribute so that xUnit.net picks up your custom test framework. This is required for *every* test assembly that should use your custom test framework.
+
+```csharp
+[assembly: Xunit.TestFramework("MyNamespace.MyFramework", "MyAssembly.Facts")]
+```
+
+Note:
+
+* The `nameof` operator cannot be used to reference the `MyFramework` class. If your global configuration doesn't work, ensure there is no typo in the assembly level attribute declaration and that the assembly containing the `MyFramework` class is referenced by the test assembly and gets copied to the output folder.
+* Because you have to add the assembly level attribute per assembly you can define different `AssertionOptions` per test assembly if required.

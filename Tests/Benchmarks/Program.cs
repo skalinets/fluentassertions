@@ -1,28 +1,29 @@
-﻿using BenchmarkDotNet.Columns;
+﻿using System.Globalization;
 using BenchmarkDotNet.Configs;
 using BenchmarkDotNet.Exporters.Csv;
 using BenchmarkDotNet.Reports;
 using BenchmarkDotNet.Running;
+using Perfolizer.Horology;
+using Perfolizer.Metrology;
 
-namespace Benchmarks
+namespace Benchmarks;
+
+internal static class Program
 {
-    internal static class Program
+    public static void Main()
     {
-        public static void Main()
-        {
-            var exporter = new CsvExporter(
-                CsvSeparator.CurrentCulture,
-                new SummaryStyle(
-                    cultureInfo: System.Globalization.CultureInfo.GetCultureInfo("nl-NL"),
-                    printUnitsInHeader: true,
-                    printUnitsInContent: false,
-                    timeUnit: Perfolizer.Horology.TimeUnit.Microsecond,
-                    sizeUnit: SizeUnit.KB
-                ));
+        var exporter = new CsvExporter(
+            CsvSeparator.CurrentCulture,
+            new SummaryStyle(
+                cultureInfo: CultureInfo.GetCultureInfo("nl-NL"),
+                printUnitsInHeader: true,
+                sizeUnit: SizeUnit.KB,
+                timeUnit: TimeUnit.Microsecond,
+                printUnitsInContent: false
+            ));
 
-            var config = ManualConfig.CreateMinimumViable().AddExporter(exporter);
+        var config = ManualConfig.CreateMinimumViable().AddExporter(exporter);
 
-            _ = BenchmarkRunner.Run<BeEquivalentToWithDeeplyNestedStructures>(config);
-        }
+        _ = BenchmarkRunner.Run<CheckIfMemberIsBrowsableBenchmarks>(config);
     }
 }

@@ -2,15 +2,15 @@
 using Xunit;
 using Xunit.Sdk;
 
-namespace FluentAssertions.Specs.Types
-{
-    /// <content>
-    /// The [Not]BeStatic specs.
-    /// </content>
-    public partial class TypeAssertionSpecs
-    {
-        #region BeStatic
+namespace FluentAssertions.Specs.Types;
 
+/// <content>
+/// The [Not]BeStatic specs.
+/// </content>
+public partial class TypeAssertionSpecs
+{
+    public class BeStatic
+    {
         [Fact]
         public void When_type_is_static_it_succeeds()
         {
@@ -74,11 +74,10 @@ namespace FluentAssertions.Specs.Types
             act.Should().Throw<XunitException>()
                 .WithMessage("Expected type to be static *failure message*, but type is <null>.");
         }
+    }
 
-        #endregion
-
-        #region NotBeStatic
-
+    public class NotBeStatic
+    {
         [Theory]
         [InlineData(typeof(ClassWithoutMembers))]
         [InlineData(typeof(Sealed))]
@@ -145,7 +144,5 @@ namespace FluentAssertions.Specs.Types
             act.Should().Throw<XunitException>()
                 .WithMessage("Expected type not to be static *failure message*, but type is <null>.");
         }
-
-        #endregion
     }
 }

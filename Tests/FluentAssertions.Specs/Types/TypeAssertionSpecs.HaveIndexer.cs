@@ -1,18 +1,17 @@
 ﻿using System;
 using FluentAssertions.Common;
-using FluentAssertions.Specs.Equivalency;
 using Xunit;
 using Xunit.Sdk;
 
-namespace FluentAssertions.Specs.Types
-{
-    /// <content>
-    /// The [Not]HaveIndexer specs.
-    /// </content>
-    public partial class TypeAssertionSpecs
-    {
-        #region HaveIndexer
+namespace FluentAssertions.Specs.Types;
 
+/// <content>
+/// The [Not]HaveIndexer specs.
+/// </content>
+public partial class TypeAssertionSpecs
+{
+    public class HaveIndexer
+    {
         [Fact]
         public void When_asserting_a_type_has_an_indexer_which_it_does_then_it_succeeds()
         {
@@ -24,8 +23,8 @@ namespace FluentAssertions.Specs.Types
                 type.Should()
                     .HaveIndexer(typeof(string), new[] { typeof(string) })
                     .Which.Should()
-                        .BeWritable(CSharpAccessModifier.Internal)
-                        .And.BeReadable(CSharpAccessModifier.Private);
+                    .BeWritable(CSharpAccessModifier.Internal)
+                    .And.BeReadable(CSharpAccessModifier.Private);
 
             // Assert
             act.Should().NotThrow();
@@ -45,7 +44,7 @@ namespace FluentAssertions.Specs.Types
             // Assert
             act.Should().Throw<XunitException>()
                 .WithMessage(
-                    "Expected String *.ClassWithNoMembers[System.Int32, System.Type] to exist *failure message*" +
+                    "Expected String *ClassWithNoMembers[System.Int32, System.Type] to exist *failure message*" +
                     ", but it does not.");
         }
 
@@ -110,11 +109,10 @@ namespace FluentAssertions.Specs.Types
             act.Should().ThrowExactly<ArgumentNullException>()
                 .WithParameterName("parameterTypes");
         }
+    }
 
-        #endregion
-
-        #region NotHaveIndexer
-
+    public class NotHaveIndexer
+    {
         [Fact]
         public void When_asserting_a_type_does_not_have_an_indexer_which_it_does_not_it_succeeds()
         {
@@ -173,7 +171,5 @@ namespace FluentAssertions.Specs.Types
             act.Should().ThrowExactly<ArgumentNullException>()
                 .WithParameterName("parameterTypes");
         }
-
-        #endregion
     }
 }

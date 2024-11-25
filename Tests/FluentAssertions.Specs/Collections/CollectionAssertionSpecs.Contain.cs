@@ -4,15 +4,15 @@ using FluentAssertions.Execution;
 using Xunit;
 using Xunit.Sdk;
 
-namespace FluentAssertions.Specs.Collections
-{
-    /// <content>
-    /// The [Not]Contain specs.
-    /// </content>
-    public partial class CollectionAssertionSpecs
-    {
-        #region Contain
+namespace FluentAssertions.Specs.Collections;
 
+/// <content>
+/// The [Not]Contain specs.
+/// </content>
+public partial class CollectionAssertionSpecs
+{
+    public class Contain
+    {
         [Fact]
         public void Should_succeed_when_asserting_collection_contains_an_item_from_the_collection()
         {
@@ -77,6 +77,39 @@ namespace FluentAssertions.Specs.Collections
             // Assert
             act.Should().Throw<XunitException>().WithMessage(
                 "Expected collection {1, 2, 3} to contain {3, 4, 5} because we do, but could not find {4, 5}.");
+        }
+
+        [Fact]
+        public void When_a_collection_does_not_contain_a_single_element_collection_it_should_throw_with_clear_explanation()
+        {
+            // Arrange
+            var collection = new[] { 1, 2, 3 };
+
+            // Act
+            Action act = () => collection.Should().Contain(new[] { 4 }, "because {0}", "we do");
+
+            // Assert
+            act.Should().Throw<XunitException>().WithMessage(
+                "Expected collection {1, 2, 3} to contain 4 because we do.");
+        }
+
+        [Fact]
+        public void
+            When_a_collection_does_not_contain_other_collection_with_assertion_scope_it_should_throw_with_clear_explanation()
+        {
+            // Arrange
+            var collection = new[] { 1, 2, 3 };
+
+            // Act
+            Action act = () =>
+            {
+                using var _ = new AssertionScope();
+                collection.Should().Contain(new[] { 4 }).And.Contain(new[] { 5, 6 });
+            };
+
+            // Assert
+            act.Should().Throw<XunitException>().WithMessage(
+                "*to contain 4*to contain {5, 6}*");
         }
 
         [Fact]
@@ -237,11 +270,10 @@ namespace FluentAssertions.Specs.Collections
             act.Should().Throw<XunitException>().WithMessage(
                 "Expected strings to contain (x == \"xxx\") because we're checking how it reacts to a null subject, but found <null>.");
         }
+    }
 
-        #endregion
-
-        #region Not Contain
-
+    public class NotContain
+    {
         [Fact]
         public void Should_succeed_when_asserting_collection_does_not_contain_an_item_that_is_not_in_the_collection()
         {
@@ -333,6 +365,21 @@ namespace FluentAssertions.Specs.Collections
         }
 
         [Fact]
+        public void When_collection_contains_unexpected_item_it_should_throw()
+        {
+            // Arrange
+            var collection = new[] { 1, 2, 3 };
+
+            // Act
+            Action act = () => collection.Should()
+                .NotContain(new[] { 2 }, "because we {0} like them", "don't");
+
+            // Assert
+            act.Should().Throw<XunitException>().WithMessage(
+                "Expected collection {1, 2, 3} to not contain 2 because we don't like them.");
+        }
+
+        [Fact]
         public void When_collection_contains_unexpected_items_it_should_throw()
         {
             // Arrange
@@ -345,6 +392,37 @@ namespace FluentAssertions.Specs.Collections
             // Assert
             act.Should().Throw<XunitException>().WithMessage(
                 "Expected collection {1, 2, 3} to not contain {1, 2, 4} because we don't like them, but found {1, 2}.");
+        }
+
+        [Fact]
+        public void When_asserting_multiple_collection_in_assertion_scope_all_should_be_reported()
+        {
+            // Arrange
+            var collection = new[] { 1, 2, 3 };
+
+            // Act
+            Action act = () =>
+            {
+                using var _ = new AssertionScope();
+                collection.Should().NotContain(new[] { 1, 2 }).And.NotContain(new[] { 3 });
+            };
+
+            // Assert
+            act.Should().Throw<XunitException>().WithMessage(
+                "*to not contain {1, 2}*to not contain 3*");
+        }
+
+        [Fact]
+        public void When_asserting_collection_to_not_contain_an_empty_collection_it_should_throw()
+        {
+            // Arrange
+            var collection = new[] { 1, 2, 3 };
+
+            // Act
+            Action act = () => collection.Should().NotContain(Array.Empty<int>());
+
+            // Assert
+            act.Should().Throw<ArgumentException>().WithMessage("Cannot verify*");
         }
 
         [Fact]
@@ -384,7 +462,8 @@ namespace FluentAssertions.Specs.Collections
         }
 
         [Fact]
-        public void When_asserting_collection_doesnt_contain_values_according_to_predicate_but_collection_is_null_it_should_throw()
+        public void
+            When_asserting_collection_doesnt_contain_values_according_to_predicate_but_collection_is_null_it_should_throw()
         {
             // Arrange
             const IEnumerable<string> strings = null;
@@ -425,7 +504,5 @@ namespace FluentAssertions.Specs.Collections
             act.Should().Throw<XunitException>().WithMessage(
                 "Expected collection*to not contain 2.");
         }
-
-        #endregion
     }
 }

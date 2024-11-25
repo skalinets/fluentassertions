@@ -1,21 +1,25 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Runtime.Serialization;
 using System.Xml;
 using System.Xml.Schema;
 using System.Xml.Serialization;
+using AssemblyA;
+using AssemblyB;
 using FluentAssertions.Execution;
 using FluentAssertions.Extensions;
 using FluentAssertions.Primitives;
+using JetBrains.Annotations;
 using Xunit;
 using Xunit.Sdk;
 
-namespace FluentAssertions.Specs.Primitives
-{
-    public class ObjectAssertionSpecs
-    {
-        #region Be / NotBe
+namespace FluentAssertions.Specs.Primitives;
 
+public class ObjectAssertionSpecs
+{
+    public class Be
+    {
         [Fact]
         public void When_two_equal_object_are_expected_to_be_equal_it_should_not_fail()
         {
@@ -85,6 +89,109 @@ namespace FluentAssertions.Specs.Primitives
         }
 
         [Fact]
+        public void When_comparing_a_numeric_and_an_enum_for_equality_it_should_throw()
+        {
+            // Arrange
+            object subject = 1;
+            MyEnum expected = MyEnum.One;
+
+            // Act
+            Action act = () => subject.Should().Be(expected);
+
+            // Assert
+            act.Should().Throw<XunitException>();
+        }
+
+        [Fact]
+        public void An_untyped_value_is_equal_to_another_according_to_a_comparer()
+        {
+            // Arrange
+            object value = new SomeClass(5);
+
+            // Act / Assert
+            value.Should().Be(new SomeClass(5), new SomeClassEqualityComparer());
+        }
+
+        [Fact]
+        public void A_typed_value_is_equal_to_another_according_to_a_comparer()
+        {
+            // Arrange
+            var value = new SomeClass(5);
+
+            // Act / Assert
+            value.Should().Be(new SomeClass(5), new SomeClassEqualityComparer());
+        }
+
+        [Fact]
+        public void An_untyped_value_is_not_equal_to_another_according_to_a_comparer()
+        {
+            // Arrange
+            object value = new SomeClass(3);
+
+            // Act
+            Action act = () => value.Should().Be(new SomeClass(4), new SomeClassEqualityComparer(), "I said so");
+
+            // Assert
+            act.Should().Throw<XunitException>().WithMessage("Expected value to be SomeClass(4)*I said so*found SomeClass(3).");
+        }
+
+        [Fact]
+        public void A_typed_value_is_not_equal_to_another_according_to_a_comparer()
+        {
+            // Arrange
+            var value = new SomeClass(3);
+
+            // Act
+            Action act = () => value.Should().Be(new SomeClass(4), new SomeClassEqualityComparer(), "I said so");
+
+            // Assert
+            act.Should().Throw<XunitException>().WithMessage("Expected value to be SomeClass(4)*I said so*found SomeClass(3).");
+        }
+
+        [Fact]
+        public void A_typed_value_is_not_of_the_same_type()
+        {
+            // Arrange
+            var value = new ClassWithCustomEqualMethod(3);
+
+            // Act
+            Action act = () => value.Should().Be(new SomeClass(3), new SomeClassEqualityComparer(), "I said so");
+
+            // Assert
+            act.Should().Throw<XunitException>()
+                .WithMessage("Expected value to be SomeClass(3)*I said so*found ClassWithCustomEqualMethod(3).");
+        }
+
+        [Fact]
+        public void A_untyped_value_requires_a_comparer()
+        {
+            // Arrange
+            object value = new SomeClass(3);
+
+            // Act
+            Action act = () => value.Should().Be(new SomeClass(3), comparer: null);
+
+            // Assert
+            act.Should().Throw<ArgumentNullException>().WithParameterName("comparer");
+        }
+
+        [Fact]
+        public void A_typed_value_requires_a_comparer()
+        {
+            // Arrange
+            var value = new SomeClass(3);
+
+            // Act
+            Action act = () => value.Should().Be(new SomeClass(3), comparer: null);
+
+            // Assert
+            act.Should().Throw<ArgumentNullException>().WithParameterName("comparer");
+        }
+    }
+
+    public class NotBe
+    {
+        [Fact]
         public void When_non_equal_objects_are_expected_to_be_not_equal_it_should_not_fail()
         {
             // Arrange
@@ -129,29 +236,289 @@ namespace FluentAssertions.Specs.Primitives
         }
 
         [Fact]
-        public void When_comparing_a_numeric_and_an_enum_for_equality_it_should_throw()
+        public void An_untyped_value_is_not_equal_to_another_according_to_a_comparer()
         {
             // Arrange
-            object subject = 1;
-            MyEnum expected = MyEnum.One;
+            object value = new SomeClass(5);
+
+            // Act / Assert
+            value.Should().NotBe(new SomeClass(4), new SomeClassEqualityComparer());
+        }
+
+        [Fact]
+        public void A_typed_value_is_not_equal_to_another_according_to_a_comparer()
+        {
+            // Arrange
+            var value = new SomeClass(5);
+
+            // Act / Assert
+            value.Should().NotBe(new SomeClass(4), new SomeClassEqualityComparer());
+        }
+
+        [Fact]
+        public void An_untyped_value_is_equal_to_another_according_to_a_comparer()
+        {
+            // Arrange
+            object value = new SomeClass(3);
 
             // Act
-            Action act = () => subject.Should().Be(expected);
+            Action act = () => value.Should().NotBe(new SomeClass(3), new SomeClassEqualityComparer(), "I said so");
+
+            // Assert
+            act.Should().Throw<XunitException>().WithMessage("Did not expect value to be equal to SomeClass(3)*I said so*");
+        }
+
+        [Fact]
+        public void A_typed_value_is_equal_to_another_according_to_a_comparer()
+        {
+            // Arrange
+            var value = new SomeClass(3);
+
+            // Act
+            Action act = () => value.Should().NotBe(new SomeClass(3), new SomeClassEqualityComparer(), "I said so");
+
+            // Assert
+            act.Should().Throw<XunitException>().WithMessage("Did not expect value to be equal to SomeClass(3)*I said so*");
+        }
+
+        [Fact]
+        public void A_typed_value_is_not_of_the_same_type()
+        {
+            // Arrange
+            var value = new ClassWithCustomEqualMethod(3);
+
+            // Act / Assert
+            value.Should().NotBe(new SomeClass(3), new SomeClassEqualityComparer(), "I said so");
+        }
+
+        [Fact]
+        public void An_untyped_value_requires_a_comparer()
+        {
+            // Arrange
+            object value = new SomeClass(3);
+
+            // Act
+            Action act = () => value.Should().NotBe(new SomeClass(3), comparer: null);
+
+            // Assert
+            act.Should().Throw<ArgumentNullException>().WithParameterName("comparer");
+        }
+
+        [Fact]
+        public void A_typed_value_requires_a_comparer()
+        {
+            // Arrange
+            var value = new SomeClass(3);
+
+            // Act
+            Action act = () => value.Should().NotBe(new SomeClass(3), comparer: null);
+
+            // Assert
+            act.Should().Throw<ArgumentNullException>().WithParameterName("comparer");
+        }
+    }
+
+    public class BeOneOf
+    {
+        [Fact]
+        public void When_a_value_is_not_one_of_the_specified_values_it_should_throw()
+        {
+            // Arrange
+            var value = new ClassWithCustomEqualMethod(3);
+
+            // Act
+            Action act = () => value.Should().BeOneOf(new ClassWithCustomEqualMethod(4), new ClassWithCustomEqualMethod(5));
+
+            // Assert
+            act
+                .Should().Throw<XunitException>()
+                .WithMessage(
+                    "Expected value to be one of {ClassWithCustomEqualMethod(4), ClassWithCustomEqualMethod(5)}, but found ClassWithCustomEqualMethod(3).");
+        }
+
+        [Fact]
+        public void When_a_value_is_not_one_of_the_specified_values_it_should_throw_with_descriptive_message()
+        {
+            // Arrange
+            var value = new ClassWithCustomEqualMethod(3);
+
+            // Act
+            Action act = () =>
+                value.Should().BeOneOf(new[] { new ClassWithCustomEqualMethod(4), new ClassWithCustomEqualMethod(5) },
+                    "because those are the valid values");
+
+            // Assert
+            act
+                .Should().Throw<XunitException>()
+                .WithMessage(
+                    "Expected value to be one of {ClassWithCustomEqualMethod(4), ClassWithCustomEqualMethod(5)} because those are the valid values, but found ClassWithCustomEqualMethod(3).");
+        }
+
+        [Fact]
+        public void When_a_value_is_one_of_the_specified_values_it_should_succeed()
+        {
+            // Arrange
+            var value = new ClassWithCustomEqualMethod(4);
+
+            // Act
+            Action act = () => value.Should().BeOneOf(new ClassWithCustomEqualMethod(4), new ClassWithCustomEqualMethod(5));
+
+            // Assert
+            act.Should().NotThrow();
+        }
+
+        [Fact]
+        public void An_untyped_value_is_one_of_the_specified_values()
+        {
+            // Arrange
+            object value = new SomeClass(5);
+
+            // Act / Assert
+            value.Should().BeOneOf(new[] { new SomeClass(4), new SomeClass(5) }, new SomeClassEqualityComparer());
+        }
+
+        [Fact]
+        public void A_typed_value_is_one_of_the_specified_values()
+        {
+            // Arrange
+            var value = new SomeClass(5);
+
+            // Act / Assert
+            value.Should().BeOneOf(new[] { new SomeClass(4), new SomeClass(5) }, new SomeClassEqualityComparer());
+        }
+
+        [Fact]
+        public void An_untyped_value_is_not_one_of_the_specified_values()
+        {
+            // Arrange
+            object value = new SomeClass(3);
+
+            // Act
+            Action act = () => value.Should().BeOneOf(new[] { new SomeClass(4), new SomeClass(5) },
+                new SomeClassEqualityComparer(), "I said so");
+
+            // Assert
+            act.Should().Throw<XunitException>()
+               .WithMessage("Expected value to be one of {SomeClass(4), SomeClass(5)}*I said so*SomeClass(3).");
+        }
+
+        [Fact]
+        public void An_untyped_value_is_not_one_of_no_values()
+        {
+            // Arrange
+            object value = new SomeClass(3);
+
+            // Act
+            Action act = () => value.Should().BeOneOf(Array.Empty<SomeClass>(), new SomeClassEqualityComparer());
 
             // Assert
             act.Should().Throw<XunitException>();
         }
 
-        private enum MyEnum
+        [Fact]
+        public void A_typed_value_is_not_one_of_the_specified_values()
         {
-            One = 1,
-            Two = 2
+            // Arrange
+            var value = new SomeClass(3);
+
+            // Act
+            Action act = () => value.Should().BeOneOf(new[] { new SomeClass(4), new SomeClass(5) },
+                new SomeClassEqualityComparer(), "I said so");
+
+            // Assert
+            act.Should().Throw<XunitException>()
+               .WithMessage("Expected value to be one of {SomeClass(4), SomeClass(5)}*I said so*SomeClass(3).");
         }
 
-        #endregion
+        [Fact]
+        public void A_typed_value_is_not_one_of_no_values()
+        {
+            // Arrange
+            var value = new SomeClass(3);
 
-        #region BeNull / BeNotNull
+            // Act
+            Action act = () => value.Should().BeOneOf(Array.Empty<SomeClass>(), new SomeClassEqualityComparer());
 
+            // Assert
+            act.Should().Throw<XunitException>();
+        }
+
+        [Fact]
+        public void A_typed_value_is_not_the_same_type_as_the_specified_values()
+        {
+            // Arrange
+            var value = new ClassWithCustomEqualMethod(3);
+
+            // Act
+            Action act = () => value.Should().BeOneOf(new[] { new SomeClass(4), new SomeClass(5) },
+                new SomeClassEqualityComparer(), "I said so");
+
+            // Assert
+            act.Should().Throw<XunitException>()
+               .WithMessage("Expected value to be one of {SomeClass(4), SomeClass(5)}*I said so*ClassWithCustomEqualMethod(3).");
+        }
+
+        [Fact]
+        public void An_untyped_value_requires_an_expectation()
+        {
+            // Arrange
+            object value = new SomeClass(3);
+
+            // Act
+            Action act = () => value.Should().BeOneOf(null, new SomeClassEqualityComparer());
+
+            // Assert
+            act.Should().Throw<ArgumentNullException>().WithParameterName("validValues");
+        }
+
+        [Fact]
+        public void A_typed_value_requires_an_expectation()
+        {
+            // Arrange
+            var value = new SomeClass(3);
+
+            // Act
+            Action act = () => value.Should().BeOneOf(null, new SomeClassEqualityComparer());
+
+            // Assert
+            act.Should().Throw<ArgumentNullException>().WithParameterName("validValues");
+        }
+
+        [Fact]
+        public void An_untyped_value_requires_a_comparer()
+        {
+            // Arrange
+            object value = new SomeClass(3);
+
+            // Act
+            Action act = () => value.Should().BeOneOf(Array.Empty<SomeClass>(), comparer: null);
+
+            // Assert
+            act.Should().Throw<ArgumentNullException>().WithParameterName("comparer");
+        }
+
+        [Fact]
+        public void A_typed_value_requires_a_comparer()
+        {
+            // Arrange
+            var value = new SomeClass(3);
+
+            // Act
+            Action act = () => value.Should().BeOneOf(Array.Empty<SomeClass>(), comparer: null);
+
+            // Assert
+            act.Should().Throw<ArgumentNullException>().WithParameterName("comparer");
+        }
+    }
+
+    private enum MyEnum
+    {
+        One = 1,
+        Two = 2
+    }
+
+    public class BeNull
+    {
         [Fact]
         public void Should_succeed_when_asserting_null_object_to_be_null()
         {
@@ -191,7 +558,10 @@ namespace FluentAssertions.Specs.Primitives
                     "Expected someObject to be <null> because we want to test the failure message, but found System.Object",
                     StringComparison.Ordinal));
         }
+    }
 
+    public class BeNotNull
+    {
         [Fact]
         public void Should_succeed_when_asserting_non_null_object_not_to_be_null()
         {
@@ -228,11 +598,10 @@ namespace FluentAssertions.Specs.Primitives
             act.Should().Throw<XunitException>().WithMessage(
                 "Expected someObject not to be <null> because we want to test the failure message.");
         }
+    }
 
-        #endregion
-
-        #region BeOfType / NotBeOfType
-
+    public class BeOfType
+    {
         [Fact]
         public void When_object_type_is_matched_against_null_type_exactly_it_should_throw()
         {
@@ -245,20 +614,6 @@ namespace FluentAssertions.Specs.Primitives
             // Assert
             act.Should().Throw<ArgumentNullException>()
                 .WithParameterName("expectedType");
-        }
-
-        [Fact]
-        public void When_object_type_is_matched_negatively_against_null_type_exactly_it_should_throw()
-        {
-            // Arrange
-            var someObject = new object();
-
-            // Act
-            Action act = () => someObject.Should().NotBeOfType(null);
-
-            // Assert
-            act.Should().Throw<ArgumentNullException>()
-                .WithParameterName("unexpectedType");
         }
 
         [Fact]
@@ -308,66 +663,12 @@ namespace FluentAssertions.Specs.Primitives
             int? valueTypeObject = null;
 
             // Act
-            Action act = () => valueTypeObject.Should().BeOfType(typeof(int), "because we want to test the failure {0}", "message");
+            Action act = () =>
+                valueTypeObject.Should().BeOfType(typeof(int), "because we want to test the failure {0}", "message");
 
             // Assert
             act.Should().Throw<XunitException>()
                 .WithMessage("*type to be System.Int32*because we want to test the failure message*");
-        }
-
-        [Fact]
-        public void When_object_is_matched_negatively_against_a_null_type_it_should_throw()
-        {
-            // Arrange
-            int valueTypeObject = 42;
-
-            // Act
-            Action act = () => valueTypeObject.Should().NotBeOfType(null);
-
-            // Assert
-            act.Should().Throw<ArgumentNullException>()
-                .WithParameterName("unexpectedType");
-        }
-
-        [Fact]
-        public void When_object_type_is_value_type_and_doesnt_match_received_type_as_expected_should_not_fail_and_assert_correctly()
-        {
-            // Arrange
-            int valueTypeObject = 42;
-
-            // Act
-            Action act = () => valueTypeObject.Should().NotBeOfType(typeof(double));
-
-            // Assert
-            act.Should().NotThrow();
-        }
-
-        [Fact]
-        public void When_null_object_is_matched_negatively_against_a_type_it_should_throw()
-        {
-            // Arrange
-            int? valueTypeObject = null;
-
-            // Act
-            Action act = () => valueTypeObject.Should().NotBeOfType(typeof(int), "because we want to test the failure {0}", "message");
-
-            // Assert
-            act.Should().Throw<XunitException>()
-                .WithMessage("*type not to be System.Int32*because we want to test the failure message*");
-        }
-
-        [Fact]
-        public void When_object_type_is_value_type_and_matches_received_type_not_as_expected_should_fail()
-        {
-            // Arrange
-            int valueTypeObject = 42;
-            var expectedType = typeof(int);
-
-            // Act
-            Action act = () => valueTypeObject.Should().NotBeOfType(expectedType);
-
-            // Assert
-            act.Should().Throw<XunitException>().WithMessage($"Expected type not to be [{expectedType.AssemblyQualifiedName}], but it is.");
         }
 
         [Fact]
@@ -381,7 +682,8 @@ namespace FluentAssertions.Specs.Primitives
             Action act = () => valueTypeObject.Should().BeOfType(doubleType);
 
             // Assert
-            act.Should().Throw<XunitException>().WithMessage($"Expected type to be {doubleType}, but found {valueTypeObject.GetType()}.");
+            act.Should().Throw<XunitException>()
+                .WithMessage($"Expected type to be {doubleType}, but found {valueTypeObject.GetType()}.");
         }
 
         [Fact]
@@ -426,23 +728,25 @@ namespace FluentAssertions.Specs.Primitives
         }
 
         [Fact]
-        public void When_object_type_is_same_as_expected_type_but_in_different_assembly_it_should_fail_with_assembly_qualified_name()
+        public void
+            When_object_type_is_same_as_expected_type_but_in_different_assembly_it_should_fail_with_assembly_qualified_name()
         {
             // Arrange
             var typeFromOtherAssembly =
-                new AssemblyA.ClassA().ReturnClassC();
+                new ClassA().ReturnClassC();
 
             // Act
 #pragma warning disable 436 // disable the warning on conflicting types, as this is the intention for the spec
 
             Action act = () =>
-                typeFromOtherAssembly.Should().BeOfType<AssemblyB.ClassC>();
+                typeFromOtherAssembly.Should().BeOfType<ClassC>();
 
 #pragma warning restore 436
 
             // Assert
             act.Should().Throw<XunitException>()
-                .WithMessage("Expected type to be [AssemblyB.ClassC, FluentAssertions.Specs*], but found [AssemblyB.ClassC, AssemblyB*].");
+                .WithMessage(
+                    "Expected type to be [AssemblyB.ClassC, FluentAssertions.Specs*], but found [AssemblyB.ClassC, AssemblyB*].");
         }
 
         [Fact]
@@ -458,11 +762,88 @@ namespace FluentAssertions.Specs.Primitives
             act.Should().Throw<XunitException>().WithMessage(
                 "Expected type to be FluentAssertions*DummyBaseClass, but found FluentAssertions*DummyImplementingClass.");
         }
+    }
 
-        #endregion
+    public class NotBeOfType
+    {
+        [Fact]
+        public void When_object_type_is_matched_negatively_against_null_type_exactly_it_should_throw()
+        {
+            // Arrange
+            var someObject = new object();
 
-        #region BeAssignableTo
+            // Act
+            Action act = () => someObject.Should().NotBeOfType(null);
 
+            // Assert
+            act.Should().Throw<ArgumentNullException>()
+                .WithParameterName("unexpectedType");
+        }
+
+        [Fact]
+        public void When_object_is_matched_negatively_against_a_null_type_it_should_throw()
+        {
+            // Arrange
+            int valueTypeObject = 42;
+
+            // Act
+            Action act = () => valueTypeObject.Should().NotBeOfType(null);
+
+            // Assert
+            act.Should().Throw<ArgumentNullException>()
+                .WithParameterName("unexpectedType");
+        }
+
+        [Fact]
+        public void
+            When_object_type_is_value_type_and_doesnt_match_received_type_as_expected_should_not_fail_and_assert_correctly()
+        {
+            // Arrange
+            int valueTypeObject = 42;
+
+            // Act
+            Action act = () => valueTypeObject.Should().NotBeOfType(typeof(double));
+
+            // Assert
+            act.Should().NotThrow();
+        }
+
+        [Fact]
+        public void When_null_object_is_matched_negatively_against_a_type_it_should_throw()
+        {
+            // Arrange
+            int? valueTypeObject = null;
+
+            // Act
+            Action act = () =>
+            {
+                using var _ = new AssertionScope();
+                valueTypeObject.Should().NotBeOfType(typeof(int), "because we want to test the failure {0}", "message");
+            };
+
+            // Assert
+            act.Should().Throw<XunitException>()
+                .WithMessage("*type not to be System.Int32*because we want to test the failure message*");
+        }
+
+        [Fact]
+        public void When_object_type_is_value_type_and_matches_received_type_not_as_expected_should_fail()
+        {
+            // Arrange
+            int valueTypeObject = 42;
+            var expectedType = typeof(int);
+
+            // Act
+            Action act = () => valueTypeObject.Should().NotBeOfType(expectedType);
+
+            // Assert
+            act.Should().Throw<XunitException>()
+                .WithMessage($"Expected type not to be [{expectedType.AssemblyQualifiedName}], but it is.");
+        }
+    }
+
+    public class BeAssignableTo
+    {
         [Fact]
         public void When_object_type_is_matched_against_null_type_it_should_throw()
         {
@@ -584,10 +965,10 @@ namespace FluentAssertions.Specs.Primitives
         public void When_an_implemented_open_generic_interface_type_instance_it_should_succeed()
         {
             // Arrange
-            var someObject = new System.Collections.Generic.List<string>();
+            var someObject = new List<string>();
 
             // Act / Assert
-            someObject.Should().BeAssignableTo(typeof(System.Collections.Generic.IList<>));
+            someObject.Should().BeAssignableTo(typeof(IList<>));
         }
 
         [Fact]
@@ -613,7 +994,9 @@ namespace FluentAssertions.Specs.Primitives
         {
             // Arrange
             var someObject = new DummyImplementingClass();
-            Action act = () => someObject.Should().BeAssignableTo(typeof(DateTime), "because we want to test the failure {0}", "message");
+
+            Action act = () =>
+                someObject.Should().BeAssignableTo(typeof(DateTime), "because we want to test the failure {0}", "message");
 
             // Act / Assert
             act.Should().Throw<XunitException>()
@@ -625,17 +1008,37 @@ namespace FluentAssertions.Specs.Primitives
         {
             // Arrange
             var someObject = new DummyImplementingClass();
-            Action act = () => someObject.Should().BeAssignableTo(typeof(System.Collections.Generic.IList<>), "because we want to test the failure {0}", "message");
+
+            Action act = () =>
+                someObject.Should().BeAssignableTo(typeof(IList<>), "because we want to test the failure {0}", "message");
 
             // Act / Assert
             act.Should().Throw<XunitException>()
-                .WithMessage($"*assignable to {typeof(System.Collections.Generic.IList<>)}*failure message*{typeof(DummyImplementingClass)} is not*");
+                .WithMessage($"*assignable to {typeof(IList<>)}*failure message*{typeof(DummyImplementingClass)} is not*");
         }
 
-        #endregion
+        [Fact]
+        public void When_an_assertion_fails_on_BeAssignableTo_succeeding_message_should_be_included()
+        {
+            // Act
+            Action act = () =>
+            {
+                using var _ = new AssertionScope();
+                var item = string.Empty;
+                item.Should().BeAssignableTo<int>();
+                item.Should().BeAssignableTo<long>();
+            };
 
-        #region NotBeAssignableTo
+            // Assert
+            act.Should().Throw<XunitException>()
+                .WithMessage(
+                    "Expected * to be assignable to System.Int32, but System.String is not.*" +
+                    "Expected * to be assignable to System.Int64, but System.String is not.");
+        }
+    }
 
+    public class NotBeAssignableTo
+    {
         [Fact]
         public void When_object_type_is_matched_negatively_against_null_type_it_should_throw()
         {
@@ -655,11 +1058,15 @@ namespace FluentAssertions.Specs.Primitives
         {
             // Arrange
             var someObject = new DummyImplementingClass();
-            Action act = () => someObject.Should().NotBeAssignableTo<DummyImplementingClass>("because we want to test the failure {0}", "message");
+
+            Action act = () =>
+                someObject.Should()
+                    .NotBeAssignableTo<DummyImplementingClass>("because we want to test the failure {0}", "message");
 
             // Act / Assert
             act.Should().Throw<XunitException>()
-                .WithMessage($"*not be assignable to {typeof(DummyImplementingClass)}*failure message*{typeof(DummyImplementingClass)} is*");
+                .WithMessage(
+                    $"*not be assignable to {typeof(DummyImplementingClass)}*failure message*{typeof(DummyImplementingClass)} is*");
         }
 
         [Fact]
@@ -667,11 +1074,14 @@ namespace FluentAssertions.Specs.Primitives
         {
             // Arrange
             var someObject = new DummyImplementingClass();
-            Action act = () => someObject.Should().NotBeAssignableTo<DummyBaseClass>("because we want to test the failure {0}", "message");
+
+            Action act = () =>
+                someObject.Should().NotBeAssignableTo<DummyBaseClass>("because we want to test the failure {0}", "message");
 
             // Act / Assert
             act.Should().Throw<XunitException>()
-                .WithMessage($"*not be assignable to {typeof(DummyBaseClass)}*failure message*{typeof(DummyImplementingClass)} is*");
+                .WithMessage(
+                    $"*not be assignable to {typeof(DummyBaseClass)}*failure message*{typeof(DummyImplementingClass)} is*");
         }
 
         [Fact]
@@ -679,7 +1089,9 @@ namespace FluentAssertions.Specs.Primitives
         {
             // Arrange
             var someObject = new DummyImplementingClass();
-            Action act = () => someObject.Should().NotBeAssignableTo<IDisposable>("because we want to test the failure {0}", "message");
+
+            Action act = () =>
+                someObject.Should().NotBeAssignableTo<IDisposable>("because we want to test the failure {0}", "message");
 
             // Act / Assert
             act.Should().Throw<XunitException>()
@@ -697,7 +1109,8 @@ namespace FluentAssertions.Specs.Primitives
         }
 
         [Fact]
-        public void When_not_to_the_unexpected_type_and_asserting_not_assignable_it_should_not_cast_the_returned_object_for_chaining()
+        public void
+            When_not_to_the_unexpected_type_and_asserting_not_assignable_it_should_not_cast_the_returned_object_for_chaining()
         {
             // Arrange
             var someObject = new Exception("Actual Message");
@@ -716,11 +1129,15 @@ namespace FluentAssertions.Specs.Primitives
         {
             // Arrange
             var someObject = new DummyImplementingClass();
-            Action act = () => someObject.Should().NotBeAssignableTo(typeof(DummyImplementingClass), "because we want to test the failure {0}", "message");
+
+            Action act = () =>
+                someObject.Should().NotBeAssignableTo(typeof(DummyImplementingClass), "because we want to test the failure {0}",
+                    "message");
 
             // Act / Assert
             act.Should().Throw<XunitException>()
-                .WithMessage($"*not be assignable to {typeof(DummyImplementingClass)}*failure message*{typeof(DummyImplementingClass)} is*");
+                .WithMessage(
+                    $"*not be assignable to {typeof(DummyImplementingClass)}*failure message*{typeof(DummyImplementingClass)} is*");
         }
 
         [Fact]
@@ -728,19 +1145,26 @@ namespace FluentAssertions.Specs.Primitives
         {
             // Arrange
             var someObject = new DummyImplementingClass();
-            Action act = () => someObject.Should().NotBeAssignableTo(typeof(DummyBaseClass), "because we want to test the failure {0}", "message");
+
+            Action act = () =>
+                someObject.Should()
+                    .NotBeAssignableTo(typeof(DummyBaseClass), "because we want to test the failure {0}", "message");
 
             // Act / Assert
             act.Should().Throw<XunitException>()
-                .WithMessage($"*not be assignable to {typeof(DummyBaseClass)}*failure message*{typeof(DummyImplementingClass)} is*");
+                .WithMessage(
+                    $"*not be assignable to {typeof(DummyBaseClass)}*failure message*{typeof(DummyImplementingClass)} is*");
         }
 
         [Fact]
-        public void When_an_implemented_interface_type_instance_and_asserting_not_assignable_it_should_fail_with_a_useful_message()
+        public void
+            When_an_implemented_interface_type_instance_and_asserting_not_assignable_it_should_fail_with_a_useful_message()
         {
             // Arrange
             var someObject = new DummyImplementingClass();
-            Action act = () => someObject.Should().NotBeAssignableTo(typeof(IDisposable), "because we want to test the failure {0}", "message");
+
+            Action act = () =>
+                someObject.Should().NotBeAssignableTo(typeof(IDisposable), "because we want to test the failure {0}", "message");
 
             // Act / Assert
             act.Should().Throw<XunitException>()
@@ -748,15 +1172,18 @@ namespace FluentAssertions.Specs.Primitives
         }
 
         [Fact]
-        public void When_an_implemented_open_generic_interface_type_instance_and_asserting_not_assignable_it_should_fail_with_a_useful_message()
+        public void
+            When_an_implemented_open_generic_interface_type_instance_and_asserting_not_assignable_it_should_fail_with_a_useful_message()
         {
             // Arrange
-            var someObject = new System.Collections.Generic.List<string>();
-            Action act = () => someObject.Should().NotBeAssignableTo(typeof(System.Collections.Generic.IList<>), "because we want to test the failure {0}", "message");
+            var someObject = new List<string>();
+
+            Action act = () =>
+                someObject.Should().NotBeAssignableTo(typeof(IList<>), "because we want to test the failure {0}", "message");
 
             // Act / Assert
             act.Should().Throw<XunitException>()
-                .WithMessage($"*not be assignable to {typeof(System.Collections.Generic.IList<>)}*failure message*{typeof(System.Collections.Generic.List<string>)} is*");
+                .WithMessage($"*not be assignable to {typeof(IList<>)}*failure message*{typeof(List<string>)} is*");
         }
 
         [Fact]
@@ -794,13 +1221,12 @@ namespace FluentAssertions.Specs.Primitives
             var someObject = new DummyImplementingClass();
 
             // Act / Assert
-            someObject.Should().NotBeAssignableTo(typeof(System.Collections.Generic.IList<>), "because we want to test the failure {0}", "message");
+            someObject.Should().NotBeAssignableTo(typeof(IList<>), "because we want to test the failure {0}", "message");
         }
+    }
 
-        #endregion
-
-        #region Miscellaneous
-
+    public class Miscellaneous
+    {
         [Fact]
         public void Should_support_chaining_constraints_with_and()
         {
@@ -814,10 +1240,25 @@ namespace FluentAssertions.Specs.Primitives
                 .NotBeNull();
         }
 
-        #endregion
+        [Fact]
+        public void Should_throw_a_helpful_error_when_accidentally_using_equals()
+        {
+            // Arrange
+            var someObject = new Exception();
 
-        #region BeBinarySerializable
+            // Act
+            var action = () => someObject.Should().Equals(null);
 
+            // Assert
+            action.Should().Throw<NotSupportedException>()
+                .WithMessage("Equals is not part of Fluent Assertions. Did you mean Be() or BeSameAs() instead?");
+        }
+    }
+
+#if !NET8_0_OR_GREATER
+
+    public class BeBinarySerializable
+    {
         [Fact]
         public void When_an_object_is_binary_serializable_it_should_succeed()
         {
@@ -839,7 +1280,7 @@ namespace FluentAssertions.Specs.Primitives
         public void When_an_object_is_binary_serializable_with_non_serializable_members_it_should_succeed()
         {
             // Arrange
-            var subject = new SerializableClassWithNonSerializableMember()
+            var subject = new SerializableClassWithNonSerializableMember
             {
                 Name = "John",
                 NonSerializable = "Nonserializable value"
@@ -881,7 +1322,8 @@ namespace FluentAssertions.Specs.Primitives
 
             // Assert
             act.Should().Throw<XunitException>()
-                .WithMessage("*to be serializable because we need to store it on disk, but serialization failed with:*UnserializableClass*");
+                .WithMessage(
+                    "*to be serializable because we need to store it on disk, but serialization failed with:*UnserializableClass*");
         }
 
         [Fact]
@@ -899,7 +1341,8 @@ namespace FluentAssertions.Specs.Primitives
 
             // Assert
             act.Should().Throw<XunitException>()
-                .WithMessage("*to be serializable, but serialization failed with:*BinarySerializableClassMissingDeserializationConstructor*");
+                .WithMessage(
+                    "*to be serializable, but serialization failed with:*BinarySerializableClassMissingDeserializationConstructor*");
         }
 
         [Fact]
@@ -932,73 +1375,74 @@ namespace FluentAssertions.Specs.Primitives
             // Assert
             act.Should().NotThrow();
         }
+    }
 
-        internal class UnserializableClass
+#endif
+
+    internal class UnserializableClass
+    {
+        public string Name { get; set; }
+    }
+
+    [Serializable]
+    public class SerializableClass
+    {
+        public string Name { get; set; }
+
+        public int Id;
+    }
+
+    [Serializable]
+    public class SerializableClassWithNonSerializableMember
+    {
+        [NonSerialized]
+        private string nonSerializable;
+
+        public string Name { get; set; }
+
+        public string NonSerializable
         {
-            public string Name { get; set; }
+            get => nonSerializable;
+            set => nonSerializable = value;
+        }
+    }
+
+    [Serializable]
+    internal class BinarySerializableClassMissingDeserializationConstructor : ISerializable
+    {
+        public string Name { get; set; }
+
+        public DateTime BirthDay { get; set; }
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+        }
+    }
+
+    [Serializable]
+    internal class BinarySerializableClassNotRestoringAllProperties : ISerializable
+    {
+        public string Name { get; set; }
+
+        public DateTime BirthDay { get; set; }
+
+        public BinarySerializableClassNotRestoringAllProperties()
+        {
         }
 
-        [Serializable]
-        public class SerializableClass
+        public BinarySerializableClassNotRestoringAllProperties(SerializationInfo info, StreamingContext context)
         {
-            public string Name { get; set; }
-
-            public int Id;
+            BirthDay = info.GetDateTime("BirthDay");
         }
 
-        [Serializable]
-        public class SerializableClassWithNonSerializableMember
+        public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            [NonSerialized]
-            private string nonSerializable;
-
-            public string Name { get; set; }
-
-            public string NonSerializable
-            {
-                get { return nonSerializable; }
-                set { nonSerializable = value; }
-            }
+            info.AddValue("BirthDay", BirthDay);
         }
+    }
 
-        [Serializable]
-        internal class BinarySerializableClassMissingDeserializationConstructor : ISerializable
-        {
-            public string Name { get; set; }
-
-            public DateTime BirthDay { get; set; }
-
-            public void GetObjectData(SerializationInfo info, StreamingContext context)
-            {
-            }
-        }
-
-        [Serializable]
-        internal class BinarySerializableClassNotRestoringAllProperties : ISerializable
-        {
-            public string Name { get; set; }
-
-            public DateTime BirthDay { get; set; }
-
-            public BinarySerializableClassNotRestoringAllProperties()
-            {
-            }
-
-            public BinarySerializableClassNotRestoringAllProperties(SerializationInfo info, StreamingContext context)
-            {
-                BirthDay = info.GetDateTime("BirthDay");
-            }
-
-            public void GetObjectData(SerializationInfo info, StreamingContext context)
-            {
-                info.AddValue("BirthDay", BirthDay);
-            }
-        }
-
-        #endregion
-
-        #region BeXmlSerializable
-
+    public class BeXmlSerializable
+    {
         [Fact]
         public void When_an_object_is_xml_serializable_it_should_succeed()
         {
@@ -1030,7 +1474,8 @@ namespace FluentAssertions.Specs.Primitives
 
             // Assert
             act.Should().Throw<XunitException>()
-                .WithMessage("*to be serializable because we need to store it on disk, but serialization failed with:*NonPublicClass*");
+                .WithMessage(
+                    "*to be serializable because we need to store it on disk, but serialization failed with:*NonPublicClass*");
         }
 
         [Fact]
@@ -1050,45 +1495,47 @@ namespace FluentAssertions.Specs.Primitives
             act.Should().Throw<XunitException>()
                 .WithMessage("*to be serializable, but serialization failed with:*Name*to be*");
         }
+    }
 
-        internal class NonPublicClass
+    internal class NonPublicClass
+    {
+        [UsedImplicitly]
+        public string Name { get; set; }
+    }
+
+    public class XmlSerializableClass
+    {
+        [UsedImplicitly]
+        public string Name { get; set; }
+
+        public int Id;
+    }
+
+    public class XmlSerializableClassNotRestoringAllProperties : IXmlSerializable
+    {
+        [UsedImplicitly]
+        public string Name { get; set; }
+
+        public DateTime BirthDay { get; set; }
+
+        public XmlSchema GetSchema()
         {
-            public string Name { get; set; }
+            return null;
         }
 
-        public class XmlSerializableClass
+        public void ReadXml(XmlReader reader)
         {
-            public string Name { get; set; }
-
-            public int Id;
+            BirthDay = DateTime.Parse(reader.ReadElementContentAsString(), CultureInfo.InvariantCulture);
         }
 
-        public class XmlSerializableClassNotRestoringAllProperties : IXmlSerializable
+        public void WriteXml(XmlWriter writer)
         {
-            public string Name { get; set; }
-
-            public DateTime BirthDay { get; set; }
-
-            public XmlSchema GetSchema()
-            {
-                return null;
-            }
-
-            public void ReadXml(XmlReader reader)
-            {
-                BirthDay = DateTime.Parse(reader.ReadElementContentAsString(), CultureInfo.InvariantCulture);
-            }
-
-            public void WriteXml(XmlWriter writer)
-            {
-                writer.WriteString(BirthDay.ToString(CultureInfo.InvariantCulture));
-            }
+            writer.WriteString(BirthDay.ToString(CultureInfo.InvariantCulture));
         }
+    }
 
-        #endregion
-
-        #region BeDataContractSerializable
-
+    public class BeDataContractSerializable
+    {
         [Fact]
         public void When_an_object_is_data_contract_serializable_it_should_succeed()
         {
@@ -1150,8 +1597,9 @@ namespace FluentAssertions.Specs.Primitives
             };
 
             // Act
-            Action act = () => subject.Should().BeDataContractSerializable<DataContractSerializableClassNotRestoringAllProperties>(
-                options => options.Excluding(x => x.Name));
+            Action act = () => subject.Should()
+                .BeDataContractSerializable<DataContractSerializableClassNotRestoringAllProperties>(
+                    options => options.Excluding(x => x.Name));
 
             // Assert
             act.Should().NotThrow();
@@ -1164,54 +1612,83 @@ namespace FluentAssertions.Specs.Primitives
             var subject = new DataContractSerializableClassNotRestoringAllProperties();
 
             // Act
-            Action act = () => subject.Should().BeDataContractSerializable<DataContractSerializableClassNotRestoringAllProperties>(
-                options: null);
+            Action act = () => subject.Should()
+                .BeDataContractSerializable<DataContractSerializableClassNotRestoringAllProperties>(
+                    options: null);
 
             // Assert
             act.Should().ThrowExactly<ArgumentNullException>()
                 .WithParameterName("options");
         }
-
-        public enum Color
-        {
-            Red = 1,
-            Yellow = 2
-        }
-
-        public class NonDataContractSerializableClass
-        {
-            public Color Color { get; set; }
-        }
-
-        public class DataContractSerializableClass
-        {
-            public string Name { get; set; }
-
-            public int Id;
-        }
-
-        [DataContract]
-        public class DataContractSerializableClassNotRestoringAllProperties
-        {
-            public string Name { get; set; }
-
-            [DataMember]
-            public DateTime BirthDay { get; set; }
-        }
-
-        #endregion
-
     }
 
-    internal class DummyBaseClass
+    public enum Color
+    {
+        Red = 1,
+        Yellow = 2
+    }
+
+    public class NonDataContractSerializableClass
+    {
+        public Color Color { get; set; }
+    }
+
+    public class DataContractSerializableClass
+    {
+        [UsedImplicitly]
+        public string Name { get; set; }
+
+        public int Id;
+    }
+
+    [DataContract]
+    public class DataContractSerializableClassNotRestoringAllProperties
+    {
+        public string Name { get; set; }
+
+        [DataMember]
+        public DateTime BirthDay { get; set; }
+    }
+}
+
+internal class DummyBaseClass;
+
+internal sealed class DummyImplementingClass : DummyBaseClass, IDisposable
+{
+    public void Dispose()
+    {
+        // Ignore
+    }
+}
+
+internal class SomeClass
+{
+    public SomeClass(int key)
+    {
+        Key = key;
+    }
+
+    public int Key { get; }
+
+    public override string ToString() => $"SomeClass({Key})";
+}
+
+internal class SomeClassEqualityComparer : IEqualityComparer<SomeClass>
+{
+    public bool Equals(SomeClass x, SomeClass y) => x.Key == y.Key;
+
+    public int GetHashCode(SomeClass obj) => obj.Key;
+}
+
+internal class SomeClassAssertions : ObjectAssertions<SomeClass, SomeClassAssertions>
+{
+    public SomeClassAssertions(SomeClass value)
+        : base(value)
     {
     }
+}
 
-    internal class DummyImplementingClass : DummyBaseClass, IDisposable
-    {
-        public void Dispose()
-        {
-            // Ignore
-        }
-    }
+internal static class AssertionExtensions
+{
+    public static SomeClassAssertions Should(this SomeClass value) => new(value);
 }

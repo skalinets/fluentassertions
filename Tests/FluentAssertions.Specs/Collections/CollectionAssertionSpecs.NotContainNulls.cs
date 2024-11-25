@@ -4,15 +4,15 @@ using FluentAssertions.Execution;
 using Xunit;
 using Xunit.Sdk;
 
-namespace FluentAssertions.Specs.Collections
-{
-    /// <content>
-    /// The NotContainNulls specs.
-    /// </content>
-    public partial class CollectionAssertionSpecs
-    {
-        #region Not Contain Nulls
+namespace FluentAssertions.Specs.Collections;
 
+/// <content>
+/// The NotContainNulls specs.
+/// </content>
+public partial class CollectionAssertionSpecs
+{
+    public class NotContainNulls
+    {
         [Fact]
         public void When_collection_does_not_contain_nulls_it_should_not_throw()
         {
@@ -38,6 +38,24 @@ namespace FluentAssertions.Specs.Collections
         }
 
         [Fact]
+        public void When_collection_contains_nulls_that_are_unexpected_it_supports_chaining()
+        {
+            // Arrange
+            var collection = new[] { new object(), null };
+
+            // Act
+            Action act = () =>
+            {
+                using var _ = new AssertionScope();
+                collection.Should().NotContainNulls().And.HaveCount(c => c > 1);
+            };
+
+            // Assert
+            act.Should().Throw<XunitException>().WithMessage(
+                "*but found one*");
+        }
+
+        [Fact]
         public void When_collection_contains_multiple_nulls_that_are_unexpected_it_should_throw()
         {
             // Arrange
@@ -49,6 +67,24 @@ namespace FluentAssertions.Specs.Collections
             // Assert
             act.Should().Throw<XunitException>().WithMessage(
                 "Expected collection not to contain <null>s*because they are evil*{1, 3}*");
+        }
+
+        [Fact]
+        public void When_collection_contains_multiple_nulls_that_are_unexpected_it_supports_chaining()
+        {
+            // Arrange
+            var collection = new[] { new object(), null, new object(), null };
+
+            // Act
+            Action act = () =>
+            {
+                using var _ = new AssertionScope();
+                collection.Should().NotContainNulls().And.HaveCount(c => c > 1);
+            };
+
+            // Assert
+            act.Should().Throw<XunitException>().WithMessage(
+                "*but found several*");
         }
 
         [Fact]
@@ -167,7 +203,5 @@ namespace FluentAssertions.Specs.Collections
             act.Should().Throw<XunitException>().WithMessage(
                 "Expected collection not to contain <null>s because we want to test the behaviour with a null subject, but collection is <null>.");
         }
-
-        #endregion
     }
 }

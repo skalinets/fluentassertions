@@ -4,12 +4,12 @@ using FluentAssertions.Types;
 using Xunit;
 using Xunit.Sdk;
 
-namespace FluentAssertions.Specs.Types
-{
-    public class MethodInfoSelectorAssertionSpecs
-    {
-        #region BeVirtual
+namespace FluentAssertions.Specs.Types;
 
+public class MethodInfoSelectorAssertionSpecs
+{
+    public class BeVirtual
+    {
         [Fact]
         public void When_asserting_methods_are_virtual_and_they_are_it_should_succeed()
         {
@@ -39,7 +39,8 @@ namespace FluentAssertions.Specs.Types
         }
 
         [Fact]
-        public void When_asserting_methods_are_virtual_but_non_virtual_methods_are_found_it_should_throw_with_descriptive_message()
+        public void
+            When_asserting_methods_are_virtual_but_non_virtual_methods_are_found_it_should_throw_with_descriptive_message()
         {
             // Arrange
             var methodSelector = new MethodInfoSelector(typeof(ClassWithNonVirtualPublicMethods));
@@ -51,17 +52,16 @@ namespace FluentAssertions.Specs.Types
             // Assert
             act.Should().Throw<XunitException>()
                 .WithMessage("Expected all selected methods" +
-                             " to be virtual because we want to test the error message," +
-                             " but the following methods are not virtual:*" +
-                             "Void FluentAssertions*ClassWithNonVirtualPublicMethods.PublicDoNothing*" +
-                             "Void FluentAssertions*ClassWithNonVirtualPublicMethods.InternalDoNothing*" +
-                             "Void FluentAssertions*ClassWithNonVirtualPublicMethods.ProtectedDoNothing");
+                    " to be virtual because we want to test the error message," +
+                    " but the following methods are not virtual:*" +
+                    "Void FluentAssertions*ClassWithNonVirtualPublicMethods.PublicDoNothing*" +
+                    "Void FluentAssertions*ClassWithNonVirtualPublicMethods.InternalDoNothing*" +
+                    "Void FluentAssertions*ClassWithNonVirtualPublicMethods.ProtectedDoNothing");
         }
+    }
 
-        #endregion
-
-        #region NotBeVirtual
-
+    public class NotBeVirtual
+    {
         [Fact]
         public void When_asserting_methods_are_not_virtual_and_they_are_not_it_should_succeed()
         {
@@ -91,7 +91,8 @@ namespace FluentAssertions.Specs.Types
         }
 
         [Fact]
-        public void When_asserting_methods_are_not_virtual_but_virtual_methods_are_found_it_should_throw_with_descriptive_message()
+        public void
+            When_asserting_methods_are_not_virtual_but_virtual_methods_are_found_it_should_throw_with_descriptive_message()
         {
             // Arrange
             var methodSelector = new MethodInfoSelector(typeof(ClassWithAllMethodsVirtual));
@@ -103,17 +104,16 @@ namespace FluentAssertions.Specs.Types
             // Assert
             act.Should().Throw<XunitException>()
                 .WithMessage("Expected all selected methods" +
-                             " not to be virtual because we want to test the error message," +
-                             " but the following methods are virtual" +
-                             "*ClassWithAllMethodsVirtual.PublicVirtualDoNothing" +
-                             "*ClassWithAllMethodsVirtual.InternalVirtualDoNothing" +
-                             "*ClassWithAllMethodsVirtual.ProtectedVirtualDoNothing*");
+                    " not to be virtual because we want to test the error message," +
+                    " but the following methods are virtual" +
+                    "*ClassWithAllMethodsVirtual.PublicVirtualDoNothing" +
+                    "*ClassWithAllMethodsVirtual.InternalVirtualDoNothing" +
+                    "*ClassWithAllMethodsVirtual.ProtectedVirtualDoNothing*");
         }
+    }
 
-        #endregion
-
-        #region BeDecoratedWith
-
+    public class BeDecoratedWith
+    {
         [Fact]
         public void When_injecting_a_null_predicate_into_BeDecoratedWith_it_should_throw()
         {
@@ -160,7 +160,8 @@ namespace FluentAssertions.Specs.Types
         }
 
         [Fact]
-        public void When_asserting_methods_are_decorated_with_attribute_but_they_are_not_it_should_throw_with_descriptive_message()
+        public void
+            When_asserting_methods_are_decorated_with_attribute_but_they_are_not_it_should_throw_with_descriptive_message()
         {
             // Arrange
             var methodSelector = new MethodInfoSelector(typeof(ClassWithMethodsThatAreNotDecoratedWithDummyAttribute));
@@ -172,17 +173,16 @@ namespace FluentAssertions.Specs.Types
             // Assert
             act.Should().Throw<XunitException>()
                 .WithMessage("Expected all selected methods to be decorated with" +
-                             " FluentAssertions*DummyMethodAttribute because we want to test the error message," +
-                             " but the following methods are not:*" +
-                             "Void FluentAssertions*ClassWithMethodsThatAreNotDecoratedWithDummyAttribute.PublicDoNothing*" +
-                             "Void FluentAssertions*ClassWithMethodsThatAreNotDecoratedWithDummyAttribute.ProtectedDoNothing*" +
-                             "Void FluentAssertions*ClassWithMethodsThatAreNotDecoratedWithDummyAttribute.PrivateDoNothing");
+                    " FluentAssertions*DummyMethodAttribute because we want to test the error message," +
+                    " but the following methods are not:*" +
+                    "Void FluentAssertions*ClassWithMethodsThatAreNotDecoratedWithDummyAttribute.PublicDoNothing*" +
+                    "Void FluentAssertions*ClassWithMethodsThatAreNotDecoratedWithDummyAttribute.ProtectedDoNothing*" +
+                    "Void FluentAssertions*ClassWithMethodsThatAreNotDecoratedWithDummyAttribute.PrivateDoNothing");
         }
+    }
 
-        #endregion
-
-        #region NotBeDecoratedWith
-
+    public class NotBeDecoratedWith
+    {
         [Fact]
         public void When_injecting_a_null_predicate_into_NotBeDecoratedWith_it_should_throw()
         {
@@ -229,28 +229,29 @@ namespace FluentAssertions.Specs.Types
         }
 
         [Fact]
-        public void When_asserting_methods_are_not_decorated_with_attribute_but_they_are_it_should_throw_with_descriptive_message()
+        public void
+            When_asserting_methods_are_not_decorated_with_attribute_but_they_are_it_should_throw_with_descriptive_message()
         {
             // Arrange
             var methodSelector = new MethodInfoSelector(typeof(ClassWithAllMethodsDecoratedWithDummyAttribute));
 
             // Act
-            Action act = () =>
-                methodSelector.Should().NotBeDecoratedWith<DummyMethodAttribute>("because we want to test the error {0}", "message");
+            Action act = () => methodSelector.Should()
+                    .NotBeDecoratedWith<DummyMethodAttribute>("because we want to test the error {0}", "message");
 
             // Assert
             act.Should().Throw<XunitException>()
-                .WithMessage("Expected all selected methods to not be decorated*DummyMethodAttribute*because we want to test the error message" +
-                             "*ClassWithAllMethodsDecoratedWithDummyAttribute.PublicDoNothing*" +
-                             "*ClassWithAllMethodsDecoratedWithDummyAttribute.PublicDoNothingWithSameAttributeTwice*" +
-                             "*ClassWithAllMethodsDecoratedWithDummyAttribute.ProtectedDoNothing*" +
-                             "*ClassWithAllMethodsDecoratedWithDummyAttribute.PrivateDoNothing");
+                .WithMessage(
+                    "Expected all selected methods to not be decorated*DummyMethodAttribute*because we want to test the error message" +
+                    "*ClassWithAllMethodsDecoratedWithDummyAttribute.PublicDoNothing*" +
+                    "*ClassWithAllMethodsDecoratedWithDummyAttribute.PublicDoNothingWithSameAttributeTwice*" +
+                    "*ClassWithAllMethodsDecoratedWithDummyAttribute.ProtectedDoNothing*" +
+                    "*ClassWithAllMethodsDecoratedWithDummyAttribute.PrivateDoNothing");
         }
+    }
 
-        #endregion
-
-        #region Be
-
+    public class Be
+    {
         [Fact]
         public void When_all_methods_have_specified_accessor_it_should_succeed()
         {
@@ -278,10 +279,10 @@ namespace FluentAssertions.Specs.Types
             // Assert
             act.Should().Throw<XunitException>()
                 .WithMessage("Expected all selected methods to be Public" +
-                             ", but the following methods are not:*" +
-                             "Void FluentAssertions*ClassWithNonPublicMethods.PublicDoNothing*" +
-                             "Void FluentAssertions*ClassWithNonPublicMethods.DoNothingWithParameter*" +
-                             "Void FluentAssertions*ClassWithNonPublicMethods.DoNothingWithAnotherParameter");
+                    ", but the following methods are not:*" +
+                    "Void FluentAssertions*ClassWithNonPublicMethods.PublicDoNothing*" +
+                    "Void FluentAssertions*ClassWithNonPublicMethods.DoNothingWithParameter*" +
+                    "Void FluentAssertions*ClassWithNonPublicMethods.DoNothingWithAnotherParameter");
         }
 
         [Fact]
@@ -297,17 +298,16 @@ namespace FluentAssertions.Specs.Types
             // Assert
             act.Should().Throw<XunitException>()
                 .WithMessage("Expected all selected methods to be Public" +
-                             " because we want to test the error message" +
-                             ", but the following methods are not:*" +
-                             "Void FluentAssertions*ClassWithNonPublicMethods.PublicDoNothing*" +
-                             "Void FluentAssertions*ClassWithNonPublicMethods.DoNothingWithParameter*" +
-                             "Void FluentAssertions*ClassWithNonPublicMethods.DoNothingWithAnotherParameter");
+                    " because we want to test the error message" +
+                    ", but the following methods are not:*" +
+                    "Void FluentAssertions*ClassWithNonPublicMethods.PublicDoNothing*" +
+                    "Void FluentAssertions*ClassWithNonPublicMethods.DoNothingWithParameter*" +
+                    "Void FluentAssertions*ClassWithNonPublicMethods.DoNothingWithAnotherParameter");
         }
+    }
 
-        #endregion
-
-        #region NotBe
-
+    public class NotBe
+    {
         [Fact]
         public void When_all_methods_does_not_have_specified_accessor_it_should_succeed()
         {
@@ -335,8 +335,8 @@ namespace FluentAssertions.Specs.Types
             // Assert
             act.Should().Throw<XunitException>()
                 .WithMessage("Expected all selected methods to not be Public" +
-                             ", but the following methods are:*" +
-                             "Void FluentAssertions*ClassWithPublicMethods.PublicDoNothing*");
+                    ", but the following methods are:*" +
+                    "Void FluentAssertions*ClassWithPublicMethods.PublicDoNothing*");
         }
 
         [Fact]
@@ -352,15 +352,14 @@ namespace FluentAssertions.Specs.Types
             // Assert
             act.Should().Throw<XunitException>()
                 .WithMessage("Expected all selected methods to not be Public" +
-                             " because we want to test the error message" +
-                             ", but the following methods are:*" +
-                             "Void FluentAssertions*ClassWithPublicMethods.PublicDoNothing*");
+                    " because we want to test the error message" +
+                    ", but the following methods are:*" +
+                    "Void FluentAssertions*ClassWithPublicMethods.PublicDoNothing*");
         }
+    }
 
-        #endregion
-
-        #region BeAsync
-
+    public class BeAsync
+    {
         [Fact]
         public void When_asserting_methods_are_async_and_they_are_then_it_succeeds()
         {
@@ -392,11 +391,10 @@ namespace FluentAssertions.Specs.Types
                     "Task FluentAssertions.Specs.Types.ClassWithNonAsyncMethods.InternalDoNothing" + Environment.NewLine +
                     "Task FluentAssertions.Specs.Types.ClassWithNonAsyncMethods.ProtectedDoNothing");
         }
+    }
 
-        #endregion
-
-        #region NotBeAsync
-
+    public class NotBeAsync
+    {
         [Fact]
         public void When_asserting_methods_are_not_async_and_they_are_not_then_it_succeeds()
         {
@@ -428,7 +426,5 @@ namespace FluentAssertions.Specs.Types
                     "Task FluentAssertions.Specs.Types.ClassWithAllMethodsAsync.InternalAsyncDoNothing" + Environment.NewLine +
                     "Task FluentAssertions.Specs.Types.ClassWithAllMethodsAsync.ProtectedAsyncDoNothing");
         }
-
-        #endregion
     }
 }

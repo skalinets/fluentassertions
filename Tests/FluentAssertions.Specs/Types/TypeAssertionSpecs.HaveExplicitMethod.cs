@@ -1,16 +1,17 @@
 ﻿using System;
+using FluentAssertions.Execution;
 using Xunit;
 using Xunit.Sdk;
 
-namespace FluentAssertions.Specs.Types
-{
-    /// <content>
-    /// The [Not]HaveExplicitMethod specs.
-    /// </content>
-    public partial class TypeAssertionSpecs
-    {
-        #region HaveExplicitMethod
+namespace FluentAssertions.Specs.Types;
 
+/// <content>
+/// The [Not]HaveExplicitMethod specs.
+/// </content>
+public partial class TypeAssertionSpecs
+{
+    public class HaveExplicitMethod
+    {
         [Fact]
         public void When_asserting_a_type_explicitly_implements_a_method_which_it_does_it_succeeds()
         {
@@ -29,7 +30,8 @@ namespace FluentAssertions.Specs.Types
         }
 
         [Fact]
-        public void When_asserting_a_type_explicitly_implements_a_method_which_it_implements_implicitly_and_explicitly_it_succeeds()
+        public void
+            When_asserting_a_type_explicitly_implements_a_method_which_it_implements_implicitly_and_explicitly_it_succeeds()
         {
             // Arrange
             var type = typeof(ClassExplicitlyImplementingInterface);
@@ -179,14 +181,26 @@ namespace FluentAssertions.Specs.Types
                 type.Should().HaveExplicitMethod(typeof(IExplicitInterface), string.Empty, new Type[0]);
 
             // Assert
-            act.Should().ThrowExactly<ArgumentNullException>()
+            act.Should().ThrowExactly<ArgumentException>()
                 .WithParameterName("name");
         }
 
-        #endregion
+        [Fact]
+        public void Does_not_continue_assertion_on_explicit_interface_implementation_if_not_implemented_at_all()
+        {
+            var act = () =>
+            {
+                using var _ = new AssertionScope();
+                typeof(ClassWithMembers).Should().HaveExplicitMethod(typeof(IExplicitInterface), "Foo", new Type[0]);
+            };
 
-        #region HaveExplicitMethodOfT
+            act.Should().Throw<XunitException>()
+                .WithMessage("Expected type *ClassWithMembers* to*implement *IExplicitInterface, but it does not.");
+        }
+    }
 
+    public class HaveExplicitMethodOfT
+    {
         [Fact]
         public void When_asserting_a_type_explicitly_implementsOfT_a_method_which_it_does_it_succeeds()
         {
@@ -261,14 +275,13 @@ namespace FluentAssertions.Specs.Types
                 type.Should().HaveExplicitMethod<IExplicitInterface>(string.Empty, new Type[0]);
 
             // Assert
-            act.Should().ThrowExactly<ArgumentNullException>()
+            act.Should().ThrowExactly<ArgumentException>()
                 .WithParameterName("name");
         }
+    }
 
-        #endregion
-
-        #region NotHaveExplicitMethod
-
+    public class NotHaveExplicitMethod
+    {
         [Fact]
         public void When_asserting_a_type_does_not_explicitly_implement_a_method_which_it_does_it_fails()
         {
@@ -290,7 +303,8 @@ namespace FluentAssertions.Specs.Types
         }
 
         [Fact]
-        public void When_asserting_a_type_does_not_explicitly_implement_a_method_which_it_implements_implicitly_and_explicitly_it_fails()
+        public void
+            When_asserting_a_type_does_not_explicitly_implement_a_method_which_it_implements_implicitly_and_explicitly_it_fails()
         {
             // Arrange
             var type = typeof(ClassExplicitlyImplementingInterface);
@@ -437,14 +451,28 @@ namespace FluentAssertions.Specs.Types
                 type.Should().NotHaveExplicitMethod(typeof(IExplicitInterface), string.Empty, new Type[0]);
 
             // Assert
-            act.Should().ThrowExactly<ArgumentNullException>()
+            act.Should().ThrowExactly<ArgumentException>()
                 .WithParameterName("name");
         }
 
-        #endregion
+        [Fact]
+        public void Does_not_continue_assertion_on_explicit_interface_implementation_if_implemented()
+        {
+            var act = () =>
+            {
+                using var _ = new AssertionScope();
+                typeof(ClassExplicitlyImplementingInterface)
+                    .Should().NotHaveExplicitMethod(typeof(IExplicitInterface), "ExplicitMethod", new Type[0]);
+            };
 
-        #region NotHaveExplicitMethodOfT
+            act.Should().Throw<XunitException>()
+                .WithMessage("Expected *ClassExplicitlyImplementingInterface* to not*implement " +
+                    "*IExplicitInterface.ExplicitMethod(), but it does.");
+        }
+    }
 
+    public class NotHaveExplicitMethodOfT
+    {
         [Fact]
         public void When_asserting_a_type_does_not_explicitly_implementOfT_a_method_which_it_does_it_fails()
         {
@@ -522,10 +550,8 @@ namespace FluentAssertions.Specs.Types
                 type.Should().NotHaveExplicitMethod<IExplicitInterface>(string.Empty, new Type[0]);
 
             // Assert
-            act.Should().ThrowExactly<ArgumentNullException>()
+            act.Should().ThrowExactly<ArgumentException>()
                 .WithParameterName("name");
         }
-
-        #endregion
     }
 }

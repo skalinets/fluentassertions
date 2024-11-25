@@ -4,14 +4,17 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Threading.Tasks;
 using FluentAssertions.Types;
+using Internal.AbstractAndNotAbstractClasses.Test;
+using Internal.InterfaceAndClasses.Test;
 using Internal.Main.Test;
 using Internal.NotOnlyClasses.Test;
 using Internal.Other.Test;
 using Internal.Other.Test.Common;
+using Internal.SealedAndNotSealedClasses.Test;
 using Internal.StaticAndNonStaticClasses.Test;
 using Internal.UnwrapSelectorTestTypes.Test;
+using Internal.ValueTypesAndNotValueTypes.Test;
 using Xunit;
-using ISomeInterface = Internal.Main.Test.ISomeInterface;
 
 namespace FluentAssertions.Specs.Types
 {
@@ -52,7 +55,7 @@ namespace FluentAssertions.Specs.Types
             TypeSelector propertyInfoSelector = null;
 
             // Act
-            Action act = () => propertyInfoSelector.Should();
+            var act = () => propertyInfoSelector.Should();
 
             // Assert
             act.Should().ThrowExactly<ArgumentNullException>()
@@ -277,7 +280,7 @@ namespace FluentAssertions.Specs.Types
                 .ToArray()
                 .Should()
                 .ContainSingle()
-                    .Which.Should().Be(type);
+                .Which.Should().Be(type);
         }
 
         [Fact]
@@ -294,7 +297,8 @@ namespace FluentAssertions.Specs.Types
         }
 
         [Fact]
-        public void When_selecting_types_decorated_with_or_inheriting_an_inheritable_attribute_it_should_only_return_the_applicable_types()
+        public void
+            When_selecting_types_decorated_with_or_inheriting_an_inheritable_attribute_it_should_only_return_the_applicable_types()
         {
             // Arrange
             Type type = typeof(ClassWithSomeAttributeDerived);
@@ -320,7 +324,8 @@ namespace FluentAssertions.Specs.Types
         }
 
         [Fact]
-        public void When_selecting_types_not_decorated_with_or_inheriting_an_inheritable_attribute_it_should_only_return_the_applicable_types()
+        public void
+            When_selecting_types_not_decorated_with_or_inheriting_an_inheritable_attribute_it_should_only_return_the_applicable_types()
         {
             // Arrange
             Type type = typeof(ClassWithSomeAttributeDerived);
@@ -346,7 +351,8 @@ namespace FluentAssertions.Specs.Types
         }
 
         [Fact]
-        public void When_selecting_types_decorated_with_or_inheriting_a_noninheritable_attribute_it_should_only_return_the_applicable_types()
+        public void
+            When_selecting_types_decorated_with_or_inheriting_a_noninheritable_attribute_it_should_only_return_the_applicable_types()
         {
             // Arrange
             Type type = typeof(ClassWithSomeNonInheritableAttributeDerived);
@@ -359,7 +365,8 @@ namespace FluentAssertions.Specs.Types
         }
 
         [Fact]
-        public void When_selecting_types_not_decorated_with_a_noninheritable_attribute_it_should_only_return_the_applicable_types()
+        public void
+            When_selecting_types_not_decorated_with_a_noninheritable_attribute_it_should_only_return_the_applicable_types()
         {
             // Arrange
             Type type = typeof(ClassWithSomeNonInheritableAttributeDerived);
@@ -372,7 +379,8 @@ namespace FluentAssertions.Specs.Types
         }
 
         [Fact]
-        public void When_selecting_types_not_decorated_with_or_inheriting_a_noninheritable_attribute_it_should_only_return_the_applicable_types()
+        public void
+            When_selecting_types_not_decorated_with_or_inheriting_a_noninheritable_attribute_it_should_only_return_the_applicable_types()
         {
             // Arrange
             Type type = typeof(ClassWithSomeNonInheritableAttributeDerived);
@@ -466,7 +474,10 @@ namespace FluentAssertions.Specs.Types
         public void When_selecting_types_that_are_classes_it_should_return_the_correct_types()
         {
             // Arrange
-            TypeSelector types = new[] { typeof(NotOnlyClassesClass), typeof(NotOnlyClassesEnumeration), typeof(INotOnlyClassesInterface) }.Types();
+            TypeSelector types = new[]
+            {
+                typeof(NotOnlyClassesClass), typeof(NotOnlyClassesEnumeration), typeof(INotOnlyClassesInterface)
+            }.Types();
 
             // Act
             IEnumerable<Type> filteredTypes = types.ThatAreClasses();
@@ -493,6 +504,105 @@ namespace FluentAssertions.Specs.Types
                 .HaveCount(2)
                 .And.Contain(typeof(INotOnlyClassesInterface))
                 .And.Contain(typeof(NotOnlyClassesEnumeration));
+        }
+
+        [Fact]
+        public void When_selecting_types_that_are_value_types_it_should_return_the_correct_types()
+        {
+            // Arrange
+            Assembly assembly = typeof(InternalEnumValueType).Assembly;
+
+            // Act
+            IEnumerable<Type> types = AllTypes.From(assembly)
+                .ThatAreInNamespace("Internal.ValueTypesAndNotValueTypes.Test")
+                .ThatAreValueTypes();
+
+            // Assert
+            types.Should()
+                .HaveCount(3);
+        }
+
+        [Fact]
+        public void When_selecting_types_that_are_not_value_types_it_should_return_the_correct_types()
+        {
+            // Arrange
+            Assembly assembly = typeof(InternalEnumValueType).Assembly;
+
+            // Act
+            IEnumerable<Type> types = AllTypes.From(assembly)
+                .ThatAreInNamespace("Internal.ValueTypesAndNotValueTypes.Test")
+                .ThatAreNotValueTypes();
+
+            // Assert
+            types.Should()
+                .HaveCount(3);
+        }
+
+        [Fact]
+        public void When_selecting_types_that_are_abstract_classes_it_should_return_the_correct_types()
+        {
+            // Arrange
+            Assembly assembly = typeof(AbstractClass).GetTypeInfo().Assembly;
+
+            // Act
+            IEnumerable<Type> types = AllTypes.From(assembly)
+                .ThatAreInNamespace("Internal.AbstractAndNotAbstractClasses.Test")
+                .ThatAreAbstract();
+
+            // Assert
+            types.Should()
+                .ContainSingle()
+                .Which.Should().Be(typeof(AbstractClass));
+        }
+
+        [Fact]
+        public void When_selecting_types_that_are_not_abstract_classes_it_should_return_the_correct_types()
+        {
+            // Arrange
+            Assembly assembly = typeof(NotAbstractClass).GetTypeInfo().Assembly;
+
+            // Act
+            IEnumerable<Type> types = AllTypes.From(assembly)
+                .ThatAreInNamespace("Internal.AbstractAndNotAbstractClasses.Test")
+                .ThatAreNotAbstract();
+
+            // Assert
+            types.Should()
+                .HaveCount(2);
+        }
+
+        [Fact]
+        public void When_selecting_types_that_are_sealed_classes_it_should_return_the_correct_types()
+        {
+            // Arrange
+            Assembly assembly = typeof(SealedClass).GetTypeInfo().Assembly;
+
+            // Act
+            IEnumerable<Type> types = AllTypes.From(assembly)
+                .ThatAreInNamespace("Internal.SealedAndNotSealedClasses.Test")
+                .ThatAreSealed();
+
+            // Assert
+            types.Should()
+                .ContainSingle()
+                .Which.Should().Be(typeof(SealedClass));
+        }
+
+        [Fact]
+        public void When_selecting_types_that_are_not_sealed_classes_it_should_return_the_correct_types()
+        {
+            // Arrange
+            Assembly assembly = typeof(NotSealedClass).GetTypeInfo().Assembly;
+
+            // Act
+            IEnumerable<Type> types = AllTypes.From(assembly)
+                .ThatAreInNamespace("Internal.SealedAndNotSealedClasses.Test")
+                .ThatAreNotSealed();
+
+            // Assert
+            types.Should()
+                .ContainSingle()
+                .Which.Should().Be(typeof(NotSealedClass));
         }
 
         [Fact]
@@ -574,6 +684,41 @@ namespace FluentAssertions.Specs.Types
                 .And.Contain(typeof(int))
                 .And.Contain(typeof(string));
         }
+
+        [Fact]
+        public void When_selecting_types_that_are_interfaces_it_should_return_the_correct_types()
+        {
+            // Arrange
+            Assembly assembly = typeof(InternalInterface).GetTypeInfo().Assembly;
+
+            // Act
+            IEnumerable<Type> types = AllTypes.From(assembly)
+                .ThatAreInNamespace("Internal.InterfaceAndClasses.Test")
+                .ThatAreInterfaces();
+
+            // Assert
+            types.Should()
+                .ContainSingle()
+                .Which.Should().Be(typeof(InternalInterface));
+        }
+
+        [Fact]
+        public void When_selecting_types_that_are_not_interfaces_it_should_return_the_correct_types()
+        {
+            // Arrange
+            Assembly assembly = typeof(InternalNotInterfaceClass).GetTypeInfo().Assembly;
+
+            // Act
+            IEnumerable<Type> types = AllTypes.From(assembly)
+                .ThatAreInNamespace("Internal.InterfaceAndClasses.Test")
+                .ThatAreNotInterfaces();
+
+            // Assert
+            types.Should()
+                .HaveCount(2)
+                .And.Contain(typeof(InternalNotInterfaceClass))
+                .And.Contain(typeof(InternalAbstractClass));
+        }
     }
 }
 
@@ -581,40 +726,26 @@ namespace FluentAssertions.Specs.Types
 
 namespace Internal.Main.Test
 {
-    internal class SomeBaseClass
-    {
-    }
+    internal class SomeBaseClass;
 
-    internal class ClassDerivedFromSomeBaseClass : SomeBaseClass
-    {
-    }
+    internal class ClassDerivedFromSomeBaseClass : SomeBaseClass;
 
     internal class SomeGenericBaseClass<T>
     {
         public T Value { get; set; }
     }
 
-    internal class ClassDerivedFromSomeGenericBaseClass : SomeGenericBaseClass<int>
-    {
-    }
+    internal class ClassDerivedFromSomeGenericBaseClass : SomeGenericBaseClass<int>;
 
-    internal interface ISomeInterface
-    {
-    }
+    internal interface ISomeInterface;
 
-    internal class ClassImplementingSomeInterface : ISomeInterface
-    {
-    }
+    internal class ClassImplementingSomeInterface : ISomeInterface;
 
-    [AttributeUsage(AttributeTargets.Class, Inherited = true)]
-    internal class SomeAttribute : Attribute
-    {
-    }
+    [AttributeUsage(AttributeTargets.Class)]
+    internal class SomeAttribute : Attribute;
 
     [AttributeUsage(AttributeTargets.Class, Inherited = false)]
-    internal class SomeNonInheritableAttribute : Attribute
-    {
-    }
+    internal class SomeNonInheritableAttribute : Attribute;
 
     [Some]
     internal class ClassWithSomeAttribute
@@ -626,9 +757,7 @@ namespace Internal.Main.Test
         }
     }
 
-    internal class ClassWithSomeAttributeDerived : ClassWithSomeAttribute
-    {
-    }
+    internal class ClassWithSomeAttributeDerived : ClassWithSomeAttribute;
 
     [SomeNonInheritable]
     internal class ClassWithSomeNonInheritableAttribute
@@ -640,9 +769,7 @@ namespace Internal.Main.Test
         }
     }
 
-    internal class ClassWithSomeNonInheritableAttributeDerived : ClassWithSomeNonInheritableAttribute
-    {
-    }
+    internal class ClassWithSomeNonInheritableAttributeDerived : ClassWithSomeNonInheritableAttribute;
 
     [Some]
     internal class ClassWithSomeAttributeThatImplementsSomeInterface : ISomeInterface
@@ -657,42 +784,46 @@ namespace Internal.Main.Test
 
 namespace Internal.Other.Test
 {
-    internal class SomeOtherClass
-    {
-    }
+    internal class SomeOtherClass;
 }
 
 namespace Internal.Other.Test.Common
 {
-    internal class SomeCommonClass
-    {
-    }
+    internal class SomeCommonClass;
 }
 
 namespace Internal.NotOnlyClasses.Test
 {
-    internal class NotOnlyClassesClass
-    {
-    }
+    internal class NotOnlyClassesClass;
 
-    internal enum NotOnlyClassesEnumeration
-    {
-    }
+    internal enum NotOnlyClassesEnumeration;
 
-    internal interface INotOnlyClassesInterface
-    {
-    }
+    internal interface INotOnlyClassesInterface;
 }
 
 namespace Internal.StaticAndNonStaticClasses.Test
 {
-    internal static class StaticClass
-    {
-    }
+    internal static class StaticClass;
 
-    internal class NotAStaticClass
-    {
-    }
+    internal class NotAStaticClass;
+}
+
+namespace Internal.AbstractAndNotAbstractClasses.Test
+{
+    internal abstract class AbstractClass;
+
+    internal class NotAbstractClass;
+
+    internal static class NotAbstractStaticClass;
+}
+
+namespace Internal.InterfaceAndClasses.Test
+{
+    internal interface InternalInterface;
+
+    internal abstract class InternalAbstractClass;
+
+    internal class InternalNotInterfaceClass;
 }
 
 namespace Internal.UnwrapSelectorTestTypes.Test
@@ -732,8 +863,30 @@ namespace Internal.UnwrapSelectorTestTypes.Test
     }
 }
 
-#pragma warning disable RCS1110 // Declare type inside namespace.
-internal class ClassInGlobalNamespace { }
-#pragma warning restore RCS1110
+namespace Internal.SealedAndNotSealedClasses.Test
+{
+    internal sealed class SealedClass;
+
+    internal class NotSealedClass;
+}
+
+namespace Internal.ValueTypesAndNotValueTypes.Test
+{
+    internal struct InternalStructValueType;
+
+    internal record struct InternalRecordStructValueType;
+
+    internal class InternalClassNotValueType;
+
+    internal record class InternalRecordClass;
+
+    internal enum InternalEnumValueType;
+
+    internal interface InternalInterfaceNotValueType;
+}
+
+#pragma warning disable RCS1110, S3903 // Declare type inside namespace.
+internal class ClassInGlobalNamespace;
+#pragma warning restore RCS1110, S3903
 
 #endregion

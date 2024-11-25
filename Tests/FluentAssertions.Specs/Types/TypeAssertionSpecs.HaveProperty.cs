@@ -1,18 +1,17 @@
 ﻿using System;
 using FluentAssertions.Common;
-using FluentAssertions.Specs.Equivalency;
 using Xunit;
 using Xunit.Sdk;
 
-namespace FluentAssertions.Specs.Types
-{
-    /// <content>
-    /// The [Not]HaveProperty specs.
-    /// </content>
-    public partial class TypeAssertionSpecs
-    {
-        #region HaveProperty
+namespace FluentAssertions.Specs.Types;
 
+/// <content>
+/// The [Not]HaveProperty specs.
+/// </content>
+public partial class TypeAssertionSpecs
+{
+    public class HaveProperty
+    {
         [Fact]
         public void When_asserting_a_type_has_a_property_which_it_does_then_it_succeeds()
         {
@@ -24,8 +23,8 @@ namespace FluentAssertions.Specs.Types
                 type.Should()
                     .HaveProperty(typeof(string), "PrivateWriteProtectedReadProperty")
                     .Which.Should()
-                        .BeWritable(CSharpAccessModifier.Private)
-                        .And.BeReadable(CSharpAccessModifier.Protected);
+                    .BeWritable(CSharpAccessModifier.Private)
+                    .And.BeReadable(CSharpAccessModifier.Protected);
 
             // Assert
             act.Should().NotThrow();
@@ -43,7 +42,7 @@ namespace FluentAssertions.Specs.Types
 
             // Assert
             act.Should().Throw<XunitException>()
-                .WithMessage("Expected String *.ClassWithNoMembers.PublicProperty to exist *failure message*, but it does not.");
+                .WithMessage("Expected String *ClassWithNoMembers.PublicProperty to exist *failure message*, but it does not.");
         }
 
         [Fact]
@@ -120,14 +119,13 @@ namespace FluentAssertions.Specs.Types
                 type.Should().HaveProperty(typeof(string), string.Empty);
 
             // Assert
-            act.Should().ThrowExactly<ArgumentNullException>()
+            act.Should().ThrowExactly<ArgumentException>()
                 .WithParameterName("name");
         }
+    }
 
-        #endregion
-
-        #region HavePropertyOfT
-
+    public class HavePropertyOfT
+    {
         [Fact]
         public void When_asserting_a_type_has_a_propertyOfT_which_it_does_then_it_succeeds()
         {
@@ -139,8 +137,8 @@ namespace FluentAssertions.Specs.Types
                 type.Should()
                     .HaveProperty<string>("PrivateWriteProtectedReadProperty")
                     .Which.Should()
-                        .BeWritable(CSharpAccessModifier.Private)
-                        .And.BeReadable(CSharpAccessModifier.Protected);
+                    .BeWritable(CSharpAccessModifier.Private)
+                    .And.BeReadable(CSharpAccessModifier.Protected);
 
             // Assert
             act.Should().NotThrow();
@@ -172,14 +170,13 @@ namespace FluentAssertions.Specs.Types
                 type.Should().HaveProperty<string>(string.Empty);
 
             // Assert
-            act.Should().ThrowExactly<ArgumentNullException>()
+            act.Should().ThrowExactly<ArgumentException>()
                 .WithParameterName("name");
         }
+    }
 
-        #endregion
-
-        #region NotHaveProperty
-
+    public class NotHaveProperty
+    {
         [Fact]
         public void When_asserting_a_type_does_not_have_a_property_which_it_does_not_it_succeeds()
         {
@@ -252,10 +249,8 @@ namespace FluentAssertions.Specs.Types
                 type.Should().NotHaveProperty(string.Empty);
 
             // Assert
-            act.Should().ThrowExactly<ArgumentNullException>()
+            act.Should().ThrowExactly<ArgumentException>()
                 .WithParameterName("name");
         }
-
-        #endregion
     }
 }

@@ -1,81 +1,93 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using FluentAssertions.Common;
 
-namespace FluentAssertions.Execution
+namespace FluentAssertions.Execution;
+
+/// <summary>
+/// Implements a wrapper around all supported test frameworks to throw the correct assertion exception.
+/// </summary>
+internal class TestFrameworkProvider
 {
-    internal static class TestFrameworkProvider
+    #region Private Definitions
+
+    private static readonly Dictionary<string, ITestFramework> Frameworks = new(StringComparer.OrdinalIgnoreCase)
     {
-        #region Private Definitions
+        ["mspec"] = new MSpecFramework(),
+        ["nunit"] = new NUnitTestFramework(),
+        ["mstestv2"] = new MSTestFrameworkV2(),
+        ["xunit2"] = new XUnit2TestFramework() // Keep this the last one as it uses a try/catch approach
+    };
 
-        private static readonly Dictionary<string, ITestFramework> Frameworks = new(StringComparer.OrdinalIgnoreCase)
+    private readonly Configuration configuration;
+
+    private ITestFramework testFramework;
+
+    #endregion
+
+    public TestFrameworkProvider(Configuration configuration)
+    {
+        this.configuration = configuration;
+    }
+
+    [DoesNotReturn]
+    public void Throw(string message)
+    {
+        testFramework ??= DetectFramework();
+        testFramework.Throw(message);
+    }
+
+    private ITestFramework DetectFramework()
+    {
+        ITestFramework detectedFramework = AttemptToDetectUsingAppSetting()
+            ?? AttemptToDetectUsingDynamicScanning()
+            ?? new FallbackTestFramework();
+
+        return detectedFramework;
+    }
+
+    private ITestFramework AttemptToDetectUsingAppSetting()
+    {
+        string frameworkName = configuration.TestFrameworkName;
+
+        if (string.IsNullOrEmpty(frameworkName))
         {
-            ["mspec"] = new MSpecFramework(),
-            ["nspec3"] = new NSpecFramework(),
-            ["nunit"] = new NUnitTestFramework(),
-            ["mstestv2"] = new MSTestFrameworkV2(),
-            ["xunit2"] = new XUnit2TestFramework() // Keep this the last one as it uses a try/catch approach
-        };
-
-        private static ITestFramework testFramework;
-
-        #endregion
-
-        public static void Throw(string message)
-        {
-            if (testFramework is null)
-            {
-                testFramework = DetectFramework();
-            }
-
-            testFramework.Throw(message);
+            return null;
         }
 
-        private static ITestFramework DetectFramework()
+        if (!Frameworks.TryGetValue(frameworkName, out ITestFramework framework))
         {
-            ITestFramework detectedFramework = AttemptToDetectUsingAppSetting()
-                ?? AttemptToDetectUsingDynamicScanning()
-                ?? new FallbackTestFramework();
+            string frameworks = string.Join(", ", Frameworks.Keys);
 
-            return detectedFramework;
+            var message =
+                $"FluentAssertions was configured to use the test framework '{frameworkName}' but this is not supported. " +
+                $"Please use one of the supported frameworks: {frameworks}.";
+
+            throw new InvalidOperationException(message);
         }
 
-        private static ITestFramework AttemptToDetectUsingAppSetting()
+        if (!framework.IsAvailable)
         {
-            string frameworkName = Services.Configuration.TestFrameworkName;
-            if (string.IsNullOrEmpty(frameworkName))
-            {
-                return null;
-            }
+            string frameworks = string.Join(", ", Frameworks.Keys);
 
-            if (!Frameworks.TryGetValue(frameworkName, out ITestFramework framework))
-            {
-                string frameworks = string.Join(", ", Frameworks.Keys);
-                var message = $"FluentAssertions was configured to use {frameworkName} but the requested test framework is not supported. " +
-                    $"Please use one of the supported frameworks: {frameworks}";
+            var innerMessage = framework is LateBoundTestFramework lateBoundTestFramework
+                ? $"the required assembly '{lateBoundTestFramework.AssemblyName}' could not be found"
+                : "it could not be found";
 
-                throw new Exception(message);
-            }
+            var message =
+                $"FluentAssertions was configured to use the test framework '{frameworkName}' but {innerMessage}. " +
+                $"Please use one of the supported frameworks: {frameworks}.";
 
-            if (!framework.IsAvailable)
-            {
-                string frameworks = string.Join(", ", Frameworks.Keys);
-                var message = framework is LateBoundTestFramework lateBoundTestFramework
-                    ? $"FluentAssertions was configured to use {frameworkName} but the required test framework assembly {lateBoundTestFramework.AssemblyName} could not be found. " +
-                        $"Please use one of the supported frameworks: {frameworks}"
-                    : $"FluentAssertions was configured to use {frameworkName} but the required test framework could not be found. " +
-                        $"Please use one of the supported frameworks: {frameworks}";
-
-                throw new Exception(message);
-            }
-
-            return framework;
+            throw new InvalidOperationException(message);
         }
 
-        private static ITestFramework AttemptToDetectUsingDynamicScanning()
-        {
-            return Frameworks.Values.FirstOrDefault(framework => framework.IsAvailable);
-        }
+        return framework;
+    }
+
+    private static ITestFramework AttemptToDetectUsingDynamicScanning()
+    {
+        return Frameworks.Values.FirstOrDefault(framework => framework.IsAvailable);
     }
 }

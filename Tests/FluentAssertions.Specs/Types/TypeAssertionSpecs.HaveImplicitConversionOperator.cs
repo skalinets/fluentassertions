@@ -2,15 +2,15 @@
 using Xunit;
 using Xunit.Sdk;
 
-namespace FluentAssertions.Specs.Types
-{
-    /// <content>
-    /// The [Not]HaveImplicitConversionOperator specs.
-    /// </content>
-    public partial class TypeAssertionSpecs
-    {
-        #region HaveImplicitConversionOperator
+namespace FluentAssertions.Specs.Types;
 
+/// <content>
+/// The [Not]HaveImplicitConversionOperator specs.
+/// </content>
+public partial class TypeAssertionSpecs
+{
+    public class HaveImplicitConversionOperator
+    {
         [Fact]
         public void When_asserting_a_type_has_an_implicit_conversion_operator_which_it_does_it_succeeds()
         {
@@ -24,7 +24,7 @@ namespace FluentAssertions.Specs.Types
                 type.Should()
                     .HaveImplicitConversionOperator(sourceType, targetType)
                     .Which.Should()
-                        .NotBeNull();
+                    .NotBeNull();
 
             // Assert
             act.Should().NotThrow();
@@ -97,11 +97,10 @@ namespace FluentAssertions.Specs.Types
             act.Should().ThrowExactly<ArgumentNullException>()
                 .WithParameterName("targetType");
         }
+    }
 
-        #endregion
-
-        #region HaveImplicitConversionOperatorOfT
-
+    public class HaveImplicitConversionOperatorOfT
+    {
         [Fact]
         public void When_asserting_a_type_has_an_implicit_conversion_operatorOfT_which_it_does_it_succeeds()
         {
@@ -113,7 +112,7 @@ namespace FluentAssertions.Specs.Types
                 type.Should()
                     .HaveImplicitConversionOperator<TypeWithConversionOperators, int>()
                     .Which.Should()
-                        .NotBeNull();
+                    .NotBeNull();
 
             // Assert
             act.Should().NotThrow();
@@ -154,11 +153,10 @@ namespace FluentAssertions.Specs.Types
                     "Expected public static implicit *.String(*.TypeWithConversionOperators) to exist *failure message*" +
                     ", but type is <null>.");
         }
+    }
 
-        #endregion
-
-        #region NotHaveImplicitConversionOperator
-
+    public class NotHaveImplicitConversionOperator
+    {
         [Fact]
         public void When_asserting_a_type_does_not_have_an_implicit_conversion_operator_which_it_does_not_it_succeeds()
         {
@@ -243,11 +241,10 @@ namespace FluentAssertions.Specs.Types
             act.Should().ThrowExactly<ArgumentNullException>()
                 .WithParameterName("targetType");
         }
+    }
 
-        #endregion
-
-        #region NotHaveImplicitConversionOperatorOfT
-
+    public class NotHaveImplicitConversionOperatorOfT
+    {
         [Fact]
         public void When_asserting_a_type_does_not_have_an_implicit_conversion_operatorOfT_which_it_does_not_it_succeeds()
         {
@@ -298,7 +295,5 @@ namespace FluentAssertions.Specs.Types
                     "Expected public static implicit *.String(*.TypeWithConversionOperators) to not exist *failure message*" +
                     ", but type is <null>.");
         }
-
-        #endregion
     }
 }

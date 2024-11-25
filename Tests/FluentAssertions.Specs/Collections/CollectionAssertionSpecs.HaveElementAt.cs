@@ -3,15 +3,15 @@ using FluentAssertions.Execution;
 using Xunit;
 using Xunit.Sdk;
 
-namespace FluentAssertions.Specs.Collections
-{
-    /// <content>
-    /// The HaveElementAt specs.
-    /// </content>
-    public partial class CollectionAssertionSpecs
-    {
-        #region Have Element At
+namespace FluentAssertions.Specs.Collections;
 
+/// <content>
+/// The HaveElementAt specs.
+/// </content>
+public partial class CollectionAssertionSpecs
+{
+    public class HaveElementAt
+    {
         [Fact]
         public void When_collection_has_expected_element_at_specific_index_it_should_not_throw()
         {
@@ -92,7 +92,5 @@ namespace FluentAssertions.Specs.Collections
             act.Should().Throw<XunitException>()
                 .WithMessage("Expected*assignable*string*");
         }
-
-        #endregion
     }
 }

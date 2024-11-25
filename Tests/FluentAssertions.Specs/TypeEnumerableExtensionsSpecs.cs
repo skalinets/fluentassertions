@@ -13,7 +13,10 @@ namespace FluentAssertions.Specs
         [Fact]
         public void When_selecting_types_that_decorated_with_attribute_it_should_return_the_correct_type()
         {
-            var types = new[] { typeof(JustAClass), typeof(ClassWithSomeAttribute), typeof(ClassDerivedFromClassWithSomeAttribute) };
+            var types = new[]
+            {
+                typeof(JustAClass), typeof(ClassWithSomeAttribute), typeof(ClassDerivedFromClassWithSomeAttribute)
+            };
 
             types.ThatAreDecoratedWith<SomeAttribute>()
                 .Should()
@@ -24,7 +27,10 @@ namespace FluentAssertions.Specs
         [Fact]
         public void When_selecting_types_that_decorated_with_attribute_or_inherit_it_should_return_the_correct_type()
         {
-            var types = new[] { typeof(JustAClass), typeof(ClassWithSomeAttribute), typeof(ClassDerivedFromClassWithSomeAttribute) };
+            var types = new[]
+            {
+                typeof(JustAClass), typeof(ClassWithSomeAttribute), typeof(ClassDerivedFromClassWithSomeAttribute)
+            };
 
             types.ThatAreDecoratedWithOrInherit<SomeAttribute>()
                 .Should()
@@ -36,7 +42,10 @@ namespace FluentAssertions.Specs
         [Fact]
         public void When_selecting_types_that_not_decorated_with_attribute_it_should_return_the_correct_type()
         {
-            var types = new[] { typeof(JustAClass), typeof(ClassWithSomeAttribute), typeof(ClassDerivedFromClassWithSomeAttribute) };
+            var types = new[]
+            {
+                typeof(JustAClass), typeof(ClassWithSomeAttribute), typeof(ClassDerivedFromClassWithSomeAttribute)
+            };
 
             types.ThatAreNotDecoratedWith<SomeAttribute>()
                 .Should()
@@ -48,7 +57,10 @@ namespace FluentAssertions.Specs
         [Fact]
         public void When_selecting_types_that_not_decorated_with_attribute_or_inherit_it_should_return_the_correct_type()
         {
-            var types = new[] { typeof(JustAClass), typeof(ClassWithSomeAttribute), typeof(ClassDerivedFromClassWithSomeAttribute) };
+            var types = new[]
+            {
+                typeof(JustAClass), typeof(ClassWithSomeAttribute), typeof(ClassDerivedFromClassWithSomeAttribute)
+            };
 
             types.ThatAreNotDecoratedWithOrInherit<SomeAttribute>()
                 .Should()
@@ -186,56 +198,35 @@ namespace FluentAssertions.Specs
 
 namespace TypeEnumerableExtensionsSpecs.BaseNamespace
 {
-    internal class BaseNamespaceClass
-    {
-    }
+    internal class BaseNamespaceClass;
 }
 
 namespace TypeEnumerableExtensionsSpecs.BaseNamespace.Nested
 {
-    internal class NestedNamespaceClass
-    {
-    }
+    internal class NestedNamespaceClass;
 }
 
 namespace TypeEnumerableExtensionsSpecs.Internal
 {
-    internal interface IJustAnInterface
-    {
-    }
+    internal interface IJustAnInterface;
 
-    internal class JustAClass
-    {
-    }
+    internal class JustAClass;
 
-    internal static class AStaticClass
-    {
-    }
+    internal static class AStaticClass;
 
-    internal class SomeBaseClass
-    {
-    }
+    internal class SomeBaseClass;
 
-    internal class SomeClassDerivedFromSomeBaseClass : SomeBaseClass
-    {
-    }
+    internal class SomeClassDerivedFromSomeBaseClass : SomeBaseClass;
 
-    internal class ClassImplementingJustAnInterface : IJustAnInterface
-    {
-    }
+    internal class ClassImplementingJustAnInterface : IJustAnInterface;
 
     [Some]
-    internal class ClassWithSomeAttribute
-    {
-    }
+    internal class ClassWithSomeAttribute;
 
-    internal class ClassDerivedFromClassWithSomeAttribute : ClassWithSomeAttribute
-    {
-    }
+    internal class ClassDerivedFromClassWithSomeAttribute : ClassWithSomeAttribute;
 
-    [AttributeUsage(AttributeTargets.Class, Inherited = true)]
-    internal class SomeAttribute : Attribute
-    {
-    }
+    [AttributeUsage(AttributeTargets.Class)]
+    internal class SomeAttribute : Attribute;
 }
+
 #endregion

@@ -1,16 +1,16 @@
 ﻿using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Xml.Linq;
+using FluentAssertions.Execution;
 using FluentAssertions.Formatting;
 using Xunit;
 using Xunit.Sdk;
 
-namespace FluentAssertions.Specs.Xml
-{
-    public class XDocumentAssertionSpecs
-    {
-        #region Be / NotBe
+namespace FluentAssertions.Specs.Xml;
 
+public class XDocumentAssertionSpecs
+{
+    public class Be
+    {
         [Fact]
         public void When_asserting_a_xml_document_is_equal_to_the_same_xml_document_it_should_succeed()
         {
@@ -73,7 +73,7 @@ namespace FluentAssertions.Specs.Xml
         public void When_a_document_is_expected_to_equal_null_it_fails()
         {
             // Arrange
-            XDocument theDocument = new XDocument();
+            XDocument theDocument = new();
 
             // Act
             Action act = () => theDocument.Should().Be(null, "we want to test the failure {0}", "message");
@@ -98,7 +98,10 @@ namespace FluentAssertions.Specs.Xml
             act.Should().Throw<XunitException>().WithMessage(
                 "Expected theDocument to be <data*> because we want to test the failure message, but found <configuration*>.");
         }
+    }
 
+    public class NotBe
+    {
         [Fact]
         public void When_asserting_a_xml_document_is_not_equal_to_a_different_xml_document_it_should_succeed()
         {
@@ -147,7 +150,7 @@ namespace FluentAssertions.Specs.Xml
         public void When_a_document_is_not_supposed_to_be_null_it_succeeds()
         {
             // Arrange
-            XDocument theDocument = new XDocument();
+            XDocument theDocument = new();
 
             // Act
             Action act = () => theDocument.Should().NotBe(null);
@@ -185,11 +188,10 @@ namespace FluentAssertions.Specs.Xml
             act.Should().Throw<XunitException>().WithMessage(
                 "Did not expect theDocument to be <configuration*> because we want to test the failure message.");
         }
+    }
 
-        #endregion
-
-        #region BeEquivalentTo / NotBeEquivalentTo
-
+    public class BeEquivalentTo
+    {
         [Fact]
         public void When_asserting_a_xml_document_is_equivalent_to_the_same_xml_document_it_should_succeed()
         {
@@ -206,7 +208,8 @@ namespace FluentAssertions.Specs.Xml
         }
 
         [Fact]
-        public void When_asserting_a_xml_selfclosing_document_is_equivalent_to_a_different_xml_document_with_same_structure_it_should_succeed()
+        public void
+            When_asserting_a_xml_selfclosing_document_is_equivalent_to_a_different_xml_document_with_same_structure_it_should_succeed()
         {
             // Arrange
             var document = XDocument.Parse("<parent><child /></parent>");
@@ -221,7 +224,8 @@ namespace FluentAssertions.Specs.Xml
         }
 
         [Fact]
-        public void When_asserting_a_xml_document_is_equivalent_to_a_different_xml_document_with_same_structure_it_should_succeed()
+        public void
+            When_asserting_a_xml_document_is_equivalent_to_a_different_xml_document_with_same_structure_it_should_succeed()
         {
             // Arrange
             var document = XDocument.Parse("<parent><child></child></parent>");
@@ -268,7 +272,8 @@ namespace FluentAssertions.Specs.Xml
         }
 
         [Fact]
-        public void When_asserting_a_xml_document_with_selfclosing_child_is_equivalent_to_a_different_xml_document_with_subchild_child_it_should_fail()
+        public void
+            When_asserting_a_xml_document_with_selfclosing_child_is_equivalent_to_a_different_xml_document_with_subchild_child_it_should_fail()
         {
             // Arrange
             var theDocument = XDocument.Parse("<parent><child /></parent>");
@@ -284,7 +289,8 @@ namespace FluentAssertions.Specs.Xml
         }
 
         [Fact]
-        public void When_asserting_a_xml_document_is_equivalent_to_a_different_xml_document_elements_missing_it_should_fail_with_descriptive_message()
+        public void
+            When_asserting_a_xml_document_is_equivalent_to_a_different_xml_document_elements_missing_it_should_fail_with_descriptive_message()
         {
             // Arrange
             var theDocument = XDocument.Parse("<parent><child /><child2 /></parent>");
@@ -301,7 +307,8 @@ namespace FluentAssertions.Specs.Xml
         }
 
         [Fact]
-        public void When_asserting_a_xml_document_is_equivalent_to_a_different_xml_document_with_extra_elements_it_should_fail_with_descriptive_message()
+        public void
+            When_asserting_a_xml_document_is_equivalent_to_a_different_xml_document_with_extra_elements_it_should_fail_with_descriptive_message()
         {
             // Arrange
             var theDocument = XDocument.Parse("<parent><child /></parent>");
@@ -363,7 +370,212 @@ namespace FluentAssertions.Specs.Xml
         }
 
         [Fact]
-        public void When_asserting_a_xml_document_is_not_equivalent_to_a_different_xml_document_with_elements_missing_it_should_succeed()
+        public void
+            When_assertion_an_xml_document_is_equivalent_to_a_different_xml_document_with_different_namespace_prefix_it_should_succeed()
+        {
+            // Arrange
+            var subject = XDocument.Parse("<xml xmlns=\"urn:a\"/>");
+            var expected = XDocument.Parse("<a:xml xmlns:a=\"urn:a\"/>");
+
+            // Act
+            Action act = () =>
+                subject.Should().BeEquivalentTo(expected);
+
+            // Assert
+            act.Should().NotThrow();
+        }
+
+        [Fact]
+        public void
+            When_asserting_an_xml_document_is_equivalent_to_a_different_xml_document_which_differs_only_on_unused_namespace_declaration_it_should_succeed()
+        {
+            // Arrange
+            var subject = XDocument.Parse("<xml xmlns:a=\"urn:a\"/>");
+            var expected = XDocument.Parse("<xml/>");
+
+            // Act
+            Action act = () =>
+                subject.Should().BeEquivalentTo(expected);
+
+            // Assert
+            act.Should().NotThrow();
+        }
+
+        [Fact]
+        public void
+            When_asserting_an_xml_document_is_equivalent_to_different_xml_document_which_lacks_attributes_it_should_fail_with_descriptive_message()
+        {
+            // Arrange
+            var theDocument = XDocument.Parse("<xml><element b=\"1\"/></xml>");
+            var expected = XDocument.Parse("<xml><element a=\"b\" b=\"1\"/></xml>");
+
+            // Act
+            Action act = () =>
+                theDocument.Should().BeEquivalentTo(expected, "we want to test the failure {0}", "message");
+
+            // Assert
+            act.Should().Throw<XunitException>().WithMessage(
+                "Expected attribute \"a\" in theDocument at \"/xml/element\" because we want to test the failure message, but found none.");
+        }
+
+        [Fact]
+        public void
+            When_asserting_an_xml_document_is_equivalent_to_different_xml_document_which_has_extra_attributes_it_should_fail_with_descriptive_message()
+        {
+            // Arrange
+            var theDocument = XDocument.Parse("<xml><element a=\"b\"/></xml>");
+            var expected = XDocument.Parse("<xml><element/></xml>");
+
+            // Act
+            Action act = () =>
+                theDocument.Should().BeEquivalentTo(expected, "we want to test the failure {0}", "message");
+
+            // Assert
+            act.Should().Throw<XunitException>().WithMessage(
+                "Did not expect to find attribute \"a\" in theDocument at \"/xml/element\" because we want to test the failure message.");
+        }
+
+        [Fact]
+        public void
+            When_asserting_an_xml_document_is_equivalent_to_different_xml_document_which_has_different_attribute_values_it_should_fail_with_descriptive_message()
+        {
+            // Arrange
+            var theDocument = XDocument.Parse("<xml><element a=\"b\"/></xml>");
+            var expected = XDocument.Parse("<xml><element a=\"c\"/></xml>");
+
+            // Act
+            Action act = () =>
+                theDocument.Should().BeEquivalentTo(expected, "we want to test the failure {0}", "message");
+
+            // Assert
+            act.Should().Throw<XunitException>().WithMessage(
+                "Expected attribute \"a\" in theDocument at \"/xml/element\" to have value \"c\" because we want to test the failure message, but found \"b\".");
+        }
+
+        [Fact]
+        public void
+            When_asserting_an_xml_document_is_equivalent_to_different_xml_document_which_has_attribute_with_different_namespace_it_should_fail_with_descriptive_message()
+        {
+            // Arrange
+            var theDocument = XDocument.Parse("<xml><element xmlns:ns=\"urn:a\" ns:a=\"b\"/></xml>");
+            var expected = XDocument.Parse("<xml><element a=\"b\"/></xml>");
+
+            // Act
+            Action act = () =>
+                theDocument.Should().BeEquivalentTo(expected, "we want to test the failure {0}", "message");
+
+            // Assert
+            act.Should().Throw<XunitException>().WithMessage(
+                "Did not expect to find attribute \"ns:a\" in theDocument at \"/xml/element\" because we want to test the failure message.");
+        }
+
+        [Fact]
+        public void
+            When_asserting_an_xml_document_is_equivalent_to_different_xml_document_which_has_different_text_contents_it_should_fail_with_descriptive_message()
+        {
+            // Arrange
+            var theDocument = XDocument.Parse("<xml>a</xml>");
+            var expected = XDocument.Parse("<xml>b</xml>");
+
+            // Act
+            Action act = () =>
+                theDocument.Should().BeEquivalentTo(expected, "we want to test the failure {0}", "message");
+
+            // Assert
+            act.Should().Throw<XunitException>().WithMessage(
+                "Expected content to be \"b\" in theDocument at \"/xml\" because we want to test the failure message, but found \"a\".");
+        }
+
+        [Fact]
+        public void
+            When_asserting_an_xml_document_is_equivalent_to_different_xml_document_with_different_comments_it_should_succeed()
+        {
+            // Arrange
+            var subject = XDocument.Parse("<xml><!--Comment--><a/></xml>");
+            var expected = XDocument.Parse("<xml><a/><!--Comment--></xml>");
+
+            // Act
+            Action act = () => subject.Should().BeEquivalentTo(expected);
+
+            // Assert
+            act.Should().NotThrow();
+        }
+
+        [Fact]
+        public void
+            When_asserting_equivalence_of_an_xml_document_but_has_different_attribute_value_it_should_fail_with_xpath_to_difference()
+        {
+            // Arrange
+            XDocument actual = XDocument.Parse("<xml><a attr=\"x\"/><b id=\"foo\"/></xml>");
+            XDocument expected = XDocument.Parse("<xml><a attr=\"x\"/><b id=\"bar\"/></xml>");
+
+            // Act
+            Action act = () => actual.Should().BeEquivalentTo(expected);
+
+            // Assert
+            act.Should().Throw<XunitException>().WithMessage("*\"/xml/b\"*");
+        }
+
+        [Fact]
+        public void
+            When_asserting_equivalence_of_document_with_repeating_element_names_but_differs_it_should_fail_with_index_xpath_to_difference()
+        {
+            // Arrange
+            XDocument actual = XDocument.Parse(
+                "<xml><xml2 /><xml2 /><xml2><a x=\"y\"/><b><sub /></b><a x=\"y\"/></xml2></xml>");
+
+            XDocument expected = XDocument.Parse(
+                "<xml><xml2 /><xml2 /><xml2><a x=\"y\"/><b><sub /></b><a x=\"z\"/></xml2></xml>");
+
+            // Act
+            Action act = () => actual.Should().BeEquivalentTo(expected);
+
+            // Assert
+            act.Should().Throw<XunitException>().WithMessage("*\"/xml/xml2[3]/a[2]\"*");
+        }
+
+        [Fact]
+        public void
+            When_asserting_equivalence_of_document_with_repeating_element_names_on_different_levels_but_differs_it_should_fail_with_index_xpath_to_difference()
+        {
+            // Arrange
+            XDocument actual = XDocument.Parse(
+                "<xml><xml /><xml /><xml><xml x=\"y\"/><xml2><xml /></xml2><xml x=\"y\"/></xml></xml>");
+
+            XDocument expected = XDocument.Parse(
+                "<xml><xml /><xml /><xml><xml x=\"y\"/><xml2><xml /></xml2><xml x=\"z\"/></xml></xml>");
+
+            // Act
+            Action act = () => actual.Should().BeEquivalentTo(expected);
+
+            // Assert
+            act.Should().Throw<XunitException>().WithMessage("*\"/xml/xml[3]/xml[2]\"*");
+        }
+
+        [Fact]
+        public void
+            When_asserting_equivalence_of_document_with_repeating_element_names_with_different_parents_but_differs_it_should_fail_with_index_xpath_to_difference()
+        {
+            // Arrange
+            XDocument actual = XDocument.Parse(
+                "<root><xml1 /><xml1><xml2 /><xml2 a=\"x\" /></xml1><xml1><xml2 /><xml2 a=\"x\" /></xml1></root>");
+
+            XDocument expected = XDocument.Parse(
+                "<root><xml1 /><xml1><xml2 /><xml2 a=\"x\" /></xml1><xml1><xml2 /><xml2 a=\"y\" /></xml1></root>");
+
+            // Act
+            Action act = () => actual.Should().BeEquivalentTo(expected);
+
+            // Assert
+            act.Should().Throw<XunitException>().WithMessage("*\"/root/xml1[3]/xml2[2]\"*");
+        }
+    }
+
+    public class NotBeEquivalentTo
+    {
+        [Fact]
+        public void
+            When_asserting_a_xml_document_is_not_equivalent_to_a_different_xml_document_with_elements_missing_it_should_succeed()
         {
             // Arrange
             var document = XDocument.Parse("<parent><child /><child2 /></parent>");
@@ -378,7 +590,8 @@ namespace FluentAssertions.Specs.Xml
         }
 
         [Fact]
-        public void When_asserting_a_xml_document_is_not_equivalent_to_a_different_xml_document_with_extra_elements_it_should_succeed()
+        public void
+            When_asserting_a_xml_document_is_not_equivalent_to_a_different_xml_document_with_extra_elements_it_should_succeed()
         {
             // Arrange
             var document = XDocument.Parse("<parent><child /></parent>");
@@ -393,7 +606,8 @@ namespace FluentAssertions.Specs.Xml
         }
 
         [Fact]
-        public void When_asserting_a_xml_document_is_not_equivalent_to_a_different_xml_document_with_same_structure_it_should_fail()
+        public void
+            When_asserting_a_xml_document_is_not_equivalent_to_a_different_xml_document_with_same_structure_it_should_fail()
         {
             // Arrange
             var theDocument = XDocument.Parse("<parent><child /></parent>");
@@ -425,7 +639,8 @@ namespace FluentAssertions.Specs.Xml
         }
 
         [Fact]
-        public void When_asserting_a_xml_document_is_not_equivalent_to_a_different_xml_document_with_same_structure_it_should_fail_with_descriptive_message()
+        public void
+            When_asserting_a_xml_document_is_not_equivalent_to_a_different_xml_document_with_same_structure_it_should_fail_with_descriptive_message()
         {
             // Arrange
             var theDocument = XDocument.Parse("<parent><child /></parent>");
@@ -441,7 +656,8 @@ namespace FluentAssertions.Specs.Xml
         }
 
         [Fact]
-        public void When_asserting_a_xml_document_is_not_equivalent_to_a_different_xml_document_with_same_contents_but_different_ns_prefixes_it_should_fail()
+        public void
+            When_asserting_a_xml_document_is_not_equivalent_to_a_different_xml_document_with_same_contents_but_different_ns_prefixes_it_should_fail()
         {
             // Arrange
             var theDocument = XDocument.Parse(@"<parent xmlns:ns1=""a""><ns1:child /></parent>");
@@ -457,7 +673,8 @@ namespace FluentAssertions.Specs.Xml
         }
 
         [Fact]
-        public void When_asserting_a_xml_document_is_not_equivalent_to_a_different_xml_document_with_same_contents_but_extra_unused_xmlns_declaration_it_should_fail()
+        public void
+            When_asserting_a_xml_document_is_not_equivalent_to_a_different_xml_document_with_same_contents_but_extra_unused_xmlns_declaration_it_should_fail()
         {
             // Arrange
             var theDocument = XDocument.Parse(@"<xml xmlns:ns1=""a"" />");
@@ -473,7 +690,8 @@ namespace FluentAssertions.Specs.Xml
         }
 
         [Fact]
-        public void When_asserting_a_xml_document_is_not_equivalent_to_the_same_xml_document_it_should_fail_with_descriptive_message()
+        public void
+            When_asserting_a_xml_document_is_not_equivalent_to_the_same_xml_document_it_should_fail_with_descriptive_message()
         {
             // Arrange
             var theDocument = XDocument.Parse("<parent><child /></parent>");
@@ -486,192 +704,6 @@ namespace FluentAssertions.Specs.Xml
             // Assert
             act.Should().Throw<XunitException>().WithMessage(
                 "Did not expect theDocument to be equivalent because we want to test the failure message, but it is.");
-        }
-
-        [Fact]
-        public void When_assertion_an_xml_document_is_equivalent_to_a_different_xml_document_with_different_namespace_prefix_it_should_succeed()
-        {
-            // Arrange
-            var subject = XDocument.Parse("<xml xmlns=\"urn:a\"/>");
-            var expected = XDocument.Parse("<a:xml xmlns:a=\"urn:a\"/>");
-
-            // Act
-            Action act = () =>
-                subject.Should().BeEquivalentTo(expected);
-
-            // Assert
-            act.Should().NotThrow();
-        }
-
-        [Fact]
-        public void When_asserting_an_xml_document_is_equivalent_to_a_different_xml_document_which_differs_only_on_unused_namespace_declaration_it_should_succeed()
-        {
-            // Arrange
-            var subject = XDocument.Parse("<xml xmlns:a=\"urn:a\"/>");
-            var expected = XDocument.Parse("<xml/>");
-
-            // Act
-            Action act = () =>
-                subject.Should().BeEquivalentTo(expected);
-
-            // Assert
-            act.Should().NotThrow();
-        }
-
-        [Fact]
-        public void When_asserting_an_xml_document_is_equivalent_to_different_xml_document_which_lacks_attributes_it_should_fail_with_descriptive_message()
-        {
-            // Arrange
-            var theDocument = XDocument.Parse("<xml><element b=\"1\"/></xml>");
-            var expected = XDocument.Parse("<xml><element a=\"b\" b=\"1\"/></xml>");
-
-            // Act
-            Action act = () =>
-                theDocument.Should().BeEquivalentTo(expected, "we want to test the failure {0}", "message");
-
-            // Assert
-            act.Should().Throw<XunitException>().WithMessage(
-                "Expected attribute \"a\" in theDocument at \"/xml/element\" because we want to test the failure message, but found none.");
-        }
-
-        [Fact]
-        public void When_asserting_an_xml_document_is_equivalent_to_different_xml_document_which_has_extra_attributes_it_should_fail_with_descriptive_message()
-        {
-            // Arrange
-            var theDocument = XDocument.Parse("<xml><element a=\"b\"/></xml>");
-            var expected = XDocument.Parse("<xml><element/></xml>");
-
-            // Act
-            Action act = () =>
-                theDocument.Should().BeEquivalentTo(expected, "we want to test the failure {0}", "message");
-
-            // Assert
-            act.Should().Throw<XunitException>().WithMessage(
-                "Did not expect to find attribute \"a\" in theDocument at \"/xml/element\" because we want to test the failure message.");
-        }
-
-        [Fact]
-        public void When_asserting_an_xml_document_is_equivalent_to_different_xml_document_which_has_different_attribute_values_it_should_fail_with_descriptive_message()
-        {
-            // Arrange
-            var theDocument = XDocument.Parse("<xml><element a=\"b\"/></xml>");
-            var expected = XDocument.Parse("<xml><element a=\"c\"/></xml>");
-
-            // Act
-            Action act = () =>
-                theDocument.Should().BeEquivalentTo(expected, "we want to test the failure {0}", "message");
-
-            // Assert
-            act.Should().Throw<XunitException>().WithMessage(
-                "Expected attribute \"a\" in theDocument at \"/xml/element\" to have value \"c\" because we want to test the failure message, but found \"b\".");
-        }
-
-        [Fact]
-        public void When_asserting_an_xml_document_is_equivalent_to_different_xml_document_which_has_attribute_with_different_namespace_it_should_fail_with_descriptive_message()
-        {
-            // Arrange
-            var theDocument = XDocument.Parse("<xml><element xmlns:ns=\"urn:a\" ns:a=\"b\"/></xml>");
-            var expected = XDocument.Parse("<xml><element a=\"b\"/></xml>");
-
-            // Act
-            Action act = () =>
-                theDocument.Should().BeEquivalentTo(expected, "we want to test the failure {0}", "message");
-
-            // Assert
-            act.Should().Throw<XunitException>().WithMessage(
-                "Did not expect to find attribute \"ns:a\" in theDocument at \"/xml/element\" because we want to test the failure message.");
-        }
-
-        [Fact]
-        public void When_asserting_an_xml_document_is_equivalent_to_different_xml_document_which_has_different_text_contents_it_should_fail_with_descriptive_message()
-        {
-            // Arrange
-            var theDocument = XDocument.Parse("<xml>a</xml>");
-            var expected = XDocument.Parse("<xml>b</xml>");
-
-            // Act
-            Action act = () =>
-                theDocument.Should().BeEquivalentTo(expected, "we want to test the failure {0}", "message");
-
-            // Assert
-            act.Should().Throw<XunitException>().WithMessage(
-                "Expected content to be \"b\" in theDocument at \"/xml\" because we want to test the failure message, but found \"a\".");
-        }
-
-        [Fact]
-        public void When_asserting_an_xml_document_is_equivalent_to_different_xml_document_with_different_comments_it_should_succeed()
-        {
-            // Arrange
-            var subject = XDocument.Parse("<xml><!--Comment--><a/></xml>");
-            var expected = XDocument.Parse("<xml><a/><!--Comment--></xml>");
-
-            // Act
-            Action act = () => subject.Should().BeEquivalentTo(expected);
-
-            // Assert
-            act.Should().NotThrow();
-        }
-
-        [Fact]
-        public void When_asserting_equivalence_of_an_xml_document_but_has_different_attribute_value_it_should_fail_with_xpath_to_difference()
-        {
-            // Arrange
-            XDocument actual = XDocument.Parse("<xml><a attr=\"x\"/><b id=\"foo\"/></xml>");
-            XDocument expected = XDocument.Parse("<xml><a attr=\"x\"/><b id=\"bar\"/></xml>");
-
-            // Act
-            Action act = () => actual.Should().BeEquivalentTo(expected);
-
-            // Assert
-            act.Should().Throw<XunitException>().WithMessage("*\"/xml/b\"*");
-        }
-
-        [Fact]
-        public void When_asserting_equivalence_of_document_with_repeating_element_names_but_differs_it_should_fail_with_index_xpath_to_difference()
-        {
-            // Arrange
-            XDocument actual = XDocument.Parse(
-                "<xml><xml2 /><xml2 /><xml2><a x=\"y\"/><b><sub /></b><a x=\"y\"/></xml2></xml>");
-            XDocument expected = XDocument.Parse(
-                "<xml><xml2 /><xml2 /><xml2><a x=\"y\"/><b><sub /></b><a x=\"z\"/></xml2></xml>");
-
-            // Act
-            Action act = () => actual.Should().BeEquivalentTo(expected);
-
-            // Assert
-            act.Should().Throw<XunitException>().WithMessage("*\"/xml/xml2[3]/a[2]\"*");
-        }
-
-        [Fact]
-        public void When_asserting_equivalence_of_document_with_repeating_element_names_on_different_levels_but_differs_it_should_fail_with_index_xpath_to_difference()
-        {
-            // Arrange
-            XDocument actual = XDocument.Parse(
-                "<xml><xml /><xml /><xml><xml x=\"y\"/><xml2><xml /></xml2><xml x=\"y\"/></xml></xml>");
-            XDocument expected = XDocument.Parse(
-                "<xml><xml /><xml /><xml><xml x=\"y\"/><xml2><xml /></xml2><xml x=\"z\"/></xml></xml>");
-
-            // Act
-            Action act = () => actual.Should().BeEquivalentTo(expected);
-
-            // Assert
-            act.Should().Throw<XunitException>().WithMessage("*\"/xml/xml[3]/xml[2]\"*");
-        }
-
-        [Fact]
-        public void When_asserting_equivalence_of_document_with_repeating_element_names_with_different_parents_but_differs_it_should_fail_with_index_xpath_to_difference()
-        {
-            // Arrange
-            XDocument actual = XDocument.Parse(
-                "<root><xml1 /><xml1><xml2 /><xml2 a=\"x\" /></xml1><xml1><xml2 /><xml2 a=\"x\" /></xml1></root>");
-            XDocument expected = XDocument.Parse(
-                "<root><xml1 /><xml1><xml2 /><xml2 a=\"x\" /></xml1><xml1><xml2 /><xml2 a=\"y\" /></xml1></root>");
-
-            // Act
-            Action act = () => actual.Should().BeEquivalentTo(expected);
-
-            // Assert
-            act.Should().Throw<XunitException>().WithMessage("*\"/root/xml1[3]/xml2[2]\"*");
         }
 
         [Fact]
@@ -710,11 +742,10 @@ namespace FluentAssertions.Specs.Xml
             // Assert
             act.Should().NotThrow();
         }
+    }
 
-        #endregion
-
-        #region BeNull / NotBeNull
-
+    public class BeNull
+    {
         [Fact]
         public void When_asserting_a_null_xml_document_is_null_it_should_succeed()
         {
@@ -758,7 +789,10 @@ namespace FluentAssertions.Specs.Xml
             act.Should().Throw<XunitException>().WithMessage(
                 "Expected theDocument to be <null> because we want to test the failure message, but found <configuration*>.");
         }
+    }
 
+    public class NotBeNull
+    {
         [Fact]
         public void When_asserting_a_non_null_xml_document_is_not_null_it_should_succeed()
         {
@@ -801,19 +835,20 @@ namespace FluentAssertions.Specs.Xml
             act.Should().Throw<XunitException>().WithMessage(
                 "Expected theDocument not to be <null> because we want to test the failure message.");
         }
+    }
 
-        #endregion
-
-        #region HaveRoot
-
+    public class HaveRoot
+    {
         [Fact]
         public void When_asserting_document_has_root_element_and_it_does_it_should_succeed_and_return_it_for_chaining()
         {
             // Arrange
             var document = XDocument.Parse(
-                @"<parent>
+                """
+                <parent>
                     <child />
-                  </parent>");
+                </parent>
+                """);
 
             // Act
             XElement root = document.Should().HaveRoot("parent").Subject;
@@ -827,9 +862,11 @@ namespace FluentAssertions.Specs.Xml
         {
             // Arrange
             var theDocument = XDocument.Parse(
-                @"<parent>
+                """
+                <parent>
                     <child />
-                  </parent>");
+                </parent>
+                """);
 
             // Act
             Action act = () => theDocument.Should().HaveRoot("unknown");
@@ -844,9 +881,11 @@ namespace FluentAssertions.Specs.Xml
         {
             // Arrange
             var theDocument = XDocument.Parse(
-                @"<parent>
+                """
+                <parent>
                     <child />
-                  </parent>");
+                </parent>
+                """);
 
             // Act
             Action act = () =>
@@ -854,8 +893,8 @@ namespace FluentAssertions.Specs.Xml
 
             // Assert
             string expectedMessage = "Expected theDocument to have root element \"unknown\"" +
-                                     " because we want to test the failure message" +
-                                    $", but found {Formatter.ToString(theDocument)}.";
+                " because we want to test the failure message" +
+                $", but found {Formatter.ToString(theDocument)}.";
 
             act.Should().Throw<XunitException>().WithMessage(expectedMessage);
         }
@@ -875,20 +914,41 @@ namespace FluentAssertions.Specs.Xml
         }
 
         [Fact]
-        public void When_asserting_a_document_has_a_null_root_element_it_should_fail()
+        public void When_asserting_a_document_has_a_root_element_with_a_null_name_it_should_fail()
         {
             // Arrange
             var theDocument = XDocument.Parse(
-                @"<parent>
+                """
+                <parent>
                     <child />
-                  </parent>");
+                </parent>
+                """);
 
             // Act
             Action act = () => theDocument.Should().HaveRoot(null);
 
             // Assert
             act.Should().Throw<ArgumentNullException>().WithMessage(
-                "Cannot assert the document has a root element if the element name is <null>*");
+                "Cannot assert the document has a root element if the expected name is <null>*");
+        }
+
+        [Fact]
+        public void When_asserting_a_document_has_a_root_element_with_a_null_xname_it_should_fail()
+        {
+            // Arrange
+            var theDocument = XDocument.Parse(
+                """
+                <parent>
+                    <child />
+                </parent>
+                """);
+
+            // Act
+            Action act = () => theDocument.Should().HaveRoot((XName)null);
+
+            // Assert
+            act.Should().Throw<ArgumentNullException>().WithMessage(
+                "Cannot assert the document has a root element if the expected name is <null>*");
         }
 
         [Fact]
@@ -896,9 +956,11 @@ namespace FluentAssertions.Specs.Xml
         {
             // Arrange
             var document = XDocument.Parse(
-                @"<parent xmlns='http://www.example.com/2012/test'>
+                """
+                <parent xmlns='http://www.example.com/2012/test'>
                     <child/>
-                  </parent>");
+                </parent>
+                """);
 
             // Act
             Action act = () =>
@@ -913,9 +975,11 @@ namespace FluentAssertions.Specs.Xml
         {
             // Arrange
             var theDocument = XDocument.Parse(
-                @"<parent>
+                """
+                <parent>
                     <child />
-                  </parent>");
+                </parent>
+                """);
 
             // Act
             Action act = () =>
@@ -931,9 +995,11 @@ namespace FluentAssertions.Specs.Xml
         {
             // Arrange
             var theDocument = XDocument.Parse(
-                @"<parent>
+                """
+                <parent>
                     <child />
-                  </parent>");
+                </parent>
+                """);
 
             // Act
             Action act = () =>
@@ -944,23 +1010,24 @@ namespace FluentAssertions.Specs.Xml
             string expectedMessage =
                 "Expected theDocument to have root element \"{http://www.example.com/2012/test}unknown\"" +
                 " because we want to test the failure message" +
-               $", but found {Formatter.ToString(theDocument)}.";
+                $", but found {Formatter.ToString(theDocument)}.";
 
             act.Should().Throw<XunitException>().WithMessage(expectedMessage);
         }
+    }
 
-        #endregion
-
-        #region HaveElement
-
+    public class HaveElement
+    {
         [Fact]
         public void When_document_has_the_expected_child_element_it_should_not_throw_and_return_the_element_for_chaining()
         {
             // Arrange
             var document = XDocument.Parse(
-                @"<parent>
+                """
+                <parent>
                     <child />
-                  </parent>");
+                </parent>
+                """);
 
             // Act
             XElement element = document.Should().HaveElement("child").Subject;
@@ -974,9 +1041,11 @@ namespace FluentAssertions.Specs.Xml
         {
             // Arrange
             var theDocument = XDocument.Parse(
-                @"<parent>
+                """
+                <parent>
                     <child />
-                  </parent>");
+                </parent>
+                """);
 
             // Act
             Action act = () =>
@@ -992,9 +1061,11 @@ namespace FluentAssertions.Specs.Xml
         {
             // Arrange
             var theDocument = XDocument.Parse(
-                @"<parent>
+                """
+                <parent>
                     <child />
-                  </parent>");
+                </parent>
+                """);
 
             // Act
             Action act = () =>
@@ -1011,9 +1082,11 @@ namespace FluentAssertions.Specs.Xml
         {
             // Arrange
             var document = XDocument.Parse(
-                @"<parent xmlns:test='http://www.example.org/2012/test'>
+                """
+                <parent xmlns:test='http://www.example.org/2012/test'>
                     <test:child />
-                  </parent>");
+                </parent>
+                """);
 
             // Act
             Action act = () =>
@@ -1028,9 +1101,11 @@ namespace FluentAssertions.Specs.Xml
         {
             // Arrange
             var document = XDocument.Parse(
-                @"<parent>
+                """
+                <parent>
                     <child />
-                  </parent>");
+                </parent>
+                """);
 
             // Act
             Action act = () =>
@@ -1043,13 +1118,16 @@ namespace FluentAssertions.Specs.Xml
         }
 
         [Fact]
-        public void When_asserting_document_has_root_with_child_element_with_ns_but_it_does_not_it_should_fail_with_descriptive_message()
+        public void
+            When_asserting_document_has_root_with_child_element_with_ns_but_it_does_not_it_should_fail_with_descriptive_message()
         {
             // Arrange
             var theDocument = XDocument.Parse(
-                @"<parent>
+                """
+                <parent>
                     <child />
-                  </parent>");
+                </parent>
+                """);
 
             // Act
             Action act = () =>
@@ -1063,13 +1141,16 @@ namespace FluentAssertions.Specs.Xml
         }
 
         [Fact]
-        public void When_asserting_document_has_root_with_child_element_with_attributes_it_should_be_possible_to_use_which_to_assert_on_the_element()
+        public void
+            When_asserting_document_has_root_with_child_element_with_attributes_it_should_be_possible_to_use_which_to_assert_on_the_element()
         {
             // Arrange
             var document = XDocument.Parse(
-                @"<parent>
+                """
+                <parent>
                     <child attr='1' />
-                  </parent>");
+                </parent>
+                """);
 
             // Act
             XElement matchedElement = document.Should().HaveElement("child").Subject;
@@ -1094,22 +1175,238 @@ namespace FluentAssertions.Specs.Xml
         }
 
         [Fact]
-        public void When_asserting_a_document_has_a_null_element_it_should_fail()
+        public void When_asserting_a_document_without_root_element_has_an_element_it_should_fail()
+        {
+            // Arrange
+            XDocument document = new();
+
+            // Act
+            Action act = () =>
+            {
+                using var _ = new AssertionScope();
+                document.Should().HaveElement("unknown");
+            };
+
+            // Assert
+            act.Should().Throw<XunitException>().WithMessage(
+                "Expected document to have root element with child \"unknown\", but it has no root element.");
+        }
+
+        [Fact]
+        public void When_asserting_a_document_has_an_element_with_a_null_name_it_should_fail()
         {
             // Arrange
             var document = XDocument.Parse(
-                @"<parent>
+                """
+                <parent>
                     <child />
-                  </parent>");
+                </parent>
+                """);
 
             // Act
             Action act = () => document.Should().HaveElement(null);
 
             // Assert
             act.Should().Throw<ArgumentNullException>().WithMessage(
-                "Cannot assert the document has an element if the element name is <null>*");
+                "Cannot assert the document has an element if the expected name is <null>*");
         }
 
-        #endregion
+        [Fact]
+        public void When_asserting_a_document_has_an_element_with_a_null_xname_it_should_fail()
+        {
+            // Arrange
+            var document = XDocument.Parse(
+                """
+                <parent>
+                    <child />
+                </parent>
+                """);
+
+            // Act
+            Action act = () => document.Should().HaveElement((XName)null);
+
+            // Assert
+            act.Should().ThrowExactly<ArgumentNullException>().WithMessage(
+                "Cannot assert the document has an element if the expected name is <null>*");
+        }
+    }
+
+    public class HaveElementWithOccurrence
+    {
+        [Fact]
+        public void When_asserting_document_has_two_child_elements_and_it_does_it_succeeds()
+        {
+            // Arrange
+            var document = XDocument.Parse(
+                """
+                <parent>
+                    <child />
+                    <child />
+                </parent>
+                """);
+
+            // Act / Assert
+            document.Should().HaveElement("child", Exactly.Twice());
+        }
+
+        [Fact]
+        public void Asserting_document_null_inside_an_assertion_scope_it_checks_the_whole_assertion_scope_before_failing()
+        {
+            // Arrange
+            XDocument document = null;
+
+            // Act
+            Action act = () =>
+            {
+                using (new AssertionScope())
+                {
+                    document.Should().HaveElement("child", Exactly.Twice());
+                    document.Should().HaveElement("child", Exactly.Twice());
+                }
+            };
+
+            // Assert
+            act.Should().NotThrow<NullReferenceException>();
+        }
+
+        [Fact]
+        public void
+            Asserting_with_document_root_null_inside_an_assertion_scope_it_checks_the_whole_assertion_scope_before_failing()
+        {
+            // Arrange
+            XDocument document = new();
+
+            // Act
+            Action act = () =>
+            {
+                using (new AssertionScope())
+                {
+                    document.Should().HaveElement("child", Exactly.Twice());
+                    document.Should().HaveElement("child", Exactly.Twice());
+                }
+            };
+
+            // Assert
+            act.Should().NotThrow<NullReferenceException>();
+        }
+
+        [Fact]
+        public void When_asserting_document_has_two_child_elements_but_it_does_have_three_it_fails()
+        {
+            // Arrange
+            var document = XDocument.Parse(
+                """
+                <parent>
+                    <child />
+                    <child />
+                    <child />
+                </parent>
+                """);
+
+            // Act
+            Action act = () => document.Should().HaveElement("child", Exactly.Twice());
+
+            // Assert
+            act.Should().Throw<XunitException>()
+                .WithMessage(
+                    "Expected document to have a root element containing a child \"child\"*exactly*2 times, but found it 3 times*");
+        }
+
+        [Fact]
+        public void Document_is_valid_and_expected_null_with_string_overload_it_fails()
+        {
+            // Arrange
+            var document = XDocument.Parse(
+                """
+                <parent>
+                    <child />
+                    <child />
+                    <child />
+                </parent>
+                """);
+
+            // Act
+            Action act = () => document.Should().HaveElement(null, Exactly.Twice());
+
+            // Assert
+            act.Should().Throw<ArgumentNullException>().WithMessage(
+                "Cannot assert the document has an element if the expected name is <null>.*");
+        }
+
+        [Fact]
+        public void Document_is_valid_and_expected_null_with_x_name_overload_it_fails()
+        {
+            // Arrange
+            var document = XDocument.Parse(
+                """
+                <parent>
+                    <child />
+                    <child />
+                    <child />
+                </parent>
+                """);
+
+            // Act
+            Action act = () => document.Should().HaveElement((XName)null, Exactly.Twice());
+
+            // Assert
+            act.Should().Throw<ArgumentNullException>().WithMessage(
+                "Cannot assert the document has an element count if the element name is <null>.*");
+        }
+
+        [Fact]
+        public void Chaining_after_a_successful_occurrence_check_does_continue_the_assertion()
+        {
+            // Arrange
+            var document = XDocument.Parse(
+                """
+                <parent>
+                    <child />
+                    <child />
+                    <child />
+                </parent>
+                """);
+
+            // Act / Assert
+            document.Should().HaveElement("child", AtLeast.Twice())
+                .Which.Should().NotBeNull();
+        }
+
+        [Fact]
+        public void Chaining_after_a_non_successful_occurrence_check_does_not_continue_the_assertion()
+        {
+            // Arrange
+            var document = XDocument.Parse(
+                """
+                <parent>
+                    <child />
+                    <child />
+                    <child />
+                </parent>
+                """);
+
+            // Act
+            Action act = () => document.Should().HaveElement("child", Exactly.Once())
+                .Which.Should().NotBeNull();
+
+            // Assert
+            act.Should().Throw<XunitException>()
+                .WithMessage(
+                    "Expected document to have a root element containing a child \"child\"*exactly*1 time, but found it 3 times.");
+        }
+
+        [Fact]
+        public void When_asserting_a_null_document_to_have_an_element_count_it_should_fail()
+        {
+            // Arrange
+            XDocument xDocument = null;
+
+            // Act
+            Action act = () => xDocument.Should().HaveElement("child", AtLeast.Once());
+
+            // Assert
+            act.Should().Throw<XunitException>().WithMessage(
+                "Cannot assert the count if the document itself is <null>.");
+        }
     }
 }

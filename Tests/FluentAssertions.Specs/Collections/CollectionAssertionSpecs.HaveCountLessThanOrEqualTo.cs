@@ -3,15 +3,15 @@ using FluentAssertions.Execution;
 using Xunit;
 using Xunit.Sdk;
 
-namespace FluentAssertions.Specs.Collections
-{
-    /// <content>
-    /// The HaveCountLessOrEqualTo specs.
-    /// </content>
-    public partial class CollectionAssertionSpecs
-    {
-        #region Have Count Less Than Or Equal To
+namespace FluentAssertions.Specs.Collections;
 
+/// <content>
+/// The HaveCountLessOrEqualTo specs.
+/// </content>
+public partial class CollectionAssertionSpecs
+{
+    public class HaveCountLessThanOrEqualTo
+    {
         [Fact]
         public void Should_succeed_when_asserting_collection_has_a_count_less_than_or_equal_to_less_the_number_of_items()
         {
@@ -36,17 +36,20 @@ namespace FluentAssertions.Specs.Collections
         }
 
         [Fact]
-        public void When_collection_has_a_count_less_than_or_equal_to_the_number_of_items_it_should_fail_with_descriptive_message_()
+        public void
+            When_collection_has_a_count_less_than_or_equal_to_the_number_of_items_it_should_fail_with_descriptive_message_()
         {
             // Arrange
             var collection = new[] { 1, 2, 3 };
 
             // Act
-            Action action = () => collection.Should().HaveCountLessThanOrEqualTo(2, "because we want to test the failure {0}", "message");
+            Action action = () =>
+                collection.Should().HaveCountLessThanOrEqualTo(2, "because we want to test the failure {0}", "message");
 
             // Assert
             action.Should().Throw<XunitException>()
-                .WithMessage("Expected collection to contain at most 2 item(s) because we want to test the failure message, but found 3: {1, 2, 3}.");
+                .WithMessage(
+                    "Expected collection to contain at most 2 item(s) because we want to test the failure message, but found 3: {1, 2, 3}.");
         }
 
         [Fact]
@@ -63,9 +66,8 @@ namespace FluentAssertions.Specs.Collections
             };
 
             // Assert
-            act.Should().Throw<XunitException>().WithMessage("*at most*1*we want to test the behaviour with a null subject*found <null>*");
+            act.Should().Throw<XunitException>()
+                .WithMessage("*at most*1*we want to test the behaviour with a null subject*found <null>*");
         }
-
-        #endregion
     }
 }
